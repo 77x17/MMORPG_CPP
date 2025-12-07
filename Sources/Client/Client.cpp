@@ -20,28 +20,42 @@ struct RemotePlayer {
 };
 
 struct RemoteProjectile {
-    sf::Vector2f position;
+    int id;
+    sf::Vector2f serverPosition;
+    sf::Vector2f velocity;
+    sf::Vector2f localPosition;
     int ownerId;
+    bool authoritative = false;
 };
 
 int main() {
-    sf::TcpSocket socket;
-    if (socket.connect(HOST , PORT, sf::seconds(1.f)) != sf::Socket::Done) {
-        std::cout << "Cannot connect to server " << HOST << ':' << PORT << '\n';
-        return 0;
+    sf::TcpSocket tcp;
+    if (tcp.connect(HOST , PORT, sf::seconds(1.f)) != sf::Socket::Done) {
+        std::cout << "Cannot connect TCP to server " << HOST << ':' << PORT << '\n';
+        return -1;
     }
-    socket.setBlocking(false);
-    std::cout << "Connected to server " << HOST << ':' << PORT << '\n';
+    tcp.setBlocking(false);
+    std::cout << "Connected TCP to server " << HOST << ':' << PORT << '\n';
+
+    sf::UdpSocket udp;
+    if (udp.bind(sf::Socket::AnyPort) != sf::Socket::Done) {
+        std::cout << "Cannot bind UDP to server " << HOST << ':' << PORT << '\n';
+        return -1;
+    }
+    udp.setBlocking(false);
+    std::cout << "Binding UDP to server " << HOST << ':' << PORT << '\n';
 
     sf::SocketSelector selector;
-    selector.add(socket);
+    selector.add(tcp);
+    selector.add(udp);
 
     int myId = -1;
     int inputSeq = 0;
+    std::vector<InputState> pendingInputs;
 
     std::unordered_map<int, RemotePlayer> remotePlayers;
-    std::vector<RemoteProjectile> remoteProjectiles;
-    std::vector<InputState> pendingInputs;
+    std::unordered_map<int, RemoteProjectile> remoteProjectiles;
+    std::vector<RemoteProjectile> localPredictedProjectiles;
 
     sf::RenderWindow window(sf::VideoMode(800, 600), "Client");
 
@@ -55,7 +69,8 @@ int main() {
         sf::Event event;
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
-                socket.disconnect();
+                tcp.disconnect();
+                udp.unbind();
                 window.close();
             }
         }
@@ -66,27 +81,46 @@ int main() {
                 input.seq = ++inputSeq;
 
                 localPosition += input.movementDir * PLAYER_SPEED * dt;
+                // localPosition += input.movementDir * PLAYER_SPEED * SERVER_TICK;
 
                 pendingInputs.push_back(input);
 
                 sf::Packet inputPacket;
                 inputPacket << std::string("Input");
                 inputPacket << input.seq << input.movementDir.x << input.movementDir.y << input.isShooting;
-                socket.send(inputPacket);
+                tcp.send(inputPacket);
             }
         }
 
         if (selector.wait(sf::milliseconds(1))) {
-            if (selector.isReady(socket)) {
+            if (selector.isReady(tcp)) {
                 sf::Packet packet;
-                sf::Socket::Status status = socket.receive(packet);
+                sf::Socket::Status status = tcp.receive(packet);
                 if (status == sf::Socket::Done) {
                     std::string type; packet >> type;
                     if (type == "Assign_ID") {
                         packet >> myId;
                         std::cout << "My ID assigned by server = " << myId << '\n';
+
+                        sf::Packet assignUdp;
+                        assignUdp << std::string("Assign_UDP") << myId;
+                        udp.send(assignUdp, HOST, PORT);
                     }
-                    else if (type == "WorldState") {
+                }
+                else if (status == sf::Socket::Disconnected) {
+                    std::cout << "Disconnected from server" << '\n';
+                    window.close();
+                }
+            }
+
+            if (selector.isReady(udp)) {
+                sf::Packet packet; 
+                sf::IpAddress sender;
+                unsigned short port;
+                sf::Socket::Status status = udp.receive(packet, sender, port);
+                if (status == sf::Socket::Done) {
+                    std::string type; packet >> type;
+                    if (type == "WorldState") {
                         int playerCount; packet >> playerCount;
                         std::unordered_map<int, RemotePlayer> newPlayers;
                         for (int i = 0; i < playerCount; ++i) {
@@ -111,33 +145,75 @@ int main() {
                                     pendingInputs.erase(pendingInputs.begin());
                                 }
 
-                                sf::Vector2f position = remotePlayer.serverPosition;
+                                sf::Vector2f reconciled = remotePlayer.serverPosition;
                                 for (InputState &input : pendingInputs) {
-                                    position += input.movementDir * PLAYER_SPEED * SERVER_TICK;
+                                    // reconciled += input.movementDir * PLAYER_SPEED * dt;
+                                    reconciled += input.movementDir * PLAYER_SPEED * SERVER_TICK;
                                 }
 
-                                localPosition = lerp(localPosition, position, 0.3f);
+                                localPosition = lerp(localPosition, reconciled, 0.6f);
                             }
 
                             newPlayers[id] = remotePlayer;
                         }
+                        remotePlayers.swap(newPlayers);
 
                         int projectileCount; packet >> projectileCount;
-                        std::vector<RemoteProjectile> newProjectiles;
+                        std::unordered_map<int, RemoteProjectile> newProjectiles;
                         for (int i = 0; i < projectileCount; ++i) {
-                            float x, y;
-                            int ownerId = -1;
-                            packet >> x >> y >> ownerId;
-                            newProjectiles.push_back({{x, y}, ownerId});
+                            int projectileId; float x, y, vx, vy; int ownerId = -1;
+                            packet >> projectileId >> x >> y >> vx >> vy >> ownerId;
+                            RemoteProjectile projectile;
+                            projectile.id             = projectileId;
+                            projectile.serverPosition = { x, y };
+                            projectile.velocity       = { vx, vy };
+                            projectile.localPosition  = projectile.serverPosition;
+                            projectile.ownerId        = ownerId;
+                            projectile.authoritative  = true;
+
+                            // Nếu đã tồn tại, giữ localPosition để bay mượt
+                            if (remoteProjectiles.count(projectileId)) {
+                                projectile.localPosition = remoteProjectiles[projectileId].localPosition;
+                            } 
+                            else {
+                                projectile.localPosition = projectile.serverPosition;
+                            }
+
+                            newProjectiles[projectileId] = projectile;
                         }
 
-                        remotePlayers.swap(newPlayers);
-                        remoteProjectiles.swap(newProjectiles);
+                        for (auto it = localPredictedProjectiles.begin(); it != localPredictedProjectiles.end(); ) {
+                            bool matched = false;
+                            for (auto &[id, projectile] : newProjectiles) {
+                                if (projectile.ownerId == myId && dist2(projectile.serverPosition, it->localPosition) < 40.0f) {
+                                    projectile.localPosition = it->localPosition;
+                                    matched = true;
+                                    break;
+                                }
+                            }
+                            if (matched) it = localPredictedProjectiles.erase(it);
+                            else ++it;
+                        }
+                 
+                        for (auto &[id, newProj] : newProjectiles) {
+                            if (remoteProjectiles.count(id)) {
+                                remoteProjectiles[id].serverPosition = newProj.serverPosition;
+                                remoteProjectiles[id].velocity = newProj.velocity;
+                            } 
+                            else {
+                                remoteProjectiles[id] = newProj;
+                            }
+                        }
+
+                        for (auto it = remoteProjectiles.begin(); it != remoteProjectiles.end(); ) {
+                            if (newProjectiles.count(it->first) == 0) {
+                                it = remoteProjectiles.erase(it);
+                            } else {
+                                ++it;
+                            }
+                        }
+                        // remoteProjectiles.swap(newProjectiles);
                     }
-                }
-                else if (status == sf::Socket::Disconnected) {
-                    std::cout << "Disconnected from server" << '\n';
-                    window.close();
                 }
             }
         }
@@ -151,7 +227,21 @@ int main() {
             }
         }
 
-        window.clear(sf::Color(20, 20, 20));
+        for (RemoteProjectile &projectile : localPredictedProjectiles) {
+            projectile.localPosition += projectile.velocity * dt;
+            // projectile.localPosition += projectile.velocity * SERVER_TICK;
+        }
+
+        for (auto &[id, projectile] : remoteProjectiles) {
+            projectile.localPosition += projectile.velocity * dt;
+            // projectile.localPosition += projectile.velocity * SERVER_TICK;
+            float distanceToServer = distance(projectile.localPosition, projectile.serverPosition);
+            if (distanceToServer > 50.0f) {
+                projectile.localPosition = lerp(projectile.localPosition, projectile.serverPosition, 0.3f);
+            }
+        }
+
+        window.clear(sf::Color(30, 30, 30));
 
         sf::RectangleShape playerShape(sf::Vector2f(40.0f, 40.0f));
         playerShape.setOrigin(playerShape.getSize() / 2.0f);
@@ -170,10 +260,17 @@ int main() {
 
         sf::CircleShape projectileShape(5.0f);
         projectileShape.setOrigin(5.0f, 5.0f);
-        for (RemoteProjectile &projectile : remoteProjectiles) {
-            projectileShape.setPosition(projectile.position);
+        for (auto &[id, projectile] : remoteProjectiles) {
+            projectileShape.setPosition(projectile.localPosition);
             projectileShape.setFillColor(projectile.ownerId == myId ? sf::Color::Yellow : sf::Color::White);
             
+            window.draw(projectileShape);
+        }
+
+        for (RemoteProjectile &projectile : localPredictedProjectiles) {
+            projectileShape.setPosition(projectile.localPosition);
+            projectileShape.setFillColor(sf::Color::Yellow);
+
             window.draw(projectileShape);
         }
 

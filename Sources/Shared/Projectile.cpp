@@ -24,3 +24,11 @@ int Projectile::getOwnerId() const {
 int Projectile::getDamage() const {
     return damage;
 }
+
+sf::Vector2f Projectile::getVelocity() const {
+    return velocity;
+}
+
+void Projectile::setId(int _id) {
+    id = _id;
+}

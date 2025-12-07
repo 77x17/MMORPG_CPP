@@ -1,7 +1,7 @@
 #pragma once
 
 const float PLAYER_SPEED   = 200.0f;
-const float COOLDOWN_TIMER = 1.0f;
+const float COOLDOWN_TIMER = 0.1f;
 
 #include "Entity.hpp"
 #include "InputState.hpp"

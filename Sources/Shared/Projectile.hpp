@@ -17,7 +17,11 @@ public:
 
     void update(const float &dt) override;
 
+    void setId(int _id);
+
     int getOwnerId() const;
 
     int getDamage() const;
+
+    sf::Vector2f getVelocity() const;
 };
