@@ -2,16 +2,16 @@
 
 #include "Utils.hpp"
 
-Projectile::Projectile(int _ownerId, const sf::Vector2f &position, const sf::Vector2f &direction) 
-    : Entity(-1, sf::Vector2f(10.0f, 10.0f), sf::Color::Yellow), 
+Projectile::Projectile(int _ownerId, const sf::Vector2f &startPosition, const sf::Vector2f &direction) 
+    : Entity(-1, sf::Vector2f(10.0f, 10.0f)), 
       ownerId(_ownerId), lifeTimer(0), damage(10) 
 {
-    setPosition(position);
-    velocity = normalize(direction) * BULLET_SPEED;
+    position = startPosition;
+    velocity = normalize(direction) * _BULLET_SPEED;
 }
 
 void Projectile::update(const float &dt) {
-    shape.move(velocity * dt);
+    position  += velocity * dt;
     lifeTimer += dt;
 
     if (lifeTimer > BULLET_LIFETIME) destroy();

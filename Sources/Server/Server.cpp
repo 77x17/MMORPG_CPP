@@ -8,6 +8,7 @@
 #include "../Shared/Player.hpp"
 #include "../Shared/Projectile.hpp"
 #include "../Shared/Utils.hpp"
+#include "../Shared/Constants.hpp"
 
 struct ClientInfo {
     int id;
@@ -77,7 +78,7 @@ int main() {
                     clients.emplace_back(
                         newId, 
                         newTcp, 
-                        new Player(newId, sf::Vector2f(100, 100), sf::Color::White)
+                        new Player(newId, sf::Vector2f(100.0f, 100.0f))
                     );
                     tcpToIndex[newTcp] = (int)clients.size() - 1;
                     inputQueues[newId] = {};
@@ -169,10 +170,26 @@ int main() {
 
                     player.lastProcessedInput = latest.seq;
                 }
+                else {
+                    InputState input;
+                    player.updatePlayer(SERVER_TICK, input);
+                }
             }
 
             for (size_t i = 0; i < projectiles.size(); ++i) {
                 projectiles[i]->update(SERVER_TICK);
+                
+                if (projectiles[i]->isDestroyed() == false) {
+                    for (ClientInfo &client : clients) {
+                        Player &player = *client.player;
+                        if (projectiles[i]->getOwnerId() != player.getId() && projectiles[i]->getBounds().intersects(player.getBounds())) {
+                            player.takeDamage(projectiles[i]->getDamage());
+                            projectiles[i]->destroy();
+                            break;
+                        }
+                    }
+                } 
+                
                 if (projectiles[i]->isDestroyed()) {
                     delete projectiles[i];
                     projectiles.erase(projectiles.begin() + i);
@@ -225,11 +242,6 @@ int main() {
                                      << projectile->getVelocity().y
                                      << projectile->getOwnerId();
                 }
-                
-                // for (size_t i = 0; i < clients.size(); ++i) {
-                //     sf::TcpSocket &socket = *clients[i].socket;
-                //     socket.send(worldStatePacket);
-                // }
 
                 udp.send(worldStatePacket, client.udpIp, client.udpPort);
             }

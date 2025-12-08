@@ -1,6 +1,6 @@
 #pragma once
 
-const float BULLET_SPEED    = 400.0f;
+const float _BULLET_SPEED = 400.0f;
 const float BULLET_LIFETIME = 2.0f;
 
 #include "Entity.hpp"
@@ -13,7 +13,7 @@ private:
     int damage;
 
 public:
-    Projectile(int _ownerId, const sf::Vector2f &position, const sf::Vector2f &direction);
+    Projectile(int _ownerId, const sf::Vector2f &startPosition, const sf::Vector2f &direction);
 
     void update(const float &dt) override;
 
