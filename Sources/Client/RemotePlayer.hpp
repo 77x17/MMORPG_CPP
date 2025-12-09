@@ -1,8 +1,6 @@
 #pragma once
 
-#include <SFML/System.hpp>
-
-#include "../Shared/InterfaceEntity.hpp"
+#include <SFML/System/Vector2.hpp>
 
 struct RemotePlayer {
     int          id = -1;

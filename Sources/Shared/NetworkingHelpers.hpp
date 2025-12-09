@@ -1,6 +1,6 @@
 #pragma once
 
-#include <SFML/Network.hpp>
+#include <SFML/Network/Packet.hpp>
 
 #include "../Shared/InterfaceEntity.hpp"
 

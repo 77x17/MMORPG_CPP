@@ -1,5 +1,7 @@
 #include "Renderer.hpp"
 
+#include <SFML/Graphics.hpp>
+
 Renderer::Renderer(sf::RenderWindow &_window) : window(_window) {
     if (!font.loadFromFile("Assets/Roboto_Mono.ttf")) {
         font.loadFromFile("../Assets/Roboto_Mono.ttf");

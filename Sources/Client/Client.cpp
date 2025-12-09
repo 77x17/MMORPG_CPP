@@ -1,11 +1,11 @@
 #include <SFML/Graphics.hpp>
 
-#include "../Shared/InputManager.hpp"
 #include "../Shared/Constants.hpp"
 #include "../Shared/Utils.hpp"
 
 #include "NetworkClient.hpp"
 #include "EntityManager.hpp"
+#include "InputManager.hpp"
 #include "Renderer.hpp"
 
 int main() {
@@ -30,6 +30,12 @@ int main() {
             if (event.type == sf::Event::Closed) {
                 networkClient.close();
                 window.close();
+            }
+            else if (event.type == sf::Event::KeyPressed) {
+                if (event.key.code == sf::Keyboard::Escape) {
+                    networkClient.close();
+                    window.close();
+                }
             }
         }
 

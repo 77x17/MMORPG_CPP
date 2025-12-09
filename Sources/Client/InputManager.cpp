@@ -1,7 +1,7 @@
 #include "InputManager.hpp"
 
 #include <SFML/Window.hpp>
-#include "Utils.hpp"
+#include "../Shared/Utils.hpp"
 
 bool InputManager::getPlayerInput(InputState &state) {
     state.movementDir = { 0.f, 0.f };

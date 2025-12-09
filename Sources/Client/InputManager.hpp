@@ -1,6 +1,6 @@
 #pragma once
 
-#include "InputState.hpp"
+#include "../Shared/InputState.hpp"
 
 class InputManager {
 public:

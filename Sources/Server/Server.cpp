@@ -1,4 +1,9 @@
-#include <SFML/Network.hpp>
+#include <SFML/Network/TcpListener.hpp>
+#include <SFML/Network/TcpSocket.hpp>
+#include <SFML/Network/UdpSocket.hpp>
+#include <SFML/Network/SocketSelector.hpp>
+#include <SFML/Network/Packet.hpp>
+
 #include <iostream>
 #include <vector>
 #include <unordered_map>
