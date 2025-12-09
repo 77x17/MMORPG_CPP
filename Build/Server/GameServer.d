@@ -1,4 +1,4 @@
-Build/Server/Server.o: Sources/Server/Server.cpp \
+Build/Server/GameServer.o: Sources/Server/GameServer.cpp \
  Sources/Server/GameServer.hpp Sources/Server/NetworkServer.hpp \
  Sources/Server/ClientSession.hpp Sources/Server/../Shared/Player.hpp \
  Sources/Server/../Shared/Entity.hpp \
