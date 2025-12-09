@@ -1,6 +1,6 @@
 #include "InputManager.hpp"
 
-#include <SFML/Window.hpp>
+#include <SFML/Window/Keyboard.hpp>
 #include "../Shared/Utils.hpp"
 
 bool InputManager::getPlayerInput(InputState &state) {

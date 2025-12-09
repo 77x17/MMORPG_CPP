@@ -1,4 +1,6 @@
-#include <SFML/Graphics.hpp>
+#include <SFML/Window/Event.hpp>
+
+#include <SFML/System/Sleep.hpp>
 
 #include "../Shared/Constants.hpp"
 #include "../Shared/Utils.hpp"

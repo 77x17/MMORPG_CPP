@@ -35,12 +35,12 @@ void Renderer::render(const EntityManager &entityManager, int myId) {
         window.draw(projectileShape);
     }
 
-    // for (auto &projectile : entityManager.getPredictedProjectiles()) {
-    //     projectileShape.setPosition(projectile.localPosition);
-    //     projectileShape.setFillColor(sf::Color::Yellow);
+    for (auto &projectile : entityManager.getPredictedProjectiles()) {
+        projectileShape.setPosition(projectile.localPosition);
+        projectileShape.setFillColor(sf::Color::Yellow);
 
-    //     window.draw(projectileShape);
-    // }
+        window.draw(projectileShape);
+    }
 
     window.display();
 }

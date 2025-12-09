@@ -3,7 +3,6 @@
 #include <unordered_map>
 #include <vector>
 
-#include "../Shared/InterfaceEntity.hpp"
 #include "../Shared/InputState.hpp"
 
 #include "WorldSnapshot.hpp"

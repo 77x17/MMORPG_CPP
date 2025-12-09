@@ -1,8 +1,8 @@
 #pragma once
 
 struct PlayerSnapshot {
-    int id;
+    int   id;
     float x, y;
-    int hp;
-    int lastProcessed;
+    int   hp;
+    int   lastProcessed;
 };

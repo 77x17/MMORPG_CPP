@@ -1,8 +1,8 @@
 #pragma once
 
 struct ProjectileSnapshot {
-    int id;
+    int   id;
     float x, y;
     float vx, vy;
-    int ownerId;
+    int   ownerId;
 };

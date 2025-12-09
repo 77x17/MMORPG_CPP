@@ -1,10 +1,8 @@
 #pragma once
 
-// #include <SFML/System.hpp>
-// #include <unordered_map>
-
 #include "RemotePlayer.hpp"
 #include "RemoteProjectile.hpp"
+
 #include "../Shared/Utils.hpp"
 
 namespace ClientInterpolation {

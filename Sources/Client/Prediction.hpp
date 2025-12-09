@@ -5,6 +5,7 @@
 
 #include "RemotePlayer.hpp"
 #include "RemoteProjectile.hpp"
+
 #include "../Shared/Utils.hpp"
 
 namespace ClientPrediction {

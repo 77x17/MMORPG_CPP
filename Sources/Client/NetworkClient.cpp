@@ -1,5 +1,8 @@
 #include "NetworkClient.hpp"
 
+#include <SFML/System/Vector2.hpp>
+#include <SFML/Network/Packet.hpp>
+
 #include <iostream>
 
 NetworkClient::NetworkClient(const std::string &_host, unsigned short _port) 

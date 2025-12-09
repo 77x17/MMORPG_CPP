@@ -3,11 +3,9 @@
 #include <SFML/Network/TcpSocket.hpp>
 #include <SFML/Network/UdpSocket.hpp>
 #include <SFML/Network/SocketSelector.hpp>
+#include <SFML/System/Vector2.hpp>
 #include <optional>
 #include <vector>
-
-#include "../Shared/InterfaceEntity.hpp"
-#include "../Shared/NetworkingHelpers.hpp"
 
 #include "WorldSnapshot.hpp"
 
