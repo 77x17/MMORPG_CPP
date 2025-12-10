@@ -2,8 +2,8 @@
 
 #include <SFML/System/Clock.hpp>
 
-bool GameServer::start(unsigned short port) {
-    if (!networkServer.start(port)) {
+bool GameServer::start(unsigned short tcpPort, unsigned short udpPort) {
+    if (!networkServer.start(tcpPort, udpPort)) {
         return false;
     }
 

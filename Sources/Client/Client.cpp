@@ -11,7 +11,7 @@
 #include "Renderer.hpp"
 
 int main() {
-    NetworkClient networkClient("127.0.0.1", 55001);
+    NetworkClient networkClient("127.0.0.1", 55001, 55002);
     if (!networkClient.connectAll()) return -1;
 
     EntityManager entityManager;
@@ -23,10 +23,12 @@ int main() {
     std::vector<InputState> pendingInputs;
 
     sf::Clock clock;
-    sf::Vector2f localPosition(100.0f, 100.0f);
+    float clientAccumulator = 0.0f;
 
     while (window.isOpen()) {
         float dt = clock.restart().asSeconds();
+        clientAccumulator += dt;
+
         sf::Event event;
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
@@ -48,15 +50,11 @@ int main() {
                 pendingInputs.push_back(input);
 
                 networkClient.sendInputPacket(input.seq, input.movementDir, input.isShooting);
-
-                // if (entityManager.getPlayers().count(myId) == 0) {
-                //     // local fallback position handling if desired
-                // }
-
-                if (input.isShooting) {
-                    sf::Vector2f spawnPosition = localPosition + input.movementDir;
-                    sf::Vector2f velocity = normalize(input.movementDir) * BULLET_SPEED;
-                    entityManager.spawnPredictedProjectile(myId, spawnPosition, velocity);
+            
+                if (entityManager.getPlayers().count(myId) > 0) {
+                    RemotePlayer &localPlayer = entityManager.getPlayer(myId);
+                    // localPlayer.localPosition += normalize(input.movementDir) * PLAYER_SPEED * SERVER_TICK;
+                    localPlayer.localPosition += normalize(input.movementDir) * PLAYER_SPEED * dt;
                 }
             }
         }
@@ -65,14 +63,6 @@ int main() {
         if (maybeSnap) {
             if (networkClient.assignedId != -1) myId = networkClient.assignedId;
             entityManager.applySnapshot(*maybeSnap, myId, pendingInputs);
-        }
-
-        if (entityManager.getPlayers().count(myId) == 0) {
-
-        }
-        else {
-            const RemotePlayer &player = entityManager.getPlayers().at(myId);
-            localPosition = player.localPosition;
         }
 
         entityManager.update(dt, myId);

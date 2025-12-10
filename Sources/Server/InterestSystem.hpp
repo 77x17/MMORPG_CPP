@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include "../Shared/Player.hpp"
-#include "../Shared/Projectile.hpp"
+#include "Player.hpp"
+#include "Projectile.hpp"
 
 constexpr float INTEREST_RADIUS = 800.0f;
 

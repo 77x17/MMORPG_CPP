@@ -31,7 +31,7 @@ public:
 
     bool runTcp(unsigned short port);
     bool bindUdp(unsigned short port);
-    bool start(unsigned short port);
+    bool start(unsigned short tcpPort, unsigned short udpPort);
 
     void poll();
 

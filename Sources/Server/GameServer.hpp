@@ -25,6 +25,6 @@ private:
     int nextProjectileId = 0;
 
 public:
-    bool start(unsigned short port);
+    bool start(unsigned short tcpPort, unsigned short udpPort);
     void run();
 };

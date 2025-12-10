@@ -1,11 +1,9 @@
 #pragma once
 
-const float EPSILON       = 0.001;
-const int   WINDOW_WIDTH  = 800;
-const int   WINDOW_HEIGHT = 600;
-
 #include <SFML/System/Vector2.hpp>
 #include <cmath>
+
+constexpr float EPSILON = 0.001;
 
 inline sf::Vector2f normalize(const sf::Vector2f &source) {
     float length = std::sqrt(source.x * source.x + source.y * source.y);

@@ -1,4 +1,5 @@
 #include "EntityManager.hpp"
+#include "Interpolation.hpp"
 
 #include "../Shared/Utils.hpp"
 #include "../Shared/Constants.hpp"
@@ -27,12 +28,18 @@ void EntityManager::applySnapshot(const WorldSnapshot &snapshot, int myId, std::
             }
 
             // recompute local predicted position using remaining pendingInputs (left as before)
-            sf::Vector2f reconciled = remotePlayer.serverPosition;
+            sf::Vector2f reconciledPosition = remotePlayer.serverPosition;
             for (InputState &input : pendingInputs) {
-                reconciled += input.movementDir * PLAYER_SPEED * SERVER_TICK;
+                reconciledPosition += normalize(input.movementDir) * PLAYER_SPEED * SERVER_TICK;
             }
 
-            remotePlayer.localPosition = lerp(remotePlayer.localPosition, reconciled, 0.6f);
+            float distanceError = distance(remotePlayer.localPosition, reconciledPosition);
+            if (distanceError > 100.0f) {
+                remotePlayer.localPosition = lerp(remotePlayer.localPosition, reconciledPosition, 0.6f);
+            }
+            else {
+                remotePlayer.localPosition = lerp(remotePlayer.localPosition, reconciledPosition, 0.35f);
+            }
         }
 
         newPlayers[remotePlayer.id] = remotePlayer;
@@ -58,19 +65,6 @@ void EntityManager::applySnapshot(const WorldSnapshot &snapshot, int myId, std::
         newProjectiles[remoteProjectile.id] = remoteProjectile;
     }
 
-    for (auto it = localPredictedProjectiles.begin(); it != localPredictedProjectiles.end(); ) {
-        bool matched = false;
-        for (auto &[id, remoteProjectile] : newProjectiles) {
-            if (remoteProjectile.ownerId == it->ownerId && distance(remoteProjectile.serverPosition, it->localPosition) < 40.0f) {
-                remoteProjectile.localPosition = it->localPosition;
-                
-                matched = true;
-                break;
-            }
-        }
-        it = (matched ? localPredictedProjectiles.erase(it) : ++it);
-    }
-
     for (auto &[id, remoteProjectile] : newProjectiles) {
         remoteProjectiles[id] = remoteProjectile;
     }
@@ -88,27 +82,8 @@ void EntityManager::update(const float &dt, int myId) {
 
     for (auto &[id, remoteProjectile] : remoteProjectiles) {
         remoteProjectile.localPosition += remoteProjectile.velocity * dt;
-        if (distance(remoteProjectile.localPosition, remoteProjectile.serverPosition) > 50.0f) {
-            remoteProjectile.localPosition = lerp(remoteProjectile.localPosition, remoteProjectile.serverPosition, 0.3f);
-        }
+        remoteProjectile.localPosition = lerp(remoteProjectile.localPosition, remoteProjectile.serverPosition, 0.5f);
     }
-
-    for (RemoteProjectile &predictedProjectile : localPredictedProjectiles) {
-        predictedProjectile.localPosition += predictedProjectile.velocity * dt;
-    }
-}
-
-RemoteProjectile EntityManager::spawnPredictedProjectile(int ownerId, const sf::Vector2f &position, const sf::Vector2f &velocity) {
-    RemoteProjectile remoteProjectile;
-    remoteProjectile.id             = --tempProjectileCounter;
-    remoteProjectile.ownerId        = ownerId;
-    remoteProjectile.localPosition  = position;
-    remoteProjectile.serverPosition = position;
-    remoteProjectile.velocity       = velocity;
-    remoteProjectile.authoritative  = false;
-
-    localPredictedProjectiles.push_back(remoteProjectile);
-    return remoteProjectile;
 }
 
 const std::unordered_map<int, RemotePlayer> & EntityManager::getPlayers() const {
@@ -119,6 +94,6 @@ const std::unordered_map<int, RemoteProjectile> & EntityManager::getProjectiles(
     return remoteProjectiles;
 }
 
-const std::vector<RemoteProjectile> & EntityManager::getPredictedProjectiles() const {
-    return localPredictedProjectiles;
+RemotePlayer & EntityManager::getPlayer(int myId) {
+    return remotePlayers.at(myId);
 }

@@ -3,7 +3,7 @@
 #include <SFML/Network/TcpSocket.hpp>
 #include <SFML/Network/IpAddress.hpp>
 
-#include "../Shared/Player.hpp"
+#include "Player.hpp"
 
 struct ClientSession {
     int            id;

@@ -3,7 +3,7 @@
 int main() {
     GameServer gameServer;
     
-    if (!gameServer.start(55001)) {
+    if (!gameServer.start(55001, 55002)) {
         return 0;
     }
     

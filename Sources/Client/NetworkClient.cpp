@@ -5,8 +5,8 @@
 
 #include <iostream>
 
-NetworkClient::NetworkClient(const std::string &_host, unsigned short _port) 
-: host(_host), port(_port) {
+NetworkClient::NetworkClient(const std::string &_host, unsigned short _tcpPort, unsigned short _udpPort) 
+: host(_host), tcpPort(_tcpPort), udpPort(_udpPort) {
     selector.clear();
 }
 
@@ -15,7 +15,7 @@ NetworkClient::~NetworkClient() {
 }
 
 bool NetworkClient::connectTcp(const float &timeoutSeconds) {
-    if (tcp.connect(host, port, sf::seconds(timeoutSeconds)) != sf::Socket::Done) {
+    if (tcp.connect(host, tcpPort, sf::seconds(timeoutSeconds)) != sf::Socket::Done) {
         std::cout << "[Network] - Cannot connect TCP" << '\n';
         return false;
     }
@@ -48,8 +48,8 @@ bool NetworkClient::connectAll(const float& timeoutSeconds) {
 
 void NetworkClient::sendInputPacket(int seq, const sf::Vector2f &moveDir, bool isShooting) {
     sf::Packet packet;
-    packet << std::string("Input") << seq << moveDir.x << moveDir.y << isShooting;
-    tcp.send(packet);
+    packet << std::string("Input") << assignedId << seq << moveDir.x << moveDir.y << isShooting;
+    udp.send(packet, host, udpPort);
 }
 
 std::optional<WorldSnapshot> NetworkClient::pollReceive() {
@@ -64,7 +64,7 @@ std::optional<WorldSnapshot> NetworkClient::pollReceive() {
 
                     sf::Packet assignUdp;
                     assignUdp << std::string("Assign_UDP") << assignedId;
-                    udp.send(assignUdp, host, port);
+                    udp.send(assignUdp, host, udpPort);
                 }
                 else {
                     std::cout << "[Network] - TCP msg type: " << type << '\n';

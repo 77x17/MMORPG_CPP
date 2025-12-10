@@ -13,9 +13,6 @@ class EntityManager {
 private:
     std::unordered_map<int, RemotePlayer>     remotePlayers;
     std::unordered_map<int, RemoteProjectile> remoteProjectiles;
-    std::vector<RemoteProjectile>             localPredictedProjectiles;
-
-    int tempProjectileCounter = 0;
 
 public:
     EntityManager() = default;
@@ -24,9 +21,8 @@ public:
 
     void update(const float &dt, int myId);
 
-    RemoteProjectile spawnPredictedProjectile(int ownerId, const sf::Vector2f &position, const sf::Vector2f &velocity);
-
     const std::unordered_map<int, RemotePlayer> & getPlayers() const;
     const std::unordered_map<int, RemoteProjectile> & getProjectiles() const;
-    const std::vector<RemoteProjectile> & getPredictedProjectiles() const;
+
+    RemotePlayer & getPlayer(int myId);
 };

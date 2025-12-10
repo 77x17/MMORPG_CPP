@@ -15,12 +15,13 @@ private:
     sf::UdpSocket      udp;
     sf::SocketSelector selector;
     std::string        host;
-    unsigned short     port;
+    unsigned short     tcpPort;
+    unsigned short     udpPort;
 
 public:
     int assignedId = -1;
 
-    NetworkClient(const std::string &_host, unsigned short _port);
+    NetworkClient(const std::string &_host, unsigned short _tcpPort, unsigned short _udpPort);
     ~NetworkClient();
 
     bool connectTcp(const float &timeoutSeconds);

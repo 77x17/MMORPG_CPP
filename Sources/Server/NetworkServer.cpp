@@ -29,12 +29,13 @@ bool NetworkServer::bindUdp(unsigned short port) {
     return true;
 }
 
-bool NetworkServer::start(unsigned short port) {
+bool NetworkServer::start(unsigned short tcpPort, unsigned short udpPort) {
     selector.clear();
-    if (!(runTcp(port) && bindUdp(port))) {
+    if (!(runTcp(tcpPort) && bindUdp(udpPort))) {
         return false;
     } 
-    std::cout << "[Network] - Server running on port " << port << "..." << '\n';        
+    std::cout << "[Network] - Server running TCP on port " << tcpPort << "..." << '\n';        
+    std::cout << "[Network] - Server running UDP on port " << udpPort << "..." << '\n';        
 
     return true;
 }
@@ -76,23 +77,24 @@ void NetworkServer::poll() {
             if (selector.isReady(tcpSocket)) {
                 sf::Packet         packet;
                 sf::Socket::Status status = tcpSocket.receive(packet);
-                if (status == sf::Socket::Done) {
-                    std::string type; packet >> type;
-                    if (type == "Input") {
-                        // === Handle input ===
-                        InputState input;
-                        packet >> input.seq >> input.movementDir.x >> input.movementDir.y >> input.isShooting;
+                // if (status == sf::Socket::Done) {
+                //     std::string type; packet >> type;
+                //     if (type == "Input") {
+                //         // === Handle input ===
+                //         InputState input;
+                //         packet >> input.seq >> input.movementDir.x >> input.movementDir.y >> input.isShooting;
                         
-                        NewInputEvent newInputEvent;
-                        newInputEvent.clientId = clients[i].id;
-                        newInputEvent.input    = input;
-                        pendingInputs.push_back(newInputEvent);
-                    }
-                    else {
-                        std::cout << "[Network] - Received undefine type: " << type << '\n';
-                    }
-                }
-                else if (status == sf::Socket::Disconnected) {
+                //         NewInputEvent newInputEvent;
+                //         newInputEvent.clientId = clients[i].id;
+                //         newInputEvent.input    = input;
+                //         pendingInputs.push_back(newInputEvent);
+                //     }
+                //     else {
+                //         std::cout << "[Network] - Received undefine type: " << type << '\n';
+                //     }
+                // }
+                // else 
+                if (status == sf::Socket::Disconnected) {
                     std::cout << "[Network] - Client TCP disconnected ID = " << clients[i].id << '\n';
                     
                     selector.remove(tcpSocket);
@@ -130,6 +132,24 @@ void NetworkServer::poll() {
                     break;
                 }
             }
+        }
+        else if (type == "Input") {
+            int clientId;
+            InputState input;
+
+            packet >> clientId
+                   >> input.seq
+                   >> input.movementDir.x
+                   >> input.movementDir.y
+                   >> input.isShooting;
+
+            NewInputEvent newInputEvent;
+            newInputEvent.clientId = clientId;
+            newInputEvent.input    = input;
+            pendingInputs.push_back(newInputEvent);
+        }
+        else {
+            std::cout << "[Network] - UDP Received undefine type: " << type << '\n';
         }
     }
 }

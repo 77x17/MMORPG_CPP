@@ -1,12 +1,7 @@
 #pragma once
 
-const float _PLAYER_SPEED             = 200.0f;
-const float PROJECTILE_COOLDOWN_TIMER = 0.1f;
-const float PLAYER_WIDTH              = 40.0f;
-const float PLAYER_HEIGHT             = 40.0f;
-
 #include "Entity.hpp"
-#include "InputState.hpp"
+#include "../Shared/InputState.hpp"
 
 class Projectile;
 
@@ -16,7 +11,9 @@ private:
     int          maxHealth;
     float        projectileCooldownTimer;
     sf::Vector2f oldShootDir = { 1.0f, 0.0f };
-    
+    sf::Vector2f velocity;
+    float knockback_strength;
+
 public:
     int lastProcessedInput = 0;
 
@@ -27,6 +24,9 @@ public:
     void update(const float &dt) override;
 
     void takeDamage(int amount);
+    void knockback(const sf::Vector2f &direction, const float &knockback);
 
     int getHealth() const;
+    sf::Vector2f getVelocity() const;
+    float getKnockback() const;
 };

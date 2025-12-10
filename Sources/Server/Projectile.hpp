@@ -1,8 +1,5 @@
 #pragma once
 
-const float _BULLET_SPEED = 400.0f;
-const float BULLET_LIFETIME = 2.0f;
-
 #include "Entity.hpp"
 
 class Projectile : public Entity {
@@ -11,6 +8,7 @@ private:
     int ownerId;
     float lifeTimer;
     int damage;
+    float knockback_strength;
 
 public:
     Projectile(int _ownerId, const sf::Vector2f &startPosition, const sf::Vector2f &direction);
@@ -24,4 +22,6 @@ public:
     int getDamage() const;
 
     sf::Vector2f getVelocity() const;
+
+    float getKnockback() const;
 };
