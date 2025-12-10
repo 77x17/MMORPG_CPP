@@ -14,7 +14,7 @@ Player::Player(int _id, const sf::Vector2f &startPosition)
     knockback_strength = 10.0f;
 }
 
-Projectile* Player::updatePlayer(const float &dt, const InputState &input) {
+DamageEntity* Player::updatePlayer(const float &dt, const InputState &input) {
     if (isDestroyed()) {
         health    = maxHealth;
         position  = sf::Vector2f(100.0f, 100.0f);

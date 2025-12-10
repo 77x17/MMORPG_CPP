@@ -4,37 +4,25 @@
 #include "../Shared/Utils.hpp"
 
 Projectile::Projectile(int _ownerId, const sf::Vector2f &startPosition, const sf::Vector2f &direction) 
-    : Entity(-1, sf::Vector2f(10.0f, 10.0f)), 
-      ownerId(_ownerId), lifeTimer(0), damage(10) 
-{
-    position = startPosition;
-    velocity = normalize(direction) * BULLET_SPEED;
-    knockback_strength = 10.0f;
+: DamageEntity(_ownerId, startPosition, { 10.0f, 10.0f }) {
+    velocity          = normalize(direction) * BULLET_SPEED;
+    damage            = 10;
+    knockbackStrength = 10.0f;
+    lifeTimer         = BULLET_LIFETIME;
 }
 
 void Projectile::update(const float &dt) {
     position  += velocity * dt;
-    lifeTimer += dt;
+    
+    lifeTimer -= dt;
 
-    if (lifeTimer > BULLET_LIFETIME) destroy();
+    if (lifeTimer <= 0) destroy();
 }
 
-int Projectile::getOwnerId() const {
-    return ownerId;
-}
-
-int Projectile::getDamage() const {
-    return damage;
+bool Projectile::canHitMultiple() const {
+    return false;
 }
 
 sf::Vector2f Projectile::getVelocity() const {
     return velocity;
-}
-
-void Projectile::setId(int _id) {
-    id = _id;
-}
-
-float Projectile::getKnockback() const {
-    return knockback_strength;
 }

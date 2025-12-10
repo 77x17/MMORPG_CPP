@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Entity.hpp"
+#include "DamageEntity.hpp"
 #include "../Shared/InputState.hpp"
 
 class Projectile;
@@ -19,7 +19,7 @@ public:
 
     Player(int _id, const sf::Vector2f &startPosition);
 
-    Projectile* updatePlayer(const float &dt, const InputState &input);
+    DamageEntity* updatePlayer(const float &dt, const InputState &input);
 
     void update(const float &dt) override;
 

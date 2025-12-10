@@ -3,23 +3,23 @@
 #include <vector>
 
 #include "Player.hpp"
-#include "Projectile.hpp"
+#include "DamageEntity.hpp"
 
 class GameWorld {
 private:
     std::vector<Player *> players;
     
     int nextProjectileId;
-    std::vector<Projectile *> projectiles;
+    std::vector<DamageEntity *> damageEntities;
 
 public:
     void addPlayer(int id);
     void removePlayer(int id);
 
-    void addProjectile(Projectile *newProjectile);
+    void addDamageEntity(DamageEntity *newDamageEntity);
 
     void update(const float &dt);
 
     const std::vector<Player *> getPlayers() const;
-    const std::vector<Projectile *> getProjectiles() const;
+    const std::vector<DamageEntity *> getDamageEntities() const;
 };

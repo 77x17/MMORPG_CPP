@@ -28,6 +28,11 @@ int Entity::getId() const {
     return id;
 }
 
+
+void Entity::setId(int _id) {
+    id = _id;
+}
+
 bool Entity::isDestroyed() const {
     return destroyed;
 }

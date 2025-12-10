@@ -2,6 +2,8 @@
 
 #include <SFML/System/Clock.hpp>
 
+#include "Projectile.hpp"
+
 bool GameServer::start(unsigned short tcpPort, unsigned short udpPort) {
     if (!networkServer.start(tcpPort, udpPort)) {
         return false;
@@ -41,10 +43,10 @@ void GameServer::run() {
                     InputState latest = inputQueue.back();
                     inputSystem.clearQueue(player->getId());
 
-                    Projectile *bullet = player->updatePlayer(SERVER_TICK, latest);
-                    if (bullet) {
-                        bullet->setId(++nextProjectileId);
-                        gameWorld.addProjectile(bullet);
+                    DamageEntity *damageEntity = player->updatePlayer(SERVER_TICK, latest);
+                    if (damageEntity) {
+                        damageEntity->setId(++nextProjectileId);
+                        gameWorld.addDamageEntity(damageEntity);
                     }
 
                     player->lastProcessedInput = latest.seq;
@@ -83,15 +85,18 @@ void GameServer::run() {
                                      << player->lastProcessedInput;
                 }
 
-                std::vector<Projectile *> visibleProjectiles = interestSytem.getVisibleProjectiles(currentPlayer, gameWorld.getProjectiles());
-                worldStatePacket << (int)visibleProjectiles.size();
-                for (Projectile *projectile : visibleProjectiles) {
-                    worldStatePacket << projectile->getId() 
-                                     << projectile->getPosition().x 
-                                     << projectile->getPosition().y 
-                                     << projectile->getVelocity().x
-                                     << projectile->getVelocity().y
-                                     << projectile->getOwnerId();
+                std::vector<DamageEntity *> visibleDamageEntities = interestSytem.getVisibleDamageEntities(currentPlayer, gameWorld.getDamageEntities());
+                worldStatePacket << (int)visibleDamageEntities.size();
+                for (DamageEntity *damageEntity : visibleDamageEntities) {
+                    Projectile *projectile = dynamic_cast<Projectile *>(damageEntity);
+                    if (projectile) {
+                        worldStatePacket << projectile->getId() 
+                                         << projectile->getPosition().x 
+                                         << projectile->getPosition().y 
+                                         << projectile->getVelocity().x
+                                         << projectile->getVelocity().y
+                                         << projectile->getOwnerId();
+                    }
                 }
 
                 networkServer.sendToClient(client, worldStatePacket);

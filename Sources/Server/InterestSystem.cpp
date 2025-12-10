@@ -12,13 +12,13 @@ std::vector<Player *> InterestSystem::getVisiblePlayers(Player *center, const st
     return visiblePlayers;
 }
 
-std::vector<Projectile *> InterestSystem::getVisibleProjectiles(Player *center, const std::vector<Projectile *> projectiles) {
-    std::vector<Projectile *> visibleProjectiles;
-    for (Projectile *projectile : projectiles) {
-        if (distance(center->getPosition(), projectile->getPosition()) <= INTEREST_RADIUS
-            || projectile->getOwnerId() == center->getId()) {
-            visibleProjectiles.push_back(projectile);
+std::vector<DamageEntity *> InterestSystem::getVisibleDamageEntities(Player *center, const std::vector<DamageEntity *> damageEntities) {
+    std::vector<DamageEntity *> visibleDamageEntities;
+    for (DamageEntity *damageEntity : damageEntities) {
+        if (distance(center->getPosition(), damageEntity->getPosition()) <= INTEREST_RADIUS
+            || damageEntity->getOwnerId() == center->getId()) {
+            visibleDamageEntities.push_back(damageEntity);
         }
     }
-    return visibleProjectiles;
+    return visibleDamageEntities;
 }

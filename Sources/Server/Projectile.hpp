@@ -1,27 +1,19 @@
 #pragma once
 
-#include "Entity.hpp"
+#include "DamageEntity.hpp"
 
-class Projectile : public Entity {
+class Projectile : public DamageEntity {
 private:
     sf::Vector2f velocity;
-    int ownerId;
-    float lifeTimer;
-    int damage;
-    float knockback_strength;
-
+    
 public:
     Projectile(int _ownerId, const sf::Vector2f &startPosition, const sf::Vector2f &direction);
 
     void update(const float &dt) override;
 
-    void setId(int _id);
+    bool canHitMultiple() const override;
 
-    int getOwnerId() const;
-
-    int getDamage() const;
+    void setId(int id);
 
     sf::Vector2f getVelocity() const;
-
-    float getKnockback() const;
 };

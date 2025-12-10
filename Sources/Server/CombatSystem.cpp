@@ -1,16 +1,19 @@
 #include "CombatSystem.hpp"
 
+#include "Projectile.hpp"
+
 void CombatSystem::handleCollision(GameWorld &gameWorld) {
     const std::vector<Player *> &players = gameWorld.getPlayers();
-    const std::vector<Projectile *> &projectiles = gameWorld.getProjectiles();
+    const std::vector<DamageEntity *> &damageEntities = gameWorld.getDamageEntities();
     
-    for (Projectile *projectile : projectiles) {
-        if (!projectile->isDestroyed()) {
-            for (Player *player : players) if (projectile->getOwnerId() != player->getId()) {
-                if (projectile->getBounds().intersects(player->getBounds())) {
+    for (DamageEntity *damageEntity : damageEntities) {
+        if (!damageEntity->isDestroyed()) {
+            for (Player *player : players) if (damageEntity->getOwnerId() != player->getId()) {
+                if (damageEntity->getBounds().intersects(player->getBounds())) {
+                    Projectile *projectile = dynamic_cast<Projectile *>(damageEntity);
                     player->takeDamage(projectile->getDamage());
-                    player->knockback(-projectile->getVelocity(), projectile->getKnockback());
-                    projectile->destroy();
+                    player->knockback(-projectile->getVelocity(), projectile->getKnockbackStrength());
+                    damageEntity->destroy();
                     break;
                 }
             }

@@ -21,6 +21,7 @@ public:
     void setPosition(const sf::Vector2f &newPosition);
     sf::FloatRect getBounds() const;
     int getId() const;
+    void setId(int _id);
 
     bool isDestroyed() const;
     void destroy();

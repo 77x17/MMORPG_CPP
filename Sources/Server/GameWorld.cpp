@@ -16,8 +16,8 @@ void GameWorld::removePlayer(int id) {
     }
 }
 
-void GameWorld::addProjectile(Projectile *newProjectile) {
-    projectiles.push_back(newProjectile);
+void GameWorld::addDamageEntity(DamageEntity *newDamageEntity) {
+    damageEntities.push_back(newDamageEntity);
 }
 
 void GameWorld::update(const float &dt) {
@@ -25,14 +25,14 @@ void GameWorld::update(const float &dt) {
         player->update(dt);
     }
 
-    for (Projectile* projectile : projectiles) {
+    for (DamageEntity* projectile : damageEntities) {
         projectile->update(dt);
     }
 
-    for (size_t i = 0; i < projectiles.size(); ++i) {
-        if (projectiles[i]->isDestroyed()) {
-            delete projectiles[i];
-            projectiles.erase(projectiles.begin() + i);
+    for (size_t i = 0; i < damageEntities.size(); ++i) {
+        if (damageEntities[i]->isDestroyed()) {
+            delete damageEntities[i];
+            damageEntities.erase(damageEntities.begin() + i);
             --i;
         }
     }
@@ -42,6 +42,6 @@ const std::vector<Player *> GameWorld::getPlayers() const {
     return players;
 }
 
-const std::vector<Projectile *> GameWorld::getProjectiles() const {
-    return projectiles;
+const std::vector<DamageEntity *> GameWorld::getDamageEntities() const {
+    return damageEntities;
 }
