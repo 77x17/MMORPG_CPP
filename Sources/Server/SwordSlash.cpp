@@ -9,10 +9,14 @@ SwordSlash::SwordSlash(int _ownerId, const sf::Vector2f &startPosition, const sf
     damage            = 10.0f;
     knockbackStrength = 10.0f;
     lifeTimer         = 0.15f;
+    displayTimer      = 0.15f;
+
+    setPosition(position + direction * range);
 }
 
 void SwordSlash::update(const float &dt) {
-    lifeTimer -= dt;
+    lifeTimer    -= dt;
+    displayTimer -= dt;
     if (lifeTimer <= 0) {
         destroy();
     }
@@ -22,7 +26,11 @@ bool SwordSlash::canHitMultiple() const {
     return true;
 }
 
-sf::FloatRect SwordSlash::getBound() const {
-    sf::Vector2f hitPosition = position + direction * range;
-    return { hitPosition, size };
+bool SwordSlash::isDestroyed() const {
+    return (displayTimer <= 0);
+}
+
+void SwordSlash::destroy() {
+    damage = 0;
+    knockbackStrength = 0;
 }

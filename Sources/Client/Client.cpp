@@ -66,7 +66,7 @@ int main() {
         }
 
         entityManager.update(dt, myId);
-
+        
         renderer.render(entityManager, myId);
 
         sf::sleep(sf::milliseconds(1));

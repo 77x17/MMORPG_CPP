@@ -13,7 +13,5 @@ public:
 
     bool canHitMultiple() const override;
 
-    void setId(int id);
-
     sf::Vector2f getVelocity() const;
 };

@@ -4,7 +4,9 @@
 
 #include "../Shared/Constants.hpp"
 #include "../Shared/Utils.hpp"
+
 #include "Projectile.hpp"
+#include "SwordSlash.hpp"
 
 Player::Player(int _id, const sf::Vector2f &startPosition) 
     : Entity(_id, sf::Vector2f(PLAYER_WIDTH, PLAYER_HEIGHT)), 
@@ -45,7 +47,15 @@ DamageEntity* Player::updatePlayer(const float &dt, const InputState &input) {
         projectileCooldownTimer = PROJECTILE_COOLDOWN_TIMER;
         sf::Vector2f shootDir = input.movementDir;
         if (shootDir.x == 0 && shootDir.y == 0) shootDir = oldShootDir;
-        return new Projectile(id, position, shootDir);
+
+        if (weapon == 0) {
+            weapon = 1;
+            return new Projectile(id, position, shootDir);
+        }
+        else if (weapon == 1) {
+            weapon = 0;
+            return new SwordSlash(id, position, shootDir);
+        }
     }
 
     return nullptr;
@@ -65,6 +75,10 @@ void Player::takeDamage(int amount) {
 
 void Player::knockback(const sf::Vector2f &direction, const float &knockback) {
     position -= normalize(direction) * knockback;
+}
+
+void Player::move(const sf::Vector2f &direction) {
+    position += direction;
 }
 
 int Player::getHealth() const {

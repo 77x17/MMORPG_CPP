@@ -97,17 +97,32 @@ std::optional<WorldSnapshot> NetworkClient::pollReceive() {
                         worldSnapshot.players.push_back(playerSnapshot); 
                     }
 
-                    int projectileCount; packet >> projectileCount;
-                    for (int i = 0; i < projectileCount; ++i) {
-                        ProjectileSnapshot projectileSnapshot; 
-                        packet >> projectileSnapshot.id 
-                               >> projectileSnapshot.x 
-                               >> projectileSnapshot.y 
-                               >> projectileSnapshot.vx 
-                               >> projectileSnapshot.vy 
-                               >> projectileSnapshot.ownerId;
-
-                        worldSnapshot.projectiles.push_back(projectileSnapshot);
+                    int damageEntitiesCount; packet >> damageEntitiesCount;
+                    for (int i = 0; i < damageEntitiesCount; ++i) {
+                        std::string type; packet >> type;
+                        if (type == "Projectile") {
+                            ProjectileSnapshot projectileSnapshot; 
+                            packet >> projectileSnapshot.id 
+                                   >> projectileSnapshot.x 
+                                   >> projectileSnapshot.y 
+                                   >> projectileSnapshot.vx 
+                                   >> projectileSnapshot.vy 
+                                   >> projectileSnapshot.ownerId;
+                            worldSnapshot.projectiles.push_back(projectileSnapshot);
+                        }
+                        else if (type == "SwordSlash") {
+                            SwordSlashSnapshot swordSlashSnapshot;
+                            packet >> swordSlashSnapshot.id 
+                                   >> swordSlashSnapshot.left 
+                                   >> swordSlashSnapshot.top 
+                                   >> swordSlashSnapshot.width
+                                   >> swordSlashSnapshot.height
+                                   >> swordSlashSnapshot.ownerId;
+                            worldSnapshot.swordSlashs.push_back(swordSlashSnapshot);
+                        }
+                        else {
+                            std::cout << "[Network] - Unknown type in DamageEntity: " << type << '\n';
+                        }
                     }
 
                     return worldSnapshot;

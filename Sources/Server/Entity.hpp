@@ -23,6 +23,6 @@ public:
     int getId() const;
     void setId(int _id);
 
-    bool isDestroyed() const;
-    void destroy();
+    virtual bool isDestroyed() const;
+    virtual void destroy();
 };

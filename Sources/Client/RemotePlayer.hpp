@@ -9,5 +9,4 @@ struct RemotePlayer {
     sf::Vector2f localPosition { 0.0f, 0.0f };
     int          hp              = 0;
     int          lastAck         = 0;       // Last processed input seq from server
-    double       serverTimestamp = 0.0;     // timestamp of the server snapshot (for interpolation)
 };

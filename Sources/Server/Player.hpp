@@ -1,9 +1,10 @@
 #pragma once
 
-#include "DamageEntity.hpp"
 #include "../Shared/InputState.hpp"
 
-class Projectile;
+#include "Entity.hpp"
+
+class DamageEntity;
 
 class Player : public Entity {
 private:
@@ -13,6 +14,8 @@ private:
     sf::Vector2f oldShootDir = { 1.0f, 0.0f };
     sf::Vector2f velocity;
     float knockback_strength;
+
+    int weapon = 0;
 
 public:
     int lastProcessedInput = 0;
@@ -25,6 +28,7 @@ public:
 
     void takeDamage(int amount);
     void knockback(const sf::Vector2f &direction, const float &knockback);
+    void move(const sf::Vector2f &direction);
 
     int getHealth() const;
     sf::Vector2f getVelocity() const;

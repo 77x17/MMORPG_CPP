@@ -3,6 +3,7 @@
 #include <SFML/System/Clock.hpp>
 
 #include "Projectile.hpp"
+#include "SwordSlash.hpp"
 
 bool GameServer::start(unsigned short tcpPort, unsigned short udpPort) {
     if (!networkServer.start(tcpPort, udpPort)) {
@@ -90,12 +91,24 @@ void GameServer::run() {
                 for (DamageEntity *damageEntity : visibleDamageEntities) {
                     Projectile *projectile = dynamic_cast<Projectile *>(damageEntity);
                     if (projectile) {
-                        worldStatePacket << projectile->getId() 
+                        worldStatePacket << "Projectile"
+                                         << projectile->getId() 
                                          << projectile->getPosition().x 
                                          << projectile->getPosition().y 
                                          << projectile->getVelocity().x
                                          << projectile->getVelocity().y
                                          << projectile->getOwnerId();
+                    }
+
+                    SwordSlash *swordSlash = dynamic_cast<SwordSlash *>(damageEntity);
+                    if (swordSlash) {
+                        worldStatePacket << "SwordSlash"
+                                         << swordSlash->getId()
+                                         << swordSlash->getBounds().left
+                                         << swordSlash->getBounds().top
+                                         << swordSlash->getBounds().width
+                                         << swordSlash->getBounds().height
+                                         << swordSlash->getOwnerId();
                     }
                 }
 

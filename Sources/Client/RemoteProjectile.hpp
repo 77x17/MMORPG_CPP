@@ -9,5 +9,4 @@ struct RemoteProjectile {
     sf::Vector2f velocity      { 0.0f, 0.0f };
     int          ownerId         = -1;
     bool         authoritative   = false;       // true if this client is authoritative for this projectile
-    double       serverTimestamp = 0.0;
 };

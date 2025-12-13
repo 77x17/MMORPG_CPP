@@ -8,6 +8,8 @@ Renderer::Renderer(sf::RenderWindow &_window) : window(_window) {
     }
 }
 
+#include <iostream>
+
 void Renderer::render(const EntityManager &entityManager, int myId) {
     window.clear(sf::Color(30, 30, 30));
 
@@ -33,6 +35,17 @@ void Renderer::render(const EntityManager &entityManager, int myId) {
         projectileShape.setFillColor(projectile.ownerId == myId ? sf::Color::Yellow : sf::Color::White);
 
         window.draw(projectileShape);
+    }
+
+    sf::RectangleShape swordSlashShape;
+    for (auto &[id, swordSlash] : entityManager.getSwordSlashs()) {
+        swordSlashShape.setPosition(swordSlash.localPosition);
+        swordSlashShape.setSize(swordSlash.size);
+        // swordSlashShape.setOrigin(swordSlash.size / 2.0f);
+
+        swordSlashShape.setFillColor(swordSlash.ownerId == myId ? sf::Color::Yellow : sf::Color::White);
+
+        window.draw(swordSlashShape);
     }
 
     for (auto &[id, player] : entityManager.getPlayers()) {

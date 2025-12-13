@@ -72,6 +72,28 @@ void EntityManager::applySnapshot(const WorldSnapshot &snapshot, int myId, std::
     for (auto it = remoteProjectiles.begin(); it != remoteProjectiles.end(); ) {
         it = ((newProjectiles.count(it->first) == 0) ? remoteProjectiles.erase(it) : ++it);
     }
+
+    std::unordered_map<int, RemoteSwordSlash> newSwordSlashs;
+    for (const SwordSlashSnapshot &swordSlashSnapshot : snapshot.swordSlashs) {
+        RemoteSwordSlash remoteSwordSlash;
+        remoteSwordSlash.id             = swordSlashSnapshot.id;
+        remoteSwordSlash.serverPosition = { swordSlashSnapshot.left, swordSlashSnapshot.top };
+        remoteSwordSlash.size           = { swordSlashSnapshot.width, swordSlashSnapshot.height };
+        remoteSwordSlash.ownerId        = swordSlashSnapshot.ownerId;
+        remoteSwordSlash.authoritative  = true;
+
+        remoteSwordSlash.localPosition = remoteSwordSlash.serverPosition;
+
+        newSwordSlashs[remoteSwordSlash.id] = remoteSwordSlash;
+    }
+
+    for (auto &[id, remoteSwordSlash] : newSwordSlashs) {
+        remoteSwordSlashs[id] = remoteSwordSlash;
+    }
+
+    for (auto it = remoteSwordSlashs.begin(); it != remoteSwordSlashs.end(); ) {
+        it = ((newSwordSlashs.count(it->first) == 0) ? remoteSwordSlashs.erase(it) : ++it);
+    }
 }
 
 void EntityManager::update(const float &dt, int myId) {
@@ -92,6 +114,10 @@ const std::unordered_map<int, RemotePlayer> & EntityManager::getPlayers() const 
 
 const std::unordered_map<int, RemoteProjectile> & EntityManager::getProjectiles() const {
     return remoteProjectiles;
+}
+
+const std::unordered_map<int, RemoteSwordSlash> & EntityManager::getSwordSlashs() const {
+    return remoteSwordSlashs;
 }
 
 RemotePlayer & EntityManager::getPlayer(int myId) {

@@ -25,8 +25,8 @@ void GameWorld::update(const float &dt) {
         player->update(dt);
     }
 
-    for (DamageEntity* projectile : damageEntities) {
-        projectile->update(dt);
+    for (DamageEntity* damageEntity : damageEntities) {
+        damageEntity->update(dt);
     }
 
     for (size_t i = 0; i < damageEntities.size(); ++i) {
