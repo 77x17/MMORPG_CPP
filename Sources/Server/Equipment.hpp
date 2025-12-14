@@ -1,17 +1,28 @@
 #pragma once
 
 #include <vector>
-
 #include "ItemSlot.hpp"
 
 class Equipment {
 private:
-    int size;
-    std::vector<ItemSlot> slots;
+    ItemSlot helmet;
+    ItemSlot chestplate;
+    ItemSlot leggings;
+    ItemSlot boots;
+    ItemSlot weapon;
+    ItemSlot ring;
+    ItemSlot amulet;
+    ItemSlot shield;
 
 public:
-    Equipment(int _size = 8);
+    Equipment();
 
-    std::vector<ItemSlot> & getSlots();
-
+    ItemSlot & getHelmet();
+    ItemSlot & getChestplate();
+    ItemSlot & getLeggings();
+    ItemSlot & getBoots();
+    ItemSlot & getWeapon();
+    ItemSlot & getRing();
+    ItemSlot & getAmulet();
+    ItemSlot & getShield();
 };

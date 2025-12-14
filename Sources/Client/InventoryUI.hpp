@@ -10,8 +10,9 @@ class Inventory;
 class InventoryUI {
 private:
     bool open = false;
-    sf::RectangleShape background;
     sf::Font font;
+    
+    sf::RectangleShape background;
     sf::Text title;
 
     int size    = 36;
@@ -20,6 +21,10 @@ private:
     int draggingIndex = -1;
 
     int getIndex(const sf::Vector2f &mousePosition);
+
+    sf::RectangleShape equipmentBackground;
+    sf::Text equipmentTitle;
+
 public:
     InventoryUI();
 
