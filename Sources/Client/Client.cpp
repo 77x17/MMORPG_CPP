@@ -40,10 +40,13 @@ int main() {
                     networkClient.close();
                     window.close();
                 }
+                else if (event.key.code == sf::Keyboard::I) {
+                    renderer.getInventoryUI().toggle();
+                }
             }
         }
 
-        if (window.hasFocus()) {
+        if (window.hasFocus() && not renderer.getInventoryUI().isOpen()) {
             InputState input;
             if (InputManager::getPlayerInput(input)) {
                 input.seq = ++inputSeq;

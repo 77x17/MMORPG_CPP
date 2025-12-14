@@ -40,10 +40,10 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
 	@$(CXX) $(CXXFLAGS) -MMD -c $< -o $@ $(INCLUDES)
 
-run-client: $(CLIENT_TARGET)
+client: $(CLIENT_TARGET)
 	$(CLIENT_TARGET)
 
-run-server: $(SERVER_TARGET)
+server: $(SERVER_TARGET)
 	$(SERVER_TARGET)
 
 clean:

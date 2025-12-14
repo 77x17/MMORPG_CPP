@@ -48,8 +48,6 @@ void CombatSystem::handleCollision(GameWorld &gameWorld) {
     for (int i = 0; i < playerSize; ++i) {
         for (int j = i + 1; j < playerSize; ++j) {
             if (players[i]->getBounds().intersects(players[j]->getBounds())) {
-                // players[i]->knockback(-players[j]->getVelocity(), players[j]->getKnockback());
-                // players[j]->knockback(-players[i]->getVelocity(), players[i]->getKnockback());                
                 sf::Vector2f direction = normalize(players[j]->getPosition() - players[i]->getPosition());
                 if (direction.x == 0 && direction.y == 0) {
                     direction = { 1.0f, 0.0f };

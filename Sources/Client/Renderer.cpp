@@ -8,11 +8,11 @@ Renderer::Renderer(sf::RenderWindow &_window) : window(_window) {
     }
 }
 
-#include <iostream>
+InventoryUI &Renderer::getInventoryUI() {
+    return inventoryUI;
+}
 
-void Renderer::render(const EntityManager &entityManager, int myId) {
-    window.clear(sf::Color(30, 30, 30));
-
+void Renderer::drawPlayers(const EntityManager &entityManager, int myId) {
     sf::RectangleShape playerShape({ 40, 40 }); playerShape.setOrigin(20, 20);
     for (auto &[id, player] : entityManager.getPlayers()) {
         playerShape.setPosition(player.localPosition);
@@ -28,7 +28,9 @@ void Renderer::render(const EntityManager &entityManager, int myId) {
 
         window.draw(playerShape);
     }
+}
 
+void Renderer::drawWorld(const EntityManager &entityManager, int myId) {
     sf::CircleShape projectileShape(5); projectileShape.setOrigin(5, 5);
     for (auto &[id, projectile] : entityManager.getProjectiles()) {
         projectileShape.setPosition(projectile.localPosition);
@@ -56,6 +58,15 @@ void Renderer::render(const EntityManager &entityManager, int myId) {
         nametag.setPosition(player.localPosition - sf::Vector2f(0, 30));
         window.draw(nametag);
     }
+}
+
+void Renderer::render(const EntityManager &entityManager, int myId) {
+    window.clear(sf::Color(30, 30, 30));
+    
+    drawPlayers(entityManager, myId);
+    drawWorld(entityManager, myId);
+    
+    inventoryUI.draw(window);
 
     window.display();
 }
