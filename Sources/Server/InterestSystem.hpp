@@ -2,8 +2,8 @@
 
 #include <vector>
 
-#include "Player.hpp"
-#include "DamageEntity.hpp"
+class Player;
+class DamageEntity;
 
 constexpr float INTEREST_RADIUS = 800.0f;
 

@@ -2,13 +2,12 @@
 
 #include "../Shared/Utils.hpp"
 
+#include "Player.hpp"
+#include "DamageEntity.hpp"
 #include "Projectile.hpp"
 #include "SwordSlash.hpp"
 
-void CombatSystem::handleCollision(GameWorld &gameWorld) {
-    const std::vector<Player *> &players = gameWorld.getPlayers();
-    const std::vector<DamageEntity *> &damageEntities = gameWorld.getDamageEntities();
-    
+void CombatSystem::handleCollision(const std::vector<Player *> &players, const std::vector<DamageEntity *> &damageEntities) {
     for (DamageEntity *damageEntity : damageEntities) {
         if (!damageEntity->isDestroyed() && damageEntity->getDamage() != 0) {
             bool destroyFlag = false;

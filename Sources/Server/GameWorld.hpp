@@ -22,4 +22,8 @@ public:
 
     const std::vector<Player *> getPlayers() const;
     const std::vector<DamageEntity *> getDamageEntities() const;
+
+    Player * getPlayer(int clientId);
+
+    bool moveItem(int clientId, int from, int to);
 };

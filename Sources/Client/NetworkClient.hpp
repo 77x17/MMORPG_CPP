@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "WorldSnapshot.hpp"
+#include "InventorySnapshot.hpp"
 
 class NetworkClient {
 private:
@@ -18,6 +19,8 @@ private:
     unsigned short     tcpPort;
     unsigned short     udpPort;
 
+    WorldSnapshot      worldSnapshot;
+    InventorySnapshot  inventorySnapshot;
 public:
     int assignedId = -1;
 
@@ -30,9 +33,13 @@ public:
 
     // non-blocking: send input via TCP
     void sendInputPacket(int seq, const sf::Vector2f &moveDir, bool isShooting);
+    void sendTcpPacket(sf::Packet &packet);
 
     // non-blocking: poll for incoming packets
-    std::optional<WorldSnapshot> pollReceive();
+    void pollReceive();
+
+    WorldSnapshot & getWorldSnapshot();
+    InventorySnapshot & getInventorySnapshot();
 
     void close();
 };

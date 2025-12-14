@@ -26,7 +26,7 @@ public:
     void toggle();
     bool isOpen() const;
 
-    void handleLeftClick(const sf::Vector2f &mousePosition);
+    void handleLeftClick(const sf::Vector2f &mousePosition, const Inventory &inventory);
     std::pair<int, int> handleRelease(const sf::Vector2f &mousePosition);
 
     void draw(const Inventory &inventory, sf::RenderWindow &window);

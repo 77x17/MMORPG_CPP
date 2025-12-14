@@ -11,6 +11,8 @@ constexpr float SEND_INTEVAL = 1.0f / SEND_HZ;
 constexpr float SERVER_HZ    = 60.0f;
 constexpr float SERVER_TICK  = 1.0f / SERVER_HZ;
 
+#include <iostream>
+
 int main() {
     NetworkServer  networkServer;
     if (!networkServer.start(55001, 55002)) {
@@ -33,20 +35,53 @@ int main() {
 
         networkServer.poll();
 
-        std::vector<NewClientEvent> newClientEvents = networkServer.fetchNewClients();
-        for (NewClientEvent &event : newClientEvents) {
-            gameWorld.addPlayer(event.clientId);
-            inputSystem.clearQueue(event.clientId);
+        std::vector<NewClientEvent> & newClientEvents = networkServer.fetchNewClients();
+        if (newClientEvents.size()) {
+            for (NewClientEvent &event : newClientEvents) {
+                gameWorld.addPlayer(event.clientId);
+                inputSystem.clearQueue(event.clientId);
+
+                Inventory &inventory = gameWorld.getPlayer(event.clientId)->getInventory();
+                sf::Packet inventoryPacket;
+                inventoryPacket << "Inventory" << (int)inventory.getSlots().size();
+                for (const ItemSlot &slot : inventory.getSlots()) {
+                    inventoryPacket << slot.id;
+                }
+                networkServer.sendToClientTcp(event.clientId, inventoryPacket);
+            }
+            newClientEvents.clear();
         }
 
-        std::vector<NewInputEvent> newInputEvents = networkServer.fetchInputs();
-        for (NewInputEvent &event : newInputEvents) {
-            inputSystem.pushInput(event.clientId, event.input);
+        std::vector<NewInputEvent> & newInputEvents = networkServer.fetchInputs();
+        if (newInputEvents.size()) {
+            for (NewInputEvent &event : newInputEvents) {
+                inputSystem.pushInput(event.clientId, event.input);
+            }
+            newInputEvents.clear();
         }
 
-        std::vector<DeleteClientEvent> deleteClientEvents = networkServer.fetchDeleteClients();
-        for (DeleteClientEvent &event : deleteClientEvents) {
-            gameWorld.removePlayer(event.clientId);
+        std::vector<DeleteClientEvent> & deleteClientEvents = networkServer.fetchDeleteClients();
+        if (deleteClientEvents.size()) {
+            for (DeleteClientEvent &event : deleteClientEvents) {
+                gameWorld.removePlayer(event.clientId);
+            }
+            deleteClientEvents.clear();
+        }
+
+        std::vector<MoveItemEvent> & moveItemEvents = networkServer.fetchMoveItems();
+        if (moveItemEvents.size()) {
+            for (MoveItemEvent &event : moveItemEvents) {
+                if (gameWorld.moveItem(event.clientId, event.from, event.to)) {
+                    Inventory &inventory = gameWorld.getPlayer(event.clientId)->getInventory();
+                    sf::Packet inventoryPacket;
+                    inventoryPacket << "Inventory" << (int)inventory.getSlots().size();
+                    for (const ItemSlot &slot : inventory.getSlots()) {
+                        inventoryPacket << slot.id;
+                    }
+                    networkServer.sendToClientTcp(event.clientId, inventoryPacket);
+                }
+            }
+            moveItemEvents.clear();
         }
 
         if (accumulator >= SERVER_TICK) {
@@ -70,7 +105,7 @@ int main() {
                 }
             }
 
-            combatSystem.handleCollision(gameWorld);
+            combatSystem.handleCollision(gameWorld.getPlayers(), gameWorld.getDamageEntities());
 
             gameWorld.update(SERVER_TICK);
 
@@ -124,7 +159,7 @@ int main() {
                     }
                 }
 
-                networkServer.sendToClient(client, worldStatePacket);
+                networkServer.sendToClientUdp(client, worldStatePacket);
             }
 
             sendClock.restart();

@@ -52,7 +52,11 @@ void NetworkClient::sendInputPacket(int seq, const sf::Vector2f &moveDir, bool i
     udp.send(packet, host, udpPort);
 }
 
-std::optional<WorldSnapshot> NetworkClient::pollReceive() {
+void NetworkClient::sendTcpPacket(sf::Packet &packet) {
+    tcp.send(packet);
+}
+
+void NetworkClient::pollReceive() {
     if (selector.wait(sf::milliseconds(1))) {
         if (selector.isReady(tcp)) {
             sf::Packet packet; sf::Socket::Status status = tcp.receive(packet);
@@ -65,6 +69,16 @@ std::optional<WorldSnapshot> NetworkClient::pollReceive() {
                     sf::Packet assignUdp;
                     assignUdp << std::string("Assign_UDP") << assignedId;
                     udp.send(assignUdp, host, udpPort);
+                }
+                else if (type == "Inventory") {
+                    inventorySnapshot.appear = true;
+                    inventorySnapshot.itemIds.clear();
+                    
+                    int inventorySize; packet >> inventorySize;
+                    for (int i = 0; i < inventorySize; ++i) {
+                        int itemId; packet >> itemId;
+                        inventorySnapshot.itemIds.push_back(itemId);
+                    }
                 }
                 else {
                     std::cout << "[Network] - TCP msg type: " << type << '\n';
@@ -84,7 +98,8 @@ std::optional<WorldSnapshot> NetworkClient::pollReceive() {
             if (status == sf::Socket::Done) {
                 std::string type; packet >> type;
                 if (type == "WorldState") {
-                    WorldSnapshot worldSnapshot;
+                    worldSnapshot.appear = true;
+                    worldSnapshot.players.clear();
                     int playerCount; packet >> playerCount;
                     for (int i = 0; i < playerCount; ++i) {
                         PlayerSnapshot playerSnapshot; 
@@ -98,6 +113,8 @@ std::optional<WorldSnapshot> NetworkClient::pollReceive() {
                     }
 
                     int damageEntitiesCount; packet >> damageEntitiesCount;
+                    worldSnapshot.projectiles.clear();
+                    worldSnapshot.swordSlashs.clear();
                     for (int i = 0; i < damageEntitiesCount; ++i) {
                         std::string type; packet >> type;
                         if (type == "Projectile") {
@@ -124,8 +141,6 @@ std::optional<WorldSnapshot> NetworkClient::pollReceive() {
                             std::cout << "[Network] - Unknown type in DamageEntity: " << type << '\n';
                         }
                     }
-
-                    return worldSnapshot;
                 }
                 else {
                     std::cout << "[Network] - UDP packet type: " << type << '\n';
@@ -133,8 +148,14 @@ std::optional<WorldSnapshot> NetworkClient::pollReceive() {
             }
         }
     }
+}
 
-    return std::nullopt;
+WorldSnapshot & NetworkClient::getWorldSnapshot() {
+    return worldSnapshot;
+}
+
+InventorySnapshot & NetworkClient::getInventorySnapshot() {
+    return inventorySnapshot;
 }
 
 void NetworkClient::close() {

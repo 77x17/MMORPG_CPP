@@ -77,23 +77,18 @@ void NetworkServer::poll() {
             if (selector.isReady(tcpSocket)) {
                 sf::Packet         packet;
                 sf::Socket::Status status = tcpSocket.receive(packet);
-                // if (status == sf::Socket::Done) {
-                //     std::string type; packet >> type;
-                //     if (type == "Input") {
-                //         // === Handle input ===
-                //         InputState input;
-                //         packet >> input.seq >> input.movementDir.x >> input.movementDir.y >> input.isShooting;
-                        
-                //         NewInputEvent newInputEvent;
-                //         newInputEvent.clientId = clients[i].id;
-                //         newInputEvent.input    = input;
-                //         pendingInputs.push_back(newInputEvent);
-                //     }
-                //     else {
-                //         std::cout << "[Network] - Received undefine type: " << type << '\n';
-                //     }
-                // }
-                // else 
+                if (status == sf::Socket::Done) {
+                    std::string type; packet >> type;
+                    if (type == "MoveItem") {
+                        int from, to;
+                        packet >> from >> to;
+                        pendingMoveItems.push_back({ clients[i].id, from, to });
+                    }
+                    else {
+                        std::cout << "[Network] - Received undefine type: " << type << '\n';
+                    }
+                }
+                else 
                 if (status == sf::Socket::Disconnected) {
                     std::cout << "[Network] - Client TCP disconnected ID = " << clients[i].id << '\n';
                     
@@ -154,32 +149,38 @@ void NetworkServer::poll() {
     }
 }
 
-void NetworkServer::sendToClient(ClientSession &client, sf::Packet &packet) {    
+void NetworkServer::sendToClientUdp(ClientSession &client, sf::Packet &packet) {    
     udp.send(packet, client.udpId, client.udpPort);
+}
+
+void NetworkServer::sendToClientTcp(int clientId, sf::Packet &packet) {    
+    for (ClientSession &client : clients) {
+        if (client.id == clientId) {
+            client.tcp->send(packet);
+            break;
+        }
+    }
 }
 
 std::vector<ClientSession> & NetworkServer::getClients() {
     return clients;
 }
 
-std::vector<NewClientEvent> NetworkServer::fetchNewClients() {
-    std::vector<NewClientEvent> temp = pendingNewClients;
-    pendingNewClients.clear();
-    return temp;
+std::vector<NewClientEvent> & NetworkServer::fetchNewClients() {
+    return pendingNewClients;
 }
 
-std::vector<NewInputEvent> NetworkServer::fetchInputs() {
-    std::vector<NewInputEvent> temp = pendingInputs;
-    pendingInputs.clear();
-    return temp;
+std::vector<NewInputEvent> & NetworkServer::fetchInputs() {
+    return pendingInputs;
 }
 
-std::vector<DeleteClientEvent> NetworkServer::fetchDeleteClients() {
-    std::vector<DeleteClientEvent> temp = pendingDeleteClients;
-    pendingDeleteClients.clear();
-    return temp;
+std::vector<DeleteClientEvent> & NetworkServer::fetchDeleteClients() {
+    return pendingDeleteClients;
 }
 
+std::vector<MoveItemEvent> & NetworkServer::fetchMoveItems() {
+    return pendingMoveItems;
+}
 
 void NetworkServer::close() {
     listener.close();

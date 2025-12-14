@@ -10,7 +10,7 @@
 
 Player::Player(int _id, const sf::Vector2f &startPosition) 
     : Entity(_id, sf::Vector2f(PLAYER_WIDTH, PLAYER_HEIGHT)), 
-      health(100), maxHealth(100), projectileCooldownTimer(0) 
+      health(100), maxHealth(100), projectileCooldownTimer(0), inventory(36)
 {
     position = startPosition;
     knockback_strength = 10.0f;
@@ -48,12 +48,11 @@ DamageEntity* Player::updatePlayer(const float &dt, const InputState &input) {
         sf::Vector2f shootDir = input.movementDir;
         if (shootDir.x == 0 && shootDir.y == 0) shootDir = oldShootDir;
 
+        int weapon = inventory[0].id;
         if (weapon == 0) {
-            weapon = 1;
             return new Projectile(id, position, shootDir);
         }
         else if (weapon == 1) {
-            weapon = 0;
             return new SwordSlash(id, position, shootDir);
         }
     }
@@ -91,4 +90,8 @@ sf::Vector2f Player::getVelocity() const {
 
 float Player::getKnockback() const {
     return knockback_strength;
+}
+
+Inventory & Player::getInventory() {
+    return inventory;
 }

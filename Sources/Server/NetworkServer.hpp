@@ -10,6 +10,7 @@
 #include "NewClientEvent.hpp"
 #include "NewInputEvent.hpp"
 #include "DeleteClientEvent.hpp"
+#include "MoveItemEvent.hpp"
 
 class NetworkServer {
 private:
@@ -23,7 +24,7 @@ private:
     std::vector<NewClientEvent>    pendingNewClients;
     std::vector<NewInputEvent>     pendingInputs;
     std::vector<DeleteClientEvent> pendingDeleteClients;
-
+    std::vector<MoveItemEvent>     pendingMoveItems;
 
 public:
     NetworkServer() = default;
@@ -35,13 +36,15 @@ public:
 
     void poll();
 
-    void sendToClient(ClientSession &client, sf::Packet &packet);
+    void sendToClientUdp(ClientSession &client, sf::Packet &packet);
+    void sendToClientTcp(int clientId, sf::Packet &packet);
 
     std::vector<ClientSession> & getClients();
 
-    std::vector<NewClientEvent> fetchNewClients();
-    std::vector<NewInputEvent> fetchInputs();
-    std::vector<DeleteClientEvent> fetchDeleteClients();
+    std::vector<NewClientEvent>    & fetchNewClients();
+    std::vector<NewInputEvent>     & fetchInputs();
+    std::vector<DeleteClientEvent> & fetchDeleteClients();
+    std::vector<MoveItemEvent>     & fetchMoveItems();
 
     void close();
 };

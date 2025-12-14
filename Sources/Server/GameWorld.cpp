@@ -45,3 +45,22 @@ const std::vector<Player *> GameWorld::getPlayers() const {
 const std::vector<DamageEntity *> GameWorld::getDamageEntities() const {
     return damageEntities;
 }
+
+Player * GameWorld::getPlayer(int clientId) {
+    for (Player *player : players) {
+        if (player->getId() == clientId) return player;
+    }
+    return nullptr;
+}
+
+bool GameWorld::moveItem(int clientId, int from, int to) {
+    Player *player = getPlayer(clientId);
+
+    if (player == nullptr) return false;
+    
+    if (player->getInventory()[from].id != -1 || player->getInventory()[to].id != -1) {
+        std::swap(player->getInventory()[from].id, player->getInventory()[to].id);
+        return true;
+    }
+    return false;
+}

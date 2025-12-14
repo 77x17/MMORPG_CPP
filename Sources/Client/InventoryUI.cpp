@@ -50,10 +50,10 @@ int InventoryUI::getIndex(const sf::Vector2f &mousePosition) {
     return -1;
 }
 
-void InventoryUI::handleLeftClick(const sf::Vector2f &mousePosition) {
+void InventoryUI::handleLeftClick(const sf::Vector2f &mousePosition, const Inventory &inventory) {
     int index = getIndex(mousePosition);
     
-    if (draggingIndex == -1) {
+    if (draggingIndex == -1 && index != -1 && inventory.getSlots()[index].itemId != -1) {
         draggingIndex = index;
     }
 }
@@ -96,12 +96,12 @@ void InventoryUI::draw(const Inventory &inventory, sf::RenderWindow &window) {
 
         window.draw(itemBox);
 
-        if (index != draggingIndex) {
+        if (inventory.getSlots()[index].itemId != -1 && index != draggingIndex) {
             itemId.setString(std::to_string(inventory.getSlots()[index].itemId));
             itemId.setPosition(itemBox.getPosition() + sf::Vector2f( 5.0f, 5.0f ));
+            
+            window.draw(itemId);
         }
-        
-        window.draw(itemId);
     }
 
     if (draggingIndex != -1) {
@@ -114,6 +114,7 @@ void InventoryUI::draw(const Inventory &inventory, sf::RenderWindow &window) {
 
         itemId.setString(std::to_string(inventory.getSlots()[draggingIndex].itemId));
         itemId.setPosition(itemBox.getPosition() + sf::Vector2f( 5.0f, 5.0f ));
+        // itemId.setFillColor(sf::Color::Yellow);
 
         window.draw(itemId);
     }

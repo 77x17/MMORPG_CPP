@@ -2,6 +2,9 @@
 
 #include "../Shared/Utils.hpp"
 
+#include "Player.hpp"
+#include "DamageEntity.hpp"
+
 std::vector<Player *> InterestSystem::getVisiblePlayers(Player *center, const std::vector<Player *> &players) {
     std::vector<Player *> visiblePlayers;
     for (Player *player : players) {

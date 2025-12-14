@@ -4,6 +4,7 @@
 
 #include "Entity.hpp"
 #include "Inventory.hpp"
+#include "Equipment.hpp"
 
 class DamageEntity;
 
@@ -16,9 +17,8 @@ private:
     sf::Vector2f velocity;
     float knockback_strength;
 
-    int weapon = 0;
-
     Inventory inventory;
+    Equipment equipment;
 
 public:
     int lastProcessedInput = 0;
@@ -36,4 +36,7 @@ public:
     int getHealth() const;
     sf::Vector2f getVelocity() const;
     float getKnockback() const;
+
+    Inventory & getInventory();
+    Equipment & getEquipment();
 };
