@@ -3,6 +3,7 @@
 #include "../Shared/InputState.hpp"
 
 #include "Entity.hpp"
+#include "Inventory.hpp"
 
 class DamageEntity;
 
@@ -16,6 +17,8 @@ private:
     float knockback_strength;
 
     int weapon = 0;
+
+    Inventory inventory;
 
 public:
     int lastProcessedInput = 0;

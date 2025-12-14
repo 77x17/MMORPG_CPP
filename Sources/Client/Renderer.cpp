@@ -60,13 +60,13 @@ void Renderer::drawWorld(const EntityManager &entityManager, int myId) {
     }
 }
 
-void Renderer::render(const EntityManager &entityManager, int myId) {
+void Renderer::render(const EntityManager &entityManager, const Inventory &inventory, int myId) {
     window.clear(sf::Color(30, 30, 30));
     
     drawPlayers(entityManager, myId);
     drawWorld(entityManager, myId);
     
-    inventoryUI.draw(window);
+    inventoryUI.draw(inventory, window);
 
     window.display();
 }

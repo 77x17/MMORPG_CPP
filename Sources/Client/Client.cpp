@@ -8,13 +8,18 @@
 #include "NetworkClient.hpp"
 #include "EntityManager.hpp"
 #include "InputManager.hpp"
+#include "Inventory.hpp"
 #include "Renderer.hpp"
+
+#include <iostream>
 
 int main() {
     NetworkClient networkClient("127.0.0.1", 55001, 55002);
     if (!networkClient.connectAll()) return -1;
 
     EntityManager entityManager;
+    Inventory inventory;
+
     sf::RenderWindow window({ 800, 600 }, "Client");
     Renderer renderer(window);
 
@@ -40,8 +45,26 @@ int main() {
                     networkClient.close();
                     window.close();
                 }
-                else if (event.key.code == sf::Keyboard::I) {
+                else if (event.key.code == sf::Keyboard::E) {
                     renderer.getInventoryUI().toggle();
+                }
+            }
+            else if (renderer.getInventoryUI().isOpen()) {
+                if (event.type == sf::Event::MouseButtonPressed) {
+                    if (event.mouseButton.button == sf::Mouse::Left) {
+                        sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+                        sf::Vector2f worldPosition = window.mapPixelToCoords(mousePosition);
+                        renderer.getInventoryUI().handleLeftClick(worldPosition);
+                    }
+                }
+                else if (event.type == sf::Event::MouseButtonReleased) {
+                    sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+                    sf::Vector2f worldPosition = window.mapPixelToCoords(mousePosition);
+                    std::pair<int, int> swapItemEvent = renderer.getInventoryUI().handleRelease(worldPosition);
+
+                    if (swapItemEvent.first != -1 && swapItemEvent.second != -1) {
+                        std::swap(inventory.getSlot(swapItemEvent.first), inventory.getSlot(swapItemEvent.second));
+                    }
                 }
             }
         }
@@ -70,7 +93,7 @@ int main() {
 
         entityManager.update(dt, myId);
         
-        renderer.render(entityManager, myId);
+        renderer.render(entityManager, inventory, myId);
 
         sf::sleep(sf::milliseconds(1));
     }

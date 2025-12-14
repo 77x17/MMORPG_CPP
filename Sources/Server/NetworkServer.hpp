@@ -19,9 +19,9 @@ private:
 
     std::vector<ClientSession> clients;
 
-    int                         nextClientId = 0;
-    std::vector<NewClientEvent> pendingNewClients;
-    std::vector<NewInputEvent>  pendingInputs;
+    int                            nextClientId = 0;
+    std::vector<NewClientEvent>    pendingNewClients;
+    std::vector<NewInputEvent>     pendingInputs;
     std::vector<DeleteClientEvent> pendingDeleteClients;
 
 

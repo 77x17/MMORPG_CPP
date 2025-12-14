@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+
 #include "InventorySlot.hpp"
 
 class Inventory {
@@ -9,8 +10,8 @@ private:
     std::vector<InventorySlot> slots;
 
 public:
-    Inventory(int size = 36);
+    Inventory(int _size = 36);
 
-    InventorySlot &getSlot(int index);
-    const std::vector<InventorySlot> & getSlots() const;
+    std::vector<InventorySlot> & getSlots();
+
 };

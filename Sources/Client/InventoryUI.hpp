@@ -5,6 +5,8 @@
 #include <SFML/Graphics/Text.hpp>
 #include <SFML/Graphics/RenderWindow.hpp>
 
+class Inventory;
+
 class InventoryUI {
 private:
     bool open = false;
@@ -12,12 +14,20 @@ private:
     sf::Font font;
     sf::Text title;
 
+    int size    = 36;
+    int columns = 9;
+
+    int draggingIndex = -1;
+
+    int getIndex(const sf::Vector2f &mousePosition);
 public:
     InventoryUI();
 
     void toggle();
     bool isOpen() const;
 
-    void draw(sf::RenderWindow &window);
+    void handleLeftClick(const sf::Vector2f &mousePosition);
+    std::pair<int, int> handleRelease(const sf::Vector2f &mousePosition);
 
+    void draw(const Inventory &inventory, sf::RenderWindow &window);
 };

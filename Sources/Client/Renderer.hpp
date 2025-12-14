@@ -5,6 +5,7 @@
 
 #include "EntityManager.hpp"
 #include "InventoryUI.hpp"
+#include "Inventory.hpp"
 
 class Renderer {
 private:
@@ -18,7 +19,7 @@ public:
     
     InventoryUI &getInventoryUI();
 
-    void render(const EntityManager &entityManager, int myId);
+    void render(const EntityManager &entityManager, const Inventory &inventory, int myId);
     
     void drawWorld(const EntityManager &entityManager, int myId);
     void drawPlayers(const EntityManager &entityManager, int myId);

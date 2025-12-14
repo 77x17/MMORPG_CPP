@@ -6,5 +6,6 @@ Build/Client/Client.o: Sources/Client/Client.cpp \
  Sources/Client/SwordSlashSnapshot.hpp Sources/Client/EntityManager.hpp \
  Sources/Client/../Shared/InputState.hpp Sources/Client/RemotePlayer.hpp \
  Sources/Client/RemoteProjectile.hpp Sources/Client/RemoteSwordSlash.hpp \
- Sources/Client/InputManager.hpp Sources/Client/Renderer.hpp \
- Sources/Client/InventoryUI.hpp
+ Sources/Client/InputManager.hpp Sources/Client/Inventory.hpp \
+ Sources/Client/InventorySlot.hpp Sources/Client/Item.hpp \
+ Sources/Client/Renderer.hpp Sources/Client/InventoryUI.hpp
