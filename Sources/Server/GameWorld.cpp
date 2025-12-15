@@ -1,13 +1,26 @@
 #include "GameWorld.hpp"
 
+#include "InventoryManager.hpp"
+
 void GameWorld::addPlayer(int id) {
     Player *newPlayer = new Player(id, sf::Vector2f(100, 100));
+
+    if (not InventoryManager::loadInventory(newPlayer->getId(), newPlayer->getInventory())) {
+        InventoryManager::saveInventory(newPlayer->getId(), newPlayer->getInventory());
+    }
+    if (not InventoryManager::loadEquipment(newPlayer->getId(), newPlayer->getEquipment())) {
+        InventoryManager::saveEquipment(newPlayer->getId(), newPlayer->getEquipment());
+    }
+    
     players.push_back(newPlayer);
 }
 
 void GameWorld::removePlayer(int id) {
     for (size_t i = 0; i < players.size(); ++i) {
         if (players[i]->getId() == id) {
+            InventoryManager::saveInventory(players[i]->getId(), players[i]->getInventory());
+            InventoryManager::saveEquipment(players[i]->getId(), players[i]->getEquipment());
+
             delete players[i];
             players.erase(players.begin() + i);
 

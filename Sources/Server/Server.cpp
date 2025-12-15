@@ -19,7 +19,7 @@ void update(GameWorld &gameWorld, InputSystem &inputSystem, CombatSystem &combat
 // === For client ===
 void syncInventoryToClient(GameWorld &gameWorld, NetworkServer &networkServer, int clientId);
 void syncEquipmentToClient(GameWorld &gameWorld, NetworkServer &networkServer, int clientId);
-void syncGameWorldToClients(GameWorld &gameWorld, NetworkServer &networkServer);
+void syncGameWorldToClients(GameWorld &gameWorld, InterestSystem &interestSystem, NetworkServer &networkServer);
 
 void syncGameWorldFromClients(GameWorld &gameWorld, InputSystem &inputSystem, NetworkServer &networkServer) {
     std::vector<NewClientEvent> & newClientEvents = networkServer.fetchNewClients();
