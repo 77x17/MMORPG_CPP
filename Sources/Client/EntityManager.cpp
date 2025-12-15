@@ -4,7 +4,7 @@
 #include "../Shared/Utils.hpp"
 #include "../Shared/Constants.hpp"
 
-void EntityManager::applySnapshot(const WorldSnapshot &snapshot, int myId, std::vector<InputState> &pendingInputs) {
+void EntityManager::applySnapshot(const WorldSnapshot &snapshot, int clientId, std::vector<InputState> &pendingInputs) {
     std::unordered_map<int, RemotePlayer> newPlayers;
     for (const PlayerSnapshot &playerSnapshot : snapshot.players) {
         RemotePlayer remotePlayer;
@@ -21,7 +21,7 @@ void EntityManager::applySnapshot(const WorldSnapshot &snapshot, int myId, std::
             remotePlayer.localPosition = remotePlayer.serverPosition;
         }
 
-        if (remotePlayer.id == myId) {
+        if (remotePlayer.id == clientId) {
             // reconcile pending inputs: remove acknowledged
             while (!pendingInputs.empty() && pendingInputs.front().seq <= remotePlayer.lastAck) {
                 pendingInputs.erase(pendingInputs.begin());
@@ -96,9 +96,9 @@ void EntityManager::applySnapshot(const WorldSnapshot &snapshot, int myId, std::
     }
 }
 
-void EntityManager::update(const float &dt, int myId) {
+void EntityManager::update(const float &dt, int clientId) {
     for (auto &[id, remotePlayer] : remotePlayers) {
-        if (remotePlayer.id == myId) continue;
+        if (remotePlayer.id == clientId) continue;
         remotePlayer.localPosition = lerp(remotePlayer.localPosition, remotePlayer.serverPosition, 0.2f);
     }
 

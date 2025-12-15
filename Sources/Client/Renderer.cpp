@@ -12,13 +12,13 @@ InventoryUI &Renderer::getInventoryUI() {
     return inventoryUI;
 }
 
-void Renderer::drawPlayers(const EntityManager &entityManager, int myId) {
+void Renderer::drawPlayers(const EntityManager &entityManager, int clientId) {
     sf::RectangleShape playerShape({ 40, 40 }); playerShape.setOrigin(20, 20);
     for (auto &[id, player] : entityManager.getPlayers()) {
         playerShape.setPosition(player.localPosition);
-        playerShape.setFillColor(player.id == myId ? sf::Color::Blue : sf::Color::Red);
+        playerShape.setFillColor(player.id == clientId ? sf::Color::Blue : sf::Color::Red);
 
-        if (window.hasFocus() && player.id == myId) {
+        if (window.hasFocus() && player.id == clientId) {
             playerShape.setOutlineColor(sf::Color::Yellow);
             playerShape.setOutlineThickness(1.0f);
         }
@@ -30,11 +30,11 @@ void Renderer::drawPlayers(const EntityManager &entityManager, int myId) {
     }
 }
 
-void Renderer::drawWorld(const EntityManager &entityManager, int myId) {
+void Renderer::drawWorld(const EntityManager &entityManager, int clientId) {
     sf::CircleShape projectileShape(5); projectileShape.setOrigin(5, 5);
     for (auto &[id, projectile] : entityManager.getProjectiles()) {
         projectileShape.setPosition(projectile.localPosition);
-        projectileShape.setFillColor(projectile.ownerId == myId ? sf::Color::Yellow : sf::Color::White);
+        projectileShape.setFillColor(projectile.ownerId == clientId ? sf::Color::Yellow : sf::Color::White);
 
         window.draw(projectileShape);
     }
@@ -45,7 +45,7 @@ void Renderer::drawWorld(const EntityManager &entityManager, int myId) {
         swordSlashShape.setSize(swordSlash.size);
         // swordSlashShape.setOrigin(swordSlash.size / 2.0f);
 
-        swordSlashShape.setFillColor(swordSlash.ownerId == myId ? sf::Color::Yellow : sf::Color::White);
+        swordSlashShape.setFillColor(swordSlash.ownerId == clientId ? sf::Color::Yellow : sf::Color::White);
 
         window.draw(swordSlashShape);
     }
@@ -60,11 +60,11 @@ void Renderer::drawWorld(const EntityManager &entityManager, int myId) {
     }
 }
 
-void Renderer::render(const EntityManager &entityManager, const Inventory &inventory, const Equipment &equipment, int myId) {
+void Renderer::render(const EntityManager &entityManager, const Inventory &inventory, const Equipment &equipment, int clientId) {
     window.clear(sf::Color(30, 30, 30));
     
-    drawPlayers(entityManager, myId);
-    drawWorld(entityManager, myId);
+    drawPlayers(entityManager, clientId);
+    drawWorld(entityManager, clientId);
     
     inventoryUI.draw(inventory, equipment, window);
 

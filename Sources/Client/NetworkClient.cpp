@@ -14,13 +14,17 @@ NetworkClient::~NetworkClient() {
     close();
 }
 
-bool NetworkClient::connectTcp(const float &timeoutSeconds) {
+bool NetworkClient::connectTcp(int clientId, const float &timeoutSeconds) {
     if (tcp.connect(host, tcpPort, sf::seconds(timeoutSeconds)) != sf::Socket::Done) {
-        std::cout << "[Network] - Cannot connect TCP" << '\n';
+        // std::cout << "[Network] - Cannot connect TCP" << '\n';
         return false;
     }
     tcp.setBlocking(false);
     selector.add(tcp);
+
+    sf::Packet loginPacket;
+    loginPacket << "Login" << clientId;
+    tcp.send(loginPacket);
 
     return true;
 }
@@ -28,7 +32,7 @@ bool NetworkClient::connectTcp(const float &timeoutSeconds) {
 // already bound in connectTcp path
 bool NetworkClient::bindUdp() {
     if (udp.bind(sf::Socket::AnyPort) != sf::Socket::Done) {
-        std::cout << "[Network] - Cannot bind UDP" << '\n';
+        // std::cout << "[Network] - Cannot bind UDP" << '\n';
         return false;
     }
     udp.setBlocking(false);
@@ -37,8 +41,8 @@ bool NetworkClient::bindUdp() {
     return true;
 }
 
-bool NetworkClient::connectAll(const float& timeoutSeconds) {
-    if (connectTcp(timeoutSeconds) && bindUdp()) {
+bool NetworkClient::connectAll(int clientId, const float& timeoutSeconds) {
+    if (connectTcp(clientId, timeoutSeconds) && bindUdp()) {
         std::cout << "[Network] - Connected to server..." << '\n';
         return true;    
     }

@@ -40,6 +40,33 @@ bool NetworkServer::start(unsigned short tcpPort, unsigned short udpPort) {
     return true;
 }
 
+bool NetworkServer::isValidClientId(int id) const {
+    for (const ClientSession &client : clients) {
+        if (client.id == id) return false;
+    }
+    return true;
+}
+
+int NetworkServer::generateNewClientId() const {
+    int *flag = new int[clients.size() + 1]();
+    for (const ClientSession &client : clients) {
+        if (client.id <= (int)clients.size()) {
+            flag[client.id] = true;
+        }
+    }
+
+    int newId = -1;
+    for (size_t i = 0; i <= clients.size(); ++i) {
+        if (flag[i] == false) {
+            newId = i;
+            break;
+        }
+    }
+    delete[] flag;
+
+    return newId;
+}
+
 void NetworkServer::poll() {
     // === Non-blocking: Accept new TCP clients / read TCP inputs ===
     if (selector.wait(sf::milliseconds(1))) {
@@ -50,21 +77,11 @@ void NetworkServer::poll() {
                 newTcp->setBlocking(false);
 
                 // === Pending create new player ===
-                int newId = ++nextClientId;
                 ClientSession newClient;
-                newClient.id  = newId;
+                newClient.id  = -1;
                 newClient.tcp = newTcp;
                 clients.push_back(newClient);
                 selector.add(*newTcp);
-
-                NewClientEvent newClientEvent;
-                newClientEvent.clientId = newId;
-                pendingNewClients.push_back(newClientEvent);
-
-                sf::Packet packet; packet << std::string("Assign_ID") << newId;
-                newTcp->send(packet);
-
-                std::cout << "[Network] - Client connected ID = " << newId << '\n';
             }
             else {
                 delete newTcp;
@@ -79,7 +96,30 @@ void NetworkServer::poll() {
                 sf::Socket::Status status = tcpSocket.receive(packet);
                 if (status == sf::Socket::Done) {
                     std::string type; packet >> type;
-                    if (type == "MoveItem") {
+                    if (type == "Login") {
+                        int requestedId; packet >> requestedId;
+
+                        int finalId;
+                        if (requestedId != -1 && isValidClientId(requestedId)) {
+                            finalId = requestedId;
+                        }
+                        else {
+                            // finalId = generateNewClientId();
+                            
+                        }
+                        
+                        clients[i].id = finalId;
+
+                        NewClientEvent newClientEvent;
+                        newClientEvent.clientId = finalId;
+                        pendingNewClients.push_back(newClientEvent);
+
+                        sf::Packet packet; packet << std::string("Assign_ID") << finalId;
+                        tcpSocket.send(packet);
+
+                        std::cout << "[Network] - Client connected ID = " << finalId << '\n';
+                    }
+                    else if (type == "MoveItem") {
                         int from, to;
                         packet >> from >> to;
                         pendingMoveItems.push_back({ clients[i].id, from, to });
@@ -165,6 +205,15 @@ void NetworkServer::sendToClientTcp(int clientId, sf::Packet &packet) {
             break;
         }
     }
+}
+
+ClientSession & NetworkServer::getClient(int clientId) {
+    for (ClientSession &client : clients) {
+        if (client.id == clientId) {
+            return client;
+        }
+    }
+    throw std::out_of_range("[Network] - getClient() out of range");
 }
 
 std::vector<ClientSession> & NetworkServer::getClients() {

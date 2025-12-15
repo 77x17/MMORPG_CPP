@@ -29,9 +29,9 @@ public:
     NetworkClient(const std::string &_host, unsigned short _tcpPort, unsigned short _udpPort);
     ~NetworkClient();
 
-    bool connectTcp(const float &timeoutSeconds);
+    bool connectTcp(int clientId, const float &timeoutSeconds);
     bool bindUdp();
-    bool connectAll(const float &timeoutSeconds = 1.0f);
+    bool connectAll(int clientId, const float &timeoutSeconds = 1.0f);
 
     // non-blocking: send input via TCP
     void sendInputPacket(int seq, const sf::Vector2f &moveDir, bool isShooting);

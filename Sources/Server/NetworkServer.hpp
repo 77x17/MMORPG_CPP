@@ -21,7 +21,6 @@ private:
 
     std::vector<ClientSession> clients;
 
-    int                            nextClientId = 0;
     std::vector<NewClientEvent>    pendingNewClients;
     std::vector<NewInputEvent>     pendingInputs;
     std::vector<DeleteClientEvent> pendingDeleteClients;
@@ -36,11 +35,15 @@ public:
     bool bindUdp(unsigned short port);
     bool start(unsigned short tcpPort, unsigned short udpPort);
 
+    bool isValidClientId(int id) const;
+    int generateNewClientId() const;
+
     void poll();
 
     void sendToClientUdp(ClientSession &client, sf::Packet &packet);
     void sendToClientTcp(int clientId, sf::Packet &packet);
 
+    ClientSession & getClient(int clientId);
     std::vector<ClientSession> & getClients();
 
     std::vector<NewClientEvent>    & fetchNewClients();
