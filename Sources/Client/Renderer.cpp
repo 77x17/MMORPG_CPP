@@ -6,10 +6,33 @@ Renderer::Renderer(sf::RenderWindow &_window) : window(_window) {
     if (!font.loadFromFile("Assets/Roboto_Mono.ttf")) {
         font.loadFromFile("../Assets/Roboto_Mono.ttf");
     }
+
+    worldView.setSize(
+        static_cast<float>(window.getSize().x),
+        static_cast<float>(window.getSize().y)
+    );
+    worldView.setCenter(0.0f, 0.0f);
+
+    uiView = window.getDefaultView();
+
+    buildBackground();
 }
 
 InventoryUI &Renderer::getInventoryUI() {
     return inventoryUI;
+}
+
+void Renderer::updateCamera(const EntityManager &entityManager, int clientId) {
+    if (not entityManager.findPlayer(clientId)) {
+        return;
+    }
+
+    const RemotePlayer &player = entityManager.getPlayer(clientId);
+
+    sf::Vector2f current = worldView.getCenter();
+    sf::Vector2f target  = player.localPosition;
+
+    worldView.setCenter(current + (target - current) * 0.15f);
 }
 
 void Renderer::drawPlayers(const EntityManager &entityManager, int clientId) {
@@ -60,13 +83,61 @@ void Renderer::drawWorld(const EntityManager &entityManager, int clientId) {
     }
 }
 
+void Renderer::drawUI(const Inventory &inventory, const Equipment &equipment) {
+    inventoryUI.draw(inventory, equipment, window);
+}
+
+void Renderer::buildBackground() {
+    backgroundTiles.clear();
+
+    constexpr int MAP_WIDTH  = 50;
+    constexpr int MAP_HEIGHT = 50;
+    constexpr float TILE_SIZE = 64.0f;
+
+    for (int y = 0; y < MAP_HEIGHT; ++y) {
+        for (int x = 0; x < MAP_WIDTH; ++x) {
+            sf::RectangleShape tile({ TILE_SIZE, TILE_SIZE });
+            tile.setPosition(x * TILE_SIZE, y * TILE_SIZE);
+
+            bool isDark = (x + y) % 2 == 0;
+            tile.setFillColor(
+                isDark ? sf::Color(60, 60, 60)
+                       : sf::Color(80, 80, 80)
+            );
+
+            backgroundTiles.push_back(tile);
+        }
+    }
+}
+
+void Renderer::drawBackground() {
+    for (auto& tile : backgroundTiles) {
+        window.draw(tile);
+    }
+}
+
 void Renderer::render(const EntityManager &entityManager, const Inventory &inventory, const Equipment &equipment, int clientId) {
     window.clear(sf::Color(30, 30, 30));
     
+    updateCamera(entityManager, clientId);
+    window.setView(worldView);
+
+    drawBackground();
+
     drawPlayers(entityManager, clientId);
     drawWorld(entityManager, clientId);
     
-    inventoryUI.draw(inventory, equipment, window);
+    window.setView(uiView);
+    drawUI(inventory, equipment);
+
+    sf::Text position;
+    position.setFont(font);
+    position.setCharacterSize(10.0f);
+    position.setFillColor(sf::Color::White);
+    position.setPosition(10.0f, 10.0f);
+    position.setString(std::to_string(worldView.getCenter().x) + " " + std::to_string(worldView.getCenter().y));
+
+    window.draw(position);
 
     window.display();
 }

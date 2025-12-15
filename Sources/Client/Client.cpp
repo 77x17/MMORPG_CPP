@@ -14,6 +14,9 @@
 
 #include <iostream>
 
+constexpr float CLIENT_HZ   = 60.0f;
+constexpr float CLIENT_TICK = 1 / CLIENT_HZ;
+
 void loginScreen(sf::RenderWindow &window, int &clientId, sf::Font &font) {
     bool loginDone = false;
     std::string inputClientId;
@@ -236,10 +239,13 @@ int main() {
             equipmentSnapshot.appear = false;
         }
 
-        entityManager.update(dt, clientId);
-        
-        renderer.render(entityManager, inventory, equipment, clientId);
+        if (clientAccumulator >= CLIENT_TICK) {
+            entityManager.update(dt, clientId);
+            
+            renderer.render(entityManager, inventory, equipment, clientId);
 
+            clientAccumulator -= CLIENT_TICK;
+        }
         sf::sleep(sf::milliseconds(1));
     }
 

@@ -3,7 +3,7 @@
 #include "InventoryManager.hpp"
 
 void GameWorld::addPlayer(int id) {
-    Player *newPlayer = new Player(id, sf::Vector2f(100, 100));
+    Player *newPlayer = new Player(id, sf::Vector2f(500, 500));
 
     if (not InventoryManager::loadInventory(newPlayer->getId(), newPlayer->getInventory())) {
         InventoryManager::saveInventory(newPlayer->getId(), newPlayer->getInventory());

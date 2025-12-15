@@ -12,14 +12,14 @@ Player::Player(int _id, const sf::Vector2f &startPosition)
     : Entity(_id, sf::Vector2f(PLAYER_WIDTH, PLAYER_HEIGHT)), 
       health(100), maxHealth(100), projectileCooldownTimer(0), inventory(36)
 {
-    position = startPosition;
+    position           = startPosition;
     knockback_strength = 10.0f;
 }
 
 DamageEntity* Player::updatePlayer(const float &dt, const InputState &input) {
     if (isDestroyed()) {
         health    = maxHealth;
-        position  = sf::Vector2f(100.0f, 100.0f);
+        position  = sf::Vector2f(500.0f, 500.0f);
         destroyed = false;
     }
 
@@ -37,8 +37,8 @@ DamageEntity* Player::updatePlayer(const float &dt, const InputState &input) {
     // Keep player inside the playground
     if (position.x < 0) position.x = 0;
     if (position.y < 0) position.y = 0;
-    if (position.x > WINDOW_WIDTH ) position.x = WINDOW_WIDTH;
-    if (position.y > WINDOW_HEIGHT) position.y = WINDOW_HEIGHT;
+    if (position.x > 3200.0f) position.x = 3200.0f;
+    if (position.y > 3200.0f) position.y = 3200.0f;
 
     // Check shooting
     if (projectileCooldownTimer > 0) projectileCooldownTimer -= dt;
