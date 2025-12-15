@@ -84,6 +84,11 @@ void NetworkServer::poll() {
                         packet >> from >> to;
                         pendingMoveItems.push_back({ clients[i].id, from, to });
                     }
+                    else if (type == "EquipItem") {
+                        int fromInventory, toEquipment;
+                        packet >> fromInventory >> toEquipment;
+                        pendingEquipItems.push_back({ clients[i].id, fromInventory, toEquipment });
+                    }
                     else {
                         std::cout << "[Network] - Received undefine type: " << type << '\n';
                     }
@@ -180,6 +185,10 @@ std::vector<DeleteClientEvent> & NetworkServer::fetchDeleteClients() {
 
 std::vector<MoveItemEvent> & NetworkServer::fetchMoveItems() {
     return pendingMoveItems;
+}
+
+std::vector<EquipItemEvent> & NetworkServer::fetchEquipItems() {
+    return pendingEquipItems;
 }
 
 void NetworkServer::close() {

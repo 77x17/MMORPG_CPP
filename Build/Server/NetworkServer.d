@@ -4,4 +4,5 @@ Build/Server/NetworkServer.o: Sources/Server/NetworkServer.cpp \
  Sources/Server/Entity.hpp Sources/Server/Inventory.hpp \
  Sources/Server/ItemSlot.hpp Sources/Server/Equipment.hpp \
  Sources/Server/NewClientEvent.hpp Sources/Server/NewInputEvent.hpp \
- Sources/Server/DeleteClientEvent.hpp Sources/Server/MoveItemEvent.hpp
+ Sources/Server/DeleteClientEvent.hpp Sources/Server/MoveItemEvent.hpp \
+ Sources/Server/EquipItemEvent.hpp

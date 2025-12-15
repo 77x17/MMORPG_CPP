@@ -11,6 +11,7 @@
 #include "NewInputEvent.hpp"
 #include "DeleteClientEvent.hpp"
 #include "MoveItemEvent.hpp"
+#include "EquipItemEvent.hpp"
 
 class NetworkServer {
 private:
@@ -25,6 +26,7 @@ private:
     std::vector<NewInputEvent>     pendingInputs;
     std::vector<DeleteClientEvent> pendingDeleteClients;
     std::vector<MoveItemEvent>     pendingMoveItems;
+    std::vector<EquipItemEvent>    pendingEquipItems;
 
 public:
     NetworkServer() = default;
@@ -45,6 +47,7 @@ public:
     std::vector<NewInputEvent>     & fetchInputs();
     std::vector<DeleteClientEvent> & fetchDeleteClients();
     std::vector<MoveItemEvent>     & fetchMoveItems();
+    std::vector<EquipItemEvent>    & fetchEquipItems();
 
     void close();
 };

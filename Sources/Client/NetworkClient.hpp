@@ -9,6 +9,7 @@
 
 #include "WorldSnapshot.hpp"
 #include "InventorySnapshot.hpp"
+#include "EquipmentSnapshot.hpp"
 
 class NetworkClient {
 private:
@@ -21,6 +22,7 @@ private:
 
     WorldSnapshot      worldSnapshot;
     InventorySnapshot  inventorySnapshot;
+    EquipmentSnapshot  equipmentSnapshot;
 public:
     int assignedId = -1;
 
@@ -40,6 +42,7 @@ public:
 
     WorldSnapshot & getWorldSnapshot();
     InventorySnapshot & getInventorySnapshot();
+    EquipmentSnapshot & getEquipmentSnapshot();
 
     void close();
 };

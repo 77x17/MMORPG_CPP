@@ -5,6 +5,7 @@
 
 class Equipment {
 private:
+    int size = 8;
     ItemSlot helmet;
     ItemSlot chestplate;
     ItemSlot leggings;
@@ -17,6 +18,9 @@ private:
 public:
     Equipment();
 
+    ItemSlot & operator [] (size_t index);
+    const ItemSlot & operator [] (size_t index) const;
+
     ItemSlot & getHelmet();
     ItemSlot & getChestplate();
     ItemSlot & getLeggings();
@@ -25,4 +29,6 @@ public:
     ItemSlot & getRing();
     ItemSlot & getAmulet();
     ItemSlot & getShield();
+
+    int getSize() const;
 };

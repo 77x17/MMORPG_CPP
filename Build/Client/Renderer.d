@@ -5,4 +5,4 @@ Build/Client/Renderer.o: Sources/Client/Renderer.cpp \
  Sources/Client/SwordSlashSnapshot.hpp Sources/Client/RemotePlayer.hpp \
  Sources/Client/RemoteProjectile.hpp Sources/Client/RemoteSwordSlash.hpp \
  Sources/Client/InventoryUI.hpp Sources/Client/Inventory.hpp \
- Sources/Client/InventorySlot.hpp Sources/Client/Item.hpp
+ Sources/Client/ItemSlot.hpp

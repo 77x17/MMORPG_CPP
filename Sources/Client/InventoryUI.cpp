@@ -3,6 +3,7 @@
 #include <SFML/Window/Mouse.hpp>
 
 #include "Inventory.hpp"
+#include "Equipment.hpp"
 
 InventoryUI::InventoryUI() {
     if (!font.loadFromFile("Assets/Roboto_Mono.ttf")) {
@@ -48,45 +49,113 @@ bool InventoryUI::isOpen() const {
     return open;
 }
 
+float InventoryUI::getPositionInventorySlotX(int index) {
+    return background.getPosition().x +  5.0f + (index % columns) * (40.0f + 5.0f);
+}
+
+float InventoryUI::getPositionInventorySlotY(int index) {
+    return background.getPosition().y + 50.0f + (index / columns) * (40.0f + 5.0f);
+}
+
+float InventoryUI::getPositionEquipmentSlotX(int index) {
+    if (0 <= index && index <= 3) {
+        return equipmentBackground.getPosition().x + 5.0f;
+    }
+    else if (4 <= index && index <= 7) {
+        return equipmentBackground.getPosition().x + 5.0f + 4 * (40.0f + 5.0f);
+    }
+    
+    return -1;
+}
+
+float InventoryUI::getPositionEquipmentSlotY(int index) {
+    if (0 <= index && index <= 3) {
+        return equipmentBackground.getPosition().y + 50.0f + (index    ) * (40.0f + 5.0f);
+    }
+    else if (4 <= index && index <= 7) {
+        return equipmentBackground.getPosition().y + 50.0f + (index - 4) * (40.0f + 5.0f);
+    }
+
+    return -1;
+}
+
+
 int InventoryUI::getIndex(const sf::Vector2f &mousePosition) {
     sf::FloatRect itemBox;
     itemBox.width  = 40.0f;
     itemBox.height = 40.0f;
     for (int index = 0; index < size; ++index) {
-        itemBox.left = background.getPosition().x +  5.0f + (index % columns) * (40.0f + 5.0f);
-        itemBox.top  = background.getPosition().y + 50.0f + (index / columns) * (40.0f + 5.0f);
+        itemBox.left = getPositionInventorySlotX(index);
+        itemBox.top  = getPositionInventorySlotY(index);
 
         if (itemBox.contains(mousePosition)) {
             return index;
         }
     }
 
+    for (int index = 0; index <= 7; ++index) {
+        itemBox.left = getPositionEquipmentSlotX(index);
+        itemBox.top  = getPositionEquipmentSlotY(index);
+        
+        if (itemBox.contains(mousePosition)) {
+            return size + index;
+        }
+    }
+
     return -1;
 }
 
-void InventoryUI::handleLeftClick(const sf::Vector2f &mousePosition, const Inventory &inventory) {
+void InventoryUI::handleLeftClick(const sf::Vector2f &mousePosition, const Inventory &inventory, const Equipment &equipment) {
     int index = getIndex(mousePosition);
     
-    if (draggingIndex == -1 && index != -1 && inventory.getSlots()[index].itemId != -1) {
-        draggingIndex = index;
+    if (index < size) {
+        if (draggingIndex.second == -1 && index != -1 && inventory[index].itemId != -1) {
+            draggingIndex.first  = 0;
+            draggingIndex.second = index;
+        }
+        else {
+            draggingIndex = { -1, -1 };
+        }
+    }
+    else {
+        index -= size;
+        if (draggingIndex.second == -1 && index != -1 && equipment[index].itemId != -1) {
+            draggingIndex.first  = 1;
+            draggingIndex.second = index;
+        }
+        else {
+            draggingIndex = { -1, -1 };
+        }
     }
 }
 
-std::pair<int, int> InventoryUI::handleRelease(const sf::Vector2f &mousePosition) {
+std::pair<std::pair<int, int>, std::pair<int, int>> InventoryUI::handleRelease(const sf::Vector2f &mousePosition) {
     int index = getIndex(mousePosition);
 
-    if (index == -1 || draggingIndex == -1 || draggingIndex == index) {
-        draggingIndex = -1;
-        return std::make_pair(-1, -1);
+    if (index < size) {
+        if (index == -1 || draggingIndex.second == -1 || (draggingIndex.first == 0 && draggingIndex.second == index)) {
+            return { draggingIndex = { -1, -1 }, { -1, -1} };
+        }
+
+        std::pair<int, int> temporary = draggingIndex;
+        draggingIndex = { -1, -1 };
+        return { temporary, { 0, index } };
+    }
+    else {
+        index -= size;
+        if (index == -1 || draggingIndex.second == -1 || (draggingIndex.first == 1 && draggingIndex.second == index)) {
+            return { draggingIndex = { -1, -1 }, { -1, -1} };
+        }
+
+        std::pair<int, int> temporary = draggingIndex;
+        draggingIndex = { -1, -1 };
+        return { temporary, { 1, index } };
     }
 
-    std::pair<int, int> result = std::make_pair(draggingIndex, index);
-    draggingIndex = -1;
-
-    return result;
+    return { draggingIndex = { -1, -1 }, { -1, -1 } };
 }
 
-void InventoryUI::draw(const Inventory &inventory, sf::RenderWindow &window) {
+void InventoryUI::draw(const Inventory &inventory, const Equipment &equipment, sf::RenderWindow &window) {
     if (!open) return;
 
     window.draw(background);
@@ -105,16 +174,17 @@ void InventoryUI::draw(const Inventory &inventory, sf::RenderWindow &window) {
     itemId.setFont(font);
     itemId.setCharacterSize(10.0f);
     itemId.setFillColor(sf::Color::White);
+
     for (int index = 0; index < size; ++index) {
         itemBox.setPosition({
-            background.getPosition().x +  5.0f + (index % columns) * (40.0f + 5.0f),
-            background.getPosition().y + 50.0f + (index / columns) * (40.0f + 5.0f)
+            getPositionInventorySlotX(index),
+            getPositionInventorySlotY(index)
         });
 
         window.draw(itemBox);
 
-        if (inventory.getSlots()[index].itemId != -1 && index != draggingIndex) {
-            itemId.setString(std::to_string(inventory.getSlots()[index].itemId));
+        if (inventory[index].itemId != -1 && (index != draggingIndex.second || draggingIndex.first != 0)) {
+            itemId.setString(std::to_string(inventory[index].itemId));
             itemId.setPosition(itemBox.getPosition() + sf::Vector2f( 5.0f, 5.0f ));
             
             window.draw(itemId);
@@ -126,10 +196,11 @@ void InventoryUI::draw(const Inventory &inventory, sf::RenderWindow &window) {
     boxLabel.setCharacterSize(13.0f);
     boxLabel.setFillColor(sf::Color::White);
     std::string label[] = { "Helmet", "Chestplate", "Leggings", "Boots", "Weapon", "Shield", "Ring", "Amulet" };
+
     for (int index = 0; index < 4; ++index) {
         itemBox.setPosition({
-            equipmentBackground.getPosition().x +  5.0f,
-            equipmentBackground.getPosition().y + 50.0f + index * (40.0f + 5.0f)
+            getPositionEquipmentSlotX(index),
+            getPositionEquipmentSlotY(index)
         });
 
         window.draw(itemBox);
@@ -138,12 +209,19 @@ void InventoryUI::draw(const Inventory &inventory, sf::RenderWindow &window) {
         boxLabel.setPosition(itemBox.getPosition() + sf::Vector2f(itemBox.getSize().x + 5.0f, 0.0f));
 
         window.draw(boxLabel);
+
+        if (equipment[index].itemId != -1 && (index != draggingIndex.second || draggingIndex.first != 1)) {
+            itemId.setString(std::to_string(equipment[index].itemId));
+            itemId.setPosition(itemBox.getPosition() + sf::Vector2f( 5.0f, 5.0f ));
+            
+            window.draw(itemId);
+        }
     }
 
     for (int index = 4; index < 8; ++index) {
         itemBox.setPosition({
-            equipmentBackground.getPosition().x +  5.0f + 4 * (40.0f + 5.0f),
-            equipmentBackground.getPosition().y + 50.0f + (index - 4) * (40.0f + 5.0f)
+            getPositionEquipmentSlotX(index),
+            getPositionEquipmentSlotY(index)
         });
 
         window.draw(itemBox);
@@ -154,9 +232,16 @@ void InventoryUI::draw(const Inventory &inventory, sf::RenderWindow &window) {
         boxLabel.setOrigin(bounds.left + bounds.width, bounds.top + bounds.height);
 
         window.draw(boxLabel);
+        
+        if (equipment[index].itemId != -1 && (index != draggingIndex.second || draggingIndex.first != 1)) {
+            itemId.setString(std::to_string(equipment[index].itemId));
+            itemId.setPosition(itemBox.getPosition() + sf::Vector2f( 5.0f, 5.0f ));
+            
+            window.draw(itemId);
+        }
     }
 
-    if (draggingIndex != -1) {
+    if (draggingIndex.first != -1 && draggingIndex.second != -1) {
         sf::Vector2i mousePixelPos = sf::Mouse::getPosition(window);
         sf::Vector2f mouseWorldPos = window.mapPixelToCoords(mousePixelPos);
 
@@ -164,7 +249,7 @@ void InventoryUI::draw(const Inventory &inventory, sf::RenderWindow &window) {
 
         window.draw(itemBox);
 
-        itemId.setString(std::to_string(inventory.getSlots()[draggingIndex].itemId));
+        itemId.setString(std::to_string(draggingIndex.first == 0 ? inventory[draggingIndex.second].itemId : equipment[draggingIndex.second].itemId));
         itemId.setPosition(itemBox.getPosition() + sf::Vector2f( 5.0f, 5.0f ));
         itemId.setFillColor(sf::Color::Yellow);
 

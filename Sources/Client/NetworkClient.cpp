@@ -80,6 +80,16 @@ void NetworkClient::pollReceive() {
                         inventorySnapshot.itemIds.push_back(itemId);
                     }
                 }
+                else if (type == "Equipment") {
+                    equipmentSnapshot.appear = true;
+                    equipmentSnapshot.itemIds.clear();
+                    
+                    int equipmentSize; packet >> equipmentSize;
+                    for (int i = 0; i < equipmentSize; ++i) {
+                        int itemId; packet >> itemId;
+                        equipmentSnapshot.itemIds.push_back(itemId);
+                    }
+                }
                 else {
                     std::cout << "[Network] - TCP msg type: " << type << '\n';
                 }
@@ -156,6 +166,10 @@ WorldSnapshot & NetworkClient::getWorldSnapshot() {
 
 InventorySnapshot & NetworkClient::getInventorySnapshot() {
     return inventorySnapshot;
+}
+
+EquipmentSnapshot & NetworkClient::getEquipmentSnapshot() {
+    return equipmentSnapshot;
 }
 
 void NetworkClient::close() {

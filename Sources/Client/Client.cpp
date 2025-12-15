@@ -10,6 +10,7 @@
 #include "InputManager.hpp"
 #include "Inventory.hpp"
 #include "Renderer.hpp"
+#include "Equipment.hpp"
 
 #include <iostream>
 
@@ -19,6 +20,7 @@ int main() {
 
     EntityManager entityManager;
     Inventory inventory;
+    Equipment equipment;
 
     sf::RenderWindow window({ 800, 600 }, "Client");
     Renderer renderer(window);
@@ -54,19 +56,36 @@ int main() {
                     if (event.mouseButton.button == sf::Mouse::Left) {
                         sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
                         sf::Vector2f worldPosition = window.mapPixelToCoords(mousePosition);
-                        renderer.getInventoryUI().handleLeftClick(worldPosition, inventory);
+                        renderer.getInventoryUI().handleLeftClick(worldPosition, inventory, equipment);
                     }
                 }
                 else if (event.type == sf::Event::MouseButtonReleased) {
                     sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
                     sf::Vector2f worldPosition = window.mapPixelToCoords(mousePosition);
-                    std::pair<int, int> swapItemEvent = renderer.getInventoryUI().handleRelease(worldPosition);
+                    auto [from, to] = renderer.getInventoryUI().handleRelease(worldPosition);
 
-                    if (swapItemEvent.first != -1 && swapItemEvent.second != -1) {
-                        // std::swap(inventory.getSlot(swapItemEvent.first), inventory.getSlot(swapItemEvent.second));
-                        sf::Packet moveItemPacket;
-                        moveItemPacket << "MoveItem" << swapItemEvent.first << swapItemEvent.second;
-                        networkClient.sendTcpPacket(moveItemPacket);
+                    if (from.first != -1 && from.second != -1 && to.first != -1 && to.second != -1) {       
+                        if (from.first == to.first) {
+                            if (from.first == 0) {
+                                sf::Packet moveItemPacket;
+                                moveItemPacket << "MoveItem" << from.second << to.second;
+                                networkClient.sendTcpPacket(moveItemPacket);
+                            }
+                            else { // 1
+                                // Equipment -> Equipment: Forbidden
+                            }
+                        }
+                        else {
+                            sf::Packet equipItemPacket; equipItemPacket << "EquipItem";
+                            if (from.first == 0) {
+                                equipItemPacket << from.second << to.second;
+                                networkClient.sendTcpPacket(equipItemPacket);
+                            }
+                            else {
+                                equipItemPacket << to.second << from.second;
+                                networkClient.sendTcpPacket(equipItemPacket);
+                            }
+                        }
                     }
                 }
             }
@@ -88,27 +107,41 @@ int main() {
         }
 
         networkClient.pollReceive();
+        
         WorldSnapshot &worldSnapshot = networkClient.getWorldSnapshot();
         if (worldSnapshot.appear) {
             if (networkClient.assignedId != -1) myId = networkClient.assignedId;
             entityManager.applySnapshot(worldSnapshot, myId, pendingInputs);
             worldSnapshot.appear = false;
         }
+
         InventorySnapshot &inventorySnapshot = networkClient.getInventorySnapshot();
         if (inventorySnapshot.appear) {
             if ((int)inventory.getSlots().size() != (int)inventorySnapshot.itemIds.size()) {
-                std::cout << "[Client] - InventorySnapshot bug!\n";
+                std::cout << "[Client] - InventorySnapshot receive bug!\n";
                 return -1;
             }
             for (int index = 0; index < (int)inventorySnapshot.itemIds.size(); ++index) {
-                inventory.getSlot(index).itemId = inventorySnapshot.itemIds[index];
+                inventory[index].itemId = inventorySnapshot.itemIds[index];
             }
             inventorySnapshot.appear = false;
         }
 
+        EquipmentSnapshot &equipmentSnapshot = networkClient.getEquipmentSnapshot();
+        if (equipmentSnapshot.appear) {
+            if ((int)equipment.getSlots().size() != (int)equipmentSnapshot.itemIds.size()) {
+                std::cout << "[Client] - EquipmentSnapshot receive bug!\n";
+                return -1;
+            }
+            for (int index = 0; index < (int)equipmentSnapshot.itemIds.size(); ++index) {
+                equipment[index].itemId = equipmentSnapshot.itemIds[index];
+            }
+            equipmentSnapshot.appear = false;
+        }
+
         entityManager.update(dt, myId);
         
-        renderer.render(entityManager, inventory, myId);
+        renderer.render(entityManager, inventory, equipment, myId);
 
         sf::sleep(sf::milliseconds(1));
     }

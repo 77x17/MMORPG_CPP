@@ -6,6 +6,7 @@
 #include <SFML/Graphics/RenderWindow.hpp>
 
 class Inventory;
+class Equipment;
 
 class InventoryUI {
 private:
@@ -14,16 +15,21 @@ private:
     
     sf::RectangleShape background;
     sf::Text title;
+    
+    sf::RectangleShape equipmentBackground;
+    sf::Text equipmentTitle;
 
     int size    = 36;
     int columns = 9;
 
-    int draggingIndex = -1;
+    // first is 0: inventory | 1: equipment --- second is index
+    std::pair<int, int> draggingIndex = { -1, -1 };
 
+    float getPositionInventorySlotX(int index);
+    float getPositionInventorySlotY(int index);
+    float getPositionEquipmentSlotX(int index);
+    float getPositionEquipmentSlotY(int index);
     int getIndex(const sf::Vector2f &mousePosition);
-
-    sf::RectangleShape equipmentBackground;
-    sf::Text equipmentTitle;
 
 public:
     InventoryUI();
@@ -31,8 +37,8 @@ public:
     void toggle();
     bool isOpen() const;
 
-    void handleLeftClick(const sf::Vector2f &mousePosition, const Inventory &inventory);
-    std::pair<int, int> handleRelease(const sf::Vector2f &mousePosition);
+    void handleLeftClick(const sf::Vector2f &mousePosition, const Inventory &inventory, const Equipment &equipment);
+    std::pair<std::pair<int, int>, std::pair<int, int>> handleRelease(const sf::Vector2f &mousePosition);
 
-    void draw(const Inventory &inventory, sf::RenderWindow &window);
+    void draw(const Inventory &inventory, const Equipment &equipment, sf::RenderWindow &window);
 };

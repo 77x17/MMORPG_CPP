@@ -26,4 +26,5 @@ public:
     Player * getPlayer(int clientId);
 
     bool moveItem(int clientId, int from, int to);
+    bool equipItem(int clientId, int fromInventory, int toEquipment);
 };

@@ -48,12 +48,15 @@ DamageEntity* Player::updatePlayer(const float &dt, const InputState &input) {
         sf::Vector2f shootDir = input.movementDir;
         if (shootDir.x == 0 && shootDir.y == 0) shootDir = oldShootDir;
 
-        int weapon = inventory[0].id;
+        int weapon = equipment.getWeapon().id;
         if (weapon == 0) {
             return new Projectile(id, position, shootDir);
         }
         else if (weapon == 1) {
             return new SwordSlash(id, position, shootDir);
+        }
+        else {
+            // std::cout << "[Player] - Unknown weapon id: " << weapon << '\n';
         }
     }
 
@@ -67,9 +70,9 @@ void Player::takeDamage(int amount) {
     if (health <= 0) {
         health = 0;
         destroy();
-        std::cout << "Player " << id << " DIED!" << '\n';
+        // std::cout << "Player " << id << " DIED!" << '\n';
     }
-    std::cout << "Player " << id << " took " << amount << " dmg. HP: " << health << '\n';
+    // std::cout << "Player " << id << " took " << amount << " dmg. HP: " << health << '\n';
 }
 
 void Player::knockback(const sf::Vector2f &direction, const float &knockback) {
@@ -94,4 +97,8 @@ float Player::getKnockback() const {
 
 Inventory & Player::getInventory() {
     return inventory;
+}
+
+Equipment & Player::getEquipment() {
+    return equipment;
 }
