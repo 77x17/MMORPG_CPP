@@ -7,15 +7,24 @@ Renderer::Renderer(sf::RenderWindow &_window) : window(_window) {
         font.loadFromFile("../Assets/Roboto_Mono.ttf");
     }
 
+    setCamera();
+
+    buildBackground();
+}
+
+void Renderer::setCamera() {
     worldView.setSize(
         static_cast<float>(window.getSize().x),
         static_cast<float>(window.getSize().y)
     );
-    worldView.setCenter(0.0f, 0.0f);
+    // worldView.setCenter(0.0f, 0.0f);
 
     uiView = window.getDefaultView();
 
-    buildBackground();
+    inventoryUI.setStartPosition(
+        static_cast<float>(window.getSize().x),
+        static_cast<float>(window.getSize().y)
+    );
 }
 
 InventoryUI &Renderer::getInventoryUI() {

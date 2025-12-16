@@ -101,7 +101,8 @@ void connectingScreen(sf::RenderWindow &window, NetworkClient &networkClient, in
 }
 
 int main() {
-    sf::RenderWindow window({ 800, 600 }, "[Client] - Login");
+    bool isFullscreen = false;
+    sf::RenderWindow window({ 800, 600 }, "[Client] - Login", sf::Style::Close);
     
     sf::Font font;
     if (!font.loadFromFile("Assets/Roboto_Mono.ttf")) {
@@ -150,6 +151,26 @@ int main() {
                 }
                 else if (event.key.code == sf::Keyboard::E) {
                     renderer.getInventoryUI().toggle();
+                }
+                else if (event.key.code == sf::Keyboard::F11) {
+                    isFullscreen = !isFullscreen;
+
+                    if (isFullscreen) {
+                        window.create(
+                            sf::VideoMode::getDesktopMode(),
+                            "[Client] - ID: " + std::to_string(clientId),
+                            sf::Style::Fullscreen
+                        );
+                        renderer.setCamera();
+                    }
+                    else {
+                        window.create(
+                            sf::VideoMode(800, 600),
+                            "[Client] - ID: " + std::to_string(clientId),
+                            sf::Style::Close
+                        );
+                        renderer.setCamera();
+                    }
                 }
             }
             else if (renderer.getInventoryUI().isOpen()) {

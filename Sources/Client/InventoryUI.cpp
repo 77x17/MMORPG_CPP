@@ -10,7 +10,10 @@ InventoryUI::InventoryUI() {
         font.loadFromFile("../Assets/Roboto_Mono.ttf");
     }
 
-    background.setSize({ (40.0f + 5.0f) * 9 + 5.0f, (40.0f + 5.0f) * 5 + 5.0f });
+    background.setSize({ 
+        (40.0f + 5.0f) * 9 + 5.0f, 
+        (40.0f + 5.0f) * 5 + 5.0f 
+    });
     background.setFillColor(sf::Color(0, 0, 0, 180));
     background.setOutlineThickness(2.0f);
     background.setOutlineColor(sf::Color::White);
@@ -25,7 +28,10 @@ InventoryUI::InventoryUI() {
         background.getPosition().y
     );
 
-    equipmentBackground.setSize({ (40.0f + 5.0f) * 5 + 5.0f, (40.0f + 5.0f) * 5 + 5.0f });
+    equipmentBackground.setSize({ 
+        (40.0f + 5.0f) * 5 + 5.0f, 
+        (40.0f + 5.0f) * 5 + 5.0f 
+    });
     equipmentBackground.setFillColor(sf::Color(0, 0, 0, 180));
     equipmentBackground.setOutlineThickness(2.0f);
     equipmentBackground.setOutlineColor(sf::Color::White);
@@ -35,6 +41,27 @@ InventoryUI::InventoryUI() {
     equipmentTitle.setString("Equipment");
     equipmentTitle.setCharacterSize(20);
     equipmentTitle.setFillColor(sf::Color::White);
+    equipmentTitle.setPosition(
+        equipmentBackground.getPosition().x + 5.0f,
+        equipmentBackground.getPosition().y
+    );
+}
+
+void InventoryUI::setStartPosition(const float &width, const float &height) {
+    float subWidth  = (40.0f + 5.0f) * 9 + 5.0f + (40.0f + 5.0f) * 5 + 5.0f + 10.0f;
+    float subHeight = (40.0f + 5.0f) * 5 + 5.0f;
+    background.setPosition(
+        width / 2 - subWidth / 2, 
+        height / 2 - subHeight / 2
+    );
+
+    title.setPosition(
+        background.getPosition().x + 5.0f,
+        background.getPosition().y
+    );
+
+    equipmentBackground.setPosition(background.getPosition() + sf::Vector2f(background.getSize().x + 10.0f, 0.0f));
+
     equipmentTitle.setPosition(
         equipmentBackground.getPosition().x + 5.0f,
         equipmentBackground.getPosition().y

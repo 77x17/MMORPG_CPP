@@ -34,8 +34,9 @@ private:
 public:
     Renderer(sf::RenderWindow &_window);
     
+    void setCamera();
+
     InventoryUI &getInventoryUI();
 
     void render(const EntityManager &entityManager, const Inventory &inventory, const Equipment &equipment, int clientId);
-    
 };

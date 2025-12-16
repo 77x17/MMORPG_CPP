@@ -34,6 +34,8 @@ private:
 public:
     InventoryUI();
 
+    void setStartPosition(const float &width, const float &height);
+
     void toggle();
     bool isOpen() const;
 
