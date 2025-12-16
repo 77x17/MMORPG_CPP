@@ -90,6 +90,7 @@ This project is not intended to be a complete or production-ready game.
 
 ## Directory Structure
 
+```bash
 .
 ├── Assets/
 │   ├── Roboto_Mono.ttf
@@ -123,7 +124,7 @@ This project is not intended to be a complete or production-ready game.
 │       └── Utility functions
 │
 └── Makefile
-
+````
 ---
 
 ## Build and Execution
