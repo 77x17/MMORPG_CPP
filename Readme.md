@@ -172,3 +172,4 @@ Build/GameClient.exe
 
 This project prioritizes architectural clarity and system correctness over content and visual quality.
 The codebase is intended to remain readable and modular to support further experimentation and extension.
+```
