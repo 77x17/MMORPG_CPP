@@ -89,6 +89,7 @@ This project is not intended to be a complete or production-ready game.
 ---
 
 ## Directory Structure
+
 .
 ├── Assets/
 │   ├── Roboto_Mono.ttf
@@ -122,8 +123,6 @@ This project is not intended to be a complete or production-ready game.
 │       └── Utility functions
 │
 └── Makefile
-
-````
 
 ---
 
@@ -179,4 +178,3 @@ Build/GameClient.exe
 This project prioritizes architectural soundness and correctness of core systems over gameplay content.
 The codebase is intentionally structured to remain readable, modular, and extensible, enabling further experimentation
 with multiplayer game programming concepts and techniques.
-```
