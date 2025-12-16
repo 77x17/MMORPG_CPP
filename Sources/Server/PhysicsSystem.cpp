@@ -12,28 +12,58 @@ PhysicsSystem::PhysicsSystem(WorldCollision &_worldCollision)
 
 }
 
+void PhysicsSystem::moveWithCollision(Player &player, const sf::Vector2f &delta) {
+    sf::Vector2f proposedPosition = player.getPosition();
+
+    sf::Vector2f proposedX = proposedPosition + sf::Vector2f(delta.x, 0.0f);
+    if (not worldCollision.checkCollision(player.buildAABB(proposedX))) {
+        proposedPosition.x = proposedX.x;
+    }
+
+    sf::Vector2f proposedY = proposedPosition + sf::Vector2f(0.0f, delta.y);
+    if (not worldCollision.checkCollision(player.buildAABB(proposedY))) {
+        proposedPosition.y = proposedY.y;
+    }
+
+    proposedPosition.x = std::clamp(proposedPosition.x, 0.0f, 3200.0f);
+    proposedPosition.y = std::clamp(proposedPosition.y, 0.0f, 3200.0f);
+
+    player.setPosition(proposedPosition);
+}
+
 void PhysicsSystem::updatePlayer(Player &player, const InputState &inputState, const float &dt) {
-    sf::Vector2f velocity{ 0.0f, 0.0f };
+    sf::Vector2f inputVelocity{ 0.0f, 0.0f };
 
     if (inputState.movementDir.x != 0 || inputState.movementDir.y != 0) {
-        velocity = normalize(inputState.movementDir) * PLAYER_SPEED;
+        inputVelocity = normalize(inputState.movementDir) * PLAYER_SPEED;
         player.setOldShootDir(inputState.movementDir);
     }
 
-    sf::Vector2f proposedPosition = player.getPosition() + player.getVelocity() * dt;
+    sf::Vector2f velocity = inputVelocity + player.getImpulse();
+    
+    sf::Vector2f proposedPosition = player.getPosition();
+
+    sf::Vector2f proposedX = proposedPosition + sf::Vector2f(velocity.x * dt, 0.0f);
+    if (not worldCollision.checkCollision(player.buildAABB(proposedX))) {
+        proposedPosition.x = proposedX.x;
+    }
+    else {
+        velocity.x = 0.0f;
+    }
+
+    sf::Vector2f proposedY = proposedPosition + sf::Vector2f(0.0f, velocity.y * dt);
+    if (not worldCollision.checkCollision(player.buildAABB(proposedY))) {
+        proposedPosition.y = proposedY.y;
+    }
+    else {
+        velocity.y = 0.0f;
+    }
     
     proposedPosition.x = std::clamp(proposedPosition.x, 0.0f, 3200.0f);
     proposedPosition.y = std::clamp(proposedPosition.y, 0.0f, 3200.0f);
-    
-    AABB proposedBox = player.buildAABB(proposedPosition);
 
-    if (not worldCollision.checkCollision(proposedBox)) {
-        player.setPosition(proposedPosition);
-        player.setVelocity(velocity);
-    }
-    else {
-        player.setVelocity({ 0.0f, 0.0f });   
-    }
+    player.setPosition(proposedPosition);
+    player.setVelocity(inputVelocity);
 }
 
 void PhysicsSystem::resolvePlayerCollisions(const std::vector<Player *> &players) {
@@ -41,11 +71,6 @@ void PhysicsSystem::resolvePlayerCollisions(const std::vector<Player *> &players
         for (size_t j = i + 1; j < players.size(); ++j) {
             if (not players[i]->getBounds().intersects(players[j]->getBounds())) {
                 continue;
-            }
-            
-            sf::Vector2f direction = normalize(players[j]->getPosition() - players[i]->getPosition());
-            if (direction.x == 0 && direction.y == 0) {
-                direction = { 1.0f, 0.0f };
             }
             
             sf::FloatRect ra = players[i]->getBounds();
@@ -59,9 +84,16 @@ void PhysicsSystem::resolvePlayerCollisions(const std::vector<Player *> &players
             float penetration = std::min(overlapX, overlapY);
             if (penetration <= 0) continue;
 
-            sf::Vector2f push = direction * (penetration * 0.5f);
-            players[i]->move(-push);
-            players[j]->move( push);
+            if (overlapX < overlapY) {
+                sf::Vector2f push{ overlapX * 0.5f * (ra.left < rb.left ? -1.f : 1.f), 0.f };
+                moveWithCollision(*players[i], push);
+                moveWithCollision(*players[j], -push);
+            }
+            else {
+                sf::Vector2f push{ 0.f, overlapY * 0.5f * (ra.top < rb.top ? -1.f : 1.f) };
+                moveWithCollision(*players[i], push);
+                moveWithCollision(*players[j], -push);
+            }
         }
     }
 }   

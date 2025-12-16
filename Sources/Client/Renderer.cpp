@@ -2,6 +2,10 @@
 
 #include <SFML/Graphics.hpp>
 
+#include "EntityManager.hpp"
+#include "Inventory.hpp"
+#include "Equipment.hpp"
+
 Renderer::Renderer(sf::RenderWindow &_window) : window(_window) {
     if (!font.loadFromFile("Assets/Roboto_Mono.ttf")) {
         font.loadFromFile("../Assets/Roboto_Mono.ttf");
@@ -125,9 +129,7 @@ void Renderer::drawBackground() {
     }
 }
 
-void Renderer::render(const EntityManager &entityManager, const Inventory &inventory, const Equipment &equipment, int clientId) {
-    window.clear(sf::Color(30, 30, 30));
-    
+void Renderer::render(const EntityManager &entityManager, int clientId) {
     updateCamera(entityManager, clientId);
     window.setView(worldView);
 
@@ -135,7 +137,9 @@ void Renderer::render(const EntityManager &entityManager, const Inventory &inven
 
     drawPlayers(entityManager, clientId);
     drawWorld(entityManager, clientId);
-    
+}
+
+void Renderer::renderUI(const Inventory &inventory, const Equipment &equipment) {
     window.setView(uiView);
     drawUI(inventory, equipment);
 
@@ -147,6 +151,4 @@ void Renderer::render(const EntityManager &entityManager, const Inventory &inven
     position.setString(std::to_string(worldView.getCenter().x) + " " + std::to_string(worldView.getCenter().y));
 
     window.draw(position);
-
-    window.display();
 }

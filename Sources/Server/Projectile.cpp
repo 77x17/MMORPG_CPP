@@ -8,8 +8,8 @@
 Projectile::Projectile(int _ownerId, const sf::Vector2f &startPosition, const sf::Vector2f &direction) 
 : DamageEntity(_ownerId, startPosition, { 10.0f, 10.0f }) {
     velocity          = normalize(direction) * BULLET_SPEED;
-    damage            = 10;
-    knockbackStrength = 10.0f;
+    damage            = 5;
+    knockbackStrength = 250.0f;
     lifeTimer         = BULLET_LIFETIME;
 }
 
@@ -31,5 +31,6 @@ sf::Vector2f Projectile::getVelocity() const {
 
 void Projectile::onHit(Player &player) {
     player.takeDamage(damage);
-    player.knockback(-velocity, knockbackStrength);
+    sf::Vector2f direction = normalize(velocity);
+    player.applyImpulse(direction * knockbackStrength);
 }

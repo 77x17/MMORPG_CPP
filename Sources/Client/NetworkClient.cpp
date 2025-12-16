@@ -94,6 +94,17 @@ void NetworkClient::pollReceive() {
                         equipmentSnapshot.itemIds.push_back(itemId);
                     }
                 }
+                else if (type == "WorldCollision") {
+                    worldCollisionSnapshot.appear = true;
+                    worldCollisionSnapshot.colliders.clear();
+
+                    int collidersSize; packet >> collidersSize;
+                    for (int i = 0; i < collidersSize; ++i) {
+                        sf::Vector2f position, size;
+                        packet >> position.x >> position.y >> size.x >> size.y;
+                        worldCollisionSnapshot.colliders.push_back({ position, size });
+                    }
+                }
                 else {
                     std::cout << "[Network] - TCP msg type: " << type << '\n';
                 }
@@ -174,6 +185,10 @@ InventorySnapshot & NetworkClient::getInventorySnapshot() {
 
 EquipmentSnapshot & NetworkClient::getEquipmentSnapshot() {
     return equipmentSnapshot;
+}
+
+WorldCollisionSnapshot & NetworkClient::getWorldCollisionSnapshot() {
+    return worldCollisionSnapshot;
 }
 
 void NetworkClient::close() {

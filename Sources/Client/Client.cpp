@@ -11,6 +11,8 @@
 #include "Inventory.hpp"
 #include "Renderer.hpp"
 #include "Equipment.hpp"
+#include "WorldCollision.hpp"
+#include "DebugRenderer.hpp"
 
 #include <iostream>
 
@@ -128,6 +130,9 @@ int main() {
 
     Renderer renderer(window);
 
+    WorldCollision worldCollision;
+    DebugRenderer debugRenderer(window);
+
     int inputSeq = 0;
     std::vector<InputState> pendingInputs;
 
@@ -171,6 +176,9 @@ int main() {
                         );
                         renderer.setCamera();
                     }
+                }
+                else if (event.key.code == sf::Keyboard::F3) {
+                    debugRenderer.toggle();
                 }
             }
             else if (renderer.getInventoryUI().isOpen()) {
@@ -232,12 +240,13 @@ int main() {
         
         WorldSnapshot &worldSnapshot = networkClient.getWorldSnapshot();
         if (worldSnapshot.appear) {
-            entityManager.applySnapshot(worldSnapshot, clientId, pendingInputs);
             worldSnapshot.appear = false;
+            entityManager.applySnapshot(worldSnapshot, clientId, pendingInputs);
         }
 
         InventorySnapshot &inventorySnapshot = networkClient.getInventorySnapshot();
         if (inventorySnapshot.appear) {
+            inventorySnapshot.appear = false;
             if ((int)inventory.getSlots().size() != (int)inventorySnapshot.itemIds.size()) {
                 std::cout << "[Client] - InventorySnapshot receive bug!\n";
                 return -1;
@@ -245,11 +254,11 @@ int main() {
             for (int index = 0; index < (int)inventorySnapshot.itemIds.size(); ++index) {
                 inventory[index].itemId = inventorySnapshot.itemIds[index];
             }
-            inventorySnapshot.appear = false;
         }
 
         EquipmentSnapshot &equipmentSnapshot = networkClient.getEquipmentSnapshot();
         if (equipmentSnapshot.appear) {
+            equipmentSnapshot.appear = false;
             if ((int)equipment.getSlots().size() != (int)equipmentSnapshot.itemIds.size()) {
                 std::cout << "[Client] - EquipmentSnapshot receive bug!\n";
                 return -1;
@@ -257,15 +266,31 @@ int main() {
             for (int index = 0; index < (int)equipmentSnapshot.itemIds.size(); ++index) {
                 equipment[index].itemId = equipmentSnapshot.itemIds[index];
             }
-            equipmentSnapshot.appear = false;
+        }
+
+        WorldCollisionSnapshot &worldCollisionSnapshot = networkClient.getWorldCollisionSnapshot();
+        if (worldCollisionSnapshot.appear) {
+            worldCollisionSnapshot.appear = false;
+            for (const AABB &box : worldCollisionSnapshot.colliders) {
+                worldCollision.getColliders().push_back(box);
+            }
         }
 
         if (clientAccumulator >= CLIENT_TICK) {
+            clientAccumulator -= CLIENT_TICK;
             entityManager.update(dt, clientId);
             
-            renderer.render(entityManager, inventory, equipment, clientId);
+            window.clear(sf::Color(30.0f, 30.0f, 30.0f));
+            
+            renderer.render(entityManager, clientId);
 
-            clientAccumulator -= CLIENT_TICK;
+            if (debugRenderer.isEnabled()) {
+                debugRenderer.render(entityManager, worldCollision, clientId);
+            }
+
+            renderer.renderUI(inventory, equipment);
+
+            window.display();
         }
         sf::sleep(sf::milliseconds(1));
     }

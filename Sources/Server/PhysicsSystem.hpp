@@ -2,6 +2,8 @@
 
 #include <vector>
 
+#include <SFML/System/Vector2.hpp>
+
 class WorldCollision;
 class Player;
 class InputState;
@@ -9,6 +11,9 @@ class InputState;
 class PhysicsSystem {
 private:
     WorldCollision &worldCollision;
+
+private:
+    void moveWithCollision(Player &player, const sf::Vector2f &delta);
 
 public:
     PhysicsSystem(WorldCollision &_worldCollision);

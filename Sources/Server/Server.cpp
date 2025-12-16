@@ -17,14 +17,16 @@ constexpr float SERVER_TICK  = 1.0f / SERVER_HZ;
 #include <iostream>
 
 // === For server ===
-void syncGameWorldFromClients(GameWorld &gameWorld, InputSystem &inputSystem, NetworkServer &networkServer);
+void syncGameWorldFromClients(GameWorld &gameWorld, InputSystem &inputSystem, NetworkServer &networkServer, WorldCollision &worldCollision);
 void update(GameWorld &gameWorld, InputSystem &inputSystem, PhysicsSystem &physicsSystem, WeaponSystem &weaponSystem, CombatSystem &combatSystem);
+void loadCollisions(WorldCollision &worldCollision);
 // === For client ===
 void syncInventoryToClient(GameWorld &gameWorld, NetworkServer &networkServer, int clientId);
 void syncEquipmentToClient(GameWorld &gameWorld, NetworkServer &networkServer, int clientId);
 void syncGameWorldToClients(GameWorld &gameWorld, InterestSystem &interestSystem, NetworkServer &networkServer);
+void sendWorldCollision(WorldCollision &worldCollision, NetworkServer &networkServer, int clientId);
 
-void syncGameWorldFromClients(GameWorld &gameWorld, InputSystem &inputSystem, NetworkServer &networkServer) {
+void syncGameWorldFromClients(GameWorld &gameWorld, InputSystem &inputSystem, NetworkServer &networkServer, WorldCollision &worldCollision) {
     std::vector<NewClientEvent> & newClientEvents = networkServer.fetchNewClients();
     if (newClientEvents.size()) {
         for (NewClientEvent &event : newClientEvents) {
@@ -33,6 +35,8 @@ void syncGameWorldFromClients(GameWorld &gameWorld, InputSystem &inputSystem, Ne
 
             syncInventoryToClient(gameWorld, networkServer, event.clientId);
             syncEquipmentToClient(gameWorld, networkServer, event.clientId);
+
+            sendWorldCollision(worldCollision, networkServer, event.clientId);
         }
         newClientEvents.clear();
     }
@@ -173,6 +177,38 @@ void syncGameWorldToClients(GameWorld &gameWorld, InterestSystem &interestSystem
     }
 }
 
+void loadCollisions(WorldCollision &worldCollision) {
+    worldCollision.addStaticCollider({
+        { 300.0f, 300.0f },
+        { 100.0f, 100.0f }
+    });
+    worldCollision.addStaticCollider({
+        { 300.0f, 400.0f },
+        { 100.0f, 100.0f }
+    });
+    worldCollision.addStaticCollider({
+        { 450.0f, 300.0f },
+        { 100.0f, 100.0f }
+    });
+    worldCollision.addStaticCollider({
+        { 200.0f, 500.0f },
+        { 100.0f, 100.0f }
+    });
+}
+
+void sendWorldCollision(WorldCollision &worldCollision, NetworkServer &networkServer, int clientId) {
+    sf::Packet worldCollisionPacket;
+    worldCollisionPacket << "WorldCollision";
+
+    const std::vector<AABB> &colliders = worldCollision.getColliders();
+    worldCollisionPacket << static_cast<int>(colliders.size());
+    for (const AABB &box : colliders) {
+        worldCollisionPacket << box.position.x << box.position.y << box.size.x << box.size.y;
+    }
+
+    networkServer.sendToClientTcp(clientId, worldCollisionPacket);
+}
+
 int main() {
     NetworkServer  networkServer;
     if (!networkServer.start(55001, 55002)) {
@@ -180,7 +216,7 @@ int main() {
     }
    
     GameWorld      gameWorld;
-    
+
     InputSystem    inputSystem;
     WorldCollision worldCollision;
     PhysicsSystem  physicsSystem(worldCollision);
@@ -188,6 +224,8 @@ int main() {
     CombatSystem   combatSystem;
     InterestSystem interestSystem;
     
+    loadCollisions(worldCollision);
+
     float accumulator = 0.0f;
    
     sf::Clock clock, sendClock;
@@ -197,7 +235,7 @@ int main() {
 
         networkServer.poll();
 
-        syncGameWorldFromClients(gameWorld, inputSystem, networkServer);
+        syncGameWorldFromClients(gameWorld, inputSystem, networkServer, worldCollision);
 
         if (accumulator >= SERVER_TICK) {
             update(gameWorld, inputSystem, physicsSystem, weaponSystem, combatSystem);

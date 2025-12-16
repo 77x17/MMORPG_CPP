@@ -10,6 +10,7 @@
 #include "WorldSnapshot.hpp"
 #include "InventorySnapshot.hpp"
 #include "EquipmentSnapshot.hpp"
+#include "WorldCollisionSnapshot.hpp"
 
 class NetworkClient {
 private:
@@ -20,9 +21,10 @@ private:
     unsigned short     tcpPort;
     unsigned short     udpPort;
 
-    WorldSnapshot      worldSnapshot;
-    InventorySnapshot  inventorySnapshot;
-    EquipmentSnapshot  equipmentSnapshot;
+    WorldSnapshot          worldSnapshot;
+    InventorySnapshot      inventorySnapshot;
+    EquipmentSnapshot      equipmentSnapshot;
+    WorldCollisionSnapshot worldCollisionSnapshot;
 public:
     int assignedId = -1;
 
@@ -43,6 +45,7 @@ public:
     WorldSnapshot & getWorldSnapshot();
     InventorySnapshot & getInventorySnapshot();
     EquipmentSnapshot & getEquipmentSnapshot();
+    WorldCollisionSnapshot & getWorldCollisionSnapshot();
 
     void close();
 };

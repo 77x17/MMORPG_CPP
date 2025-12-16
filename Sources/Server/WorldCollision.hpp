@@ -11,4 +11,6 @@ private:
 public:
     void addStaticCollider(const AABB& box);
     bool checkCollision(const AABB &box) const;
+
+    const std::vector<AABB> & getColliders() const;
 };

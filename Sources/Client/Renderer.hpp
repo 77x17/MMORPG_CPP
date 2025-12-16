@@ -5,9 +5,9 @@
 #include <SFML/Graphics/View.hpp>
 #include <SFML/Graphics/RectangleShape.hpp>
 
-#include "EntityManager.hpp"
+class EntityManager;
+
 #include "InventoryUI.hpp"
-#include "Inventory.hpp"
 
 class Renderer {
 private:
@@ -36,7 +36,9 @@ public:
     
     void setCamera();
 
-    InventoryUI &getInventoryUI();
+    InventoryUI & getInventoryUI();
 
-    void render(const EntityManager &entityManager, const Inventory &inventory, const Equipment &equipment, int clientId);
+    void render(const EntityManager &entityManager, int clientId);
+
+    void renderUI(const Inventory &inventory, const Equipment &equipment);
 };

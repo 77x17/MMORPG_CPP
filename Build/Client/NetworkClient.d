@@ -3,4 +3,6 @@ Build/Client/NetworkClient.o: Sources/Client/NetworkClient.cpp \
  Sources/Client/PlayerSnapshot.hpp Sources/Client/ProjectileSnapshot.hpp \
  Sources/Client/SwordSlashSnapshot.hpp \
  Sources/Client/InventorySnapshot.hpp \
- Sources/Client/EquipmentSnapshot.hpp
+ Sources/Client/EquipmentSnapshot.hpp \
+ Sources/Client/WorldCollisionSnapshot.hpp \
+ Sources/Client/../Shared/AABB.hpp

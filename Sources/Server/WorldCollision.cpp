@@ -12,3 +12,7 @@ bool WorldCollision::checkCollision(const AABB &box) const {
     }
     return false;
 }
+
+const std::vector<AABB> & WorldCollision::getColliders() const {
+    return staticCollisions;
+}

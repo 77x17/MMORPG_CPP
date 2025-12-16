@@ -14,7 +14,7 @@ private:
     sf::Vector2f spawnPosition;
     sf::Vector2f oldShootDir = { 1.0f, 0.0f };
     sf::Vector2f velocity;
-    float knockback_strength;
+    sf::Vector2f impulse;
     
     Inventory inventory;
     Equipment equipment;
@@ -28,16 +28,14 @@ public:
     void update(const float &dt) override;
 
     void takeDamage(int amount);
-    void knockback(const sf::Vector2f &direction, const float &knockback);
-    void move(const sf::Vector2f &direction);
+    void applyImpulse(const sf::Vector2f &_impulse);
 
     void setOldShootDir(const sf::Vector2f &newPosition);
     void setVelocity(const sf::Vector2f &newVelocity);
 
     int getHealth() const;
-    sf::Vector2f getVelocity() const;
-    float getKnockback() const;
-    sf::Vector2f getOldShootDir() const;
+    const sf::Vector2f & getOldShootDir() const;
+    const sf::Vector2f & getImpulse() const;
 
     Inventory & getInventory();
     Equipment & getEquipment();

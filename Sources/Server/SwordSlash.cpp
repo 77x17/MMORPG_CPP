@@ -8,8 +8,8 @@ SwordSlash::SwordSlash(int _ownerId, const sf::Vector2f &startPosition, const sf
 : DamageEntity(_ownerId, startPosition, { 40.0f, 40.0f }) {
     direction         = normalize(_direction);
     range             = 30.0f;
-    damage            = 20.0f;
-    knockbackStrength = 20.0f;
+    damage            = 10;
+    knockbackStrength = 400.0f;
     lifeTimer         = 0.15f;
     displayTimer      = 0.15f;
 
@@ -40,6 +40,6 @@ void SwordSlash::destroy() {
 void SwordSlash::onHit(Player &player) {
     player.takeDamage(damage);
 
-    sf::Vector2f direction = position - player.getPosition();
-    player.knockback(direction, knockbackStrength);
+    sf::Vector2f direction = normalize(player.getPosition() - position);
+    player.applyImpulse(direction * knockbackStrength);
 }

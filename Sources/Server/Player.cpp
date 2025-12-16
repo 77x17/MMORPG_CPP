@@ -10,8 +10,8 @@ Player::Player(int _id, const sf::Vector2f &startPosition)
       health(100), maxHealth(100), 
       spawnPosition(startPosition)
 {
-    position           = spawnPosition;
-    knockback_strength = 10.0f;
+    position = spawnPosition;
+    velocity = impulse = { 0.0f, 0.0f };
 }
 
 void Player::update(const float &dt) {
@@ -22,6 +22,13 @@ void Player::update(const float &dt) {
     }
 
     if (projectileCooldownTimer > 0) projectileCooldownTimer -= dt;
+
+    constexpr float DECAY = 15.0f;
+    impulse *= std::exp(-DECAY * dt);
+
+    if (fabs(impulse.x - impulse.y) < 5.0f) {
+        impulse = {0.f, 0.f};
+    }
 }
 
 void Player::takeDamage(int amount) {
@@ -34,24 +41,20 @@ void Player::takeDamage(int amount) {
     // std::cout << "Player " << id << " took " << amount << " dmg. HP: " << health << '\n';
 }
 
-void Player::knockback(const sf::Vector2f &direction, const float &knockback) {
-    position -= normalize(direction) * knockback;
-}
-
-void Player::move(const sf::Vector2f &direction) {
-    position += direction;
+void Player::applyImpulse(const sf::Vector2f &_impulse) {
+    impulse += _impulse;
 }
 
 int Player::getHealth() const {
     return health;
 }
 
-sf::Vector2f Player::getVelocity() const {
-    return velocity;
+const sf::Vector2f & Player::getOldShootDir() const {
+    return oldShootDir;
 }
 
-float Player::getKnockback() const {
-    return knockback_strength;
+const sf::Vector2f & Player::getImpulse() const {
+    return impulse;
 }
 
 Inventory & Player::getInventory() {
@@ -63,7 +66,7 @@ Equipment & Player::getEquipment() {
 }
 
 AABB Player::buildAABB(const sf::Vector2f &atPosition) const {
-    return { atPosition, size };
+    return { atPosition - size / 2.0f, size };
 }
 
 void Player::setOldShootDir(const sf::Vector2f &newPosition) {
@@ -72,8 +75,4 @@ void Player::setOldShootDir(const sf::Vector2f &newPosition) {
 
 void Player::setVelocity(const sf::Vector2f &newVelocity) {
     velocity = newVelocity;
-}
-
-sf::Vector2f Player::getOldShootDir() const {
-    return oldShootDir;
 }
