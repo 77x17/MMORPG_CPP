@@ -1,22 +1,25 @@
-```md
 # C++ Client–Server Multiplayer Game Prototype
 
-This repository contains a C++ client–server multiplayer game prototype developed as a personal learning project.
-The project focuses on implementing core real-time multiplayer game systems, with an emphasis on networking,
-state synchronization, and modular architecture rather than graphics or content.
+This repository contains a C++ client–server multiplayer game prototype developed as a personal learning and experimentation project.
+The project focuses on implementing core systems commonly found in real-time online games, with particular attention to
+networking, server-authoritative simulation, state synchronization, and modular software architecture.
+
+Visual fidelity and game content are considered secondary to system correctness and architectural clarity.
 
 ---
 
-## Project Scope
+## Project Objectives
 
-The objective of this project is to study and implement:
-- Client–server architecture for real-time games
+The primary objectives of this project are to study, design, and implement:
+
+- Client–server architecture for real-time multiplayer games
 - Server-authoritative world simulation
 - Client-side prediction and state reconciliation
-- Modular system design for game logic
-- Basic persistence for player data
+- Snapshot-based world synchronization
+- Modular and extensible game system architecture
+- Basic persistence mechanisms for player-related data
 
-The project is not intended to be a complete game.
+This project is not intended to be a complete or production-ready game.
 
 ---
 
@@ -24,66 +27,68 @@ The project is not intended to be a complete game.
 
 ### Networking
 
-- Client–server communication using TCP and UDP
-- Server assigns unique client identifiers on connection
-- Client sends input data to the server
-- Server broadcasts world snapshots to connected clients
-- Snapshot-based world state synchronization
+- Client–server communication using both TCP and UDP
+- Server-managed client connection lifecycle
+- Unique client identifier assignment on connection
+- Client-to-server input transmission
+- Server-to-client world snapshot broadcasting
+- Snapshot-based synchronization model
 
 ### Client-side Simulation
 
 - Client-side movement prediction
-- Input buffering and reconciliation
+- Input buffering and reconciliation against authoritative snapshots
 - Snapshot interpolation infrastructure
-- Separation of simulation and rendering logic
+- Decoupling of simulation logic and rendering logic
 - Camera system following the local player using SFML views
 
 ### Rendering
 
-- SFML-based rendering
-- Separation between world rendering and UI rendering
-- World-space rendering for entities
-- Screen-space rendering for user interface
-- Debug-oriented visual representation of entities
+- Rendering implemented using SFML
+- Clear separation between:
+  - World-space rendering
+  - Screen-space (UI) rendering
+- Dedicated rendering pipeline for debug visualization
+- Minimalistic visual representations intended for development and debugging
 
 ### Entity Management
 
-- Client-side entity manager maintaining:
-  - Remote players
+- Centralized client-side entity management system
+- Management of the following remote entities:
+  - Player characters
   - Projectiles
   - Melee attack entities (sword slashes)
-- Centralized snapshot application for world state updates
-- Per-frame entity updates on the client
+- Snapshot application for entity state updates
+- Per-frame entity update logic on the client
 
 ### Server-side Game Logic
 
-- Authoritative game world simulation
-- Player input processing system
-- Combat system for damage and attack handling
-- Interest management system for relevant entity updates
+- Fully server-authoritative game world simulation
+- Input processing pipeline on the server
+- Combat system handling damage and attack resolution
+- Interest management system for limiting irrelevant updates
 - Event-based server architecture
-- Entity lifetime management
+- Entity lifetime creation, update, and destruction
 
-### Inventory and Equipment
+### Inventory and Equipment System
 
 - Slot-based inventory system
-- Equipment slots for player characters
-- Inventory and equipment logic implemented on the server
+- Dedicated equipment slots for player characters
+- Inventory and equipment logic implemented exclusively on the server
 - Inventory and equipment state synchronized to clients
-- Drag-and-drop inventory user interface on the client
+- Client-side inventory user interface
+- Drag-and-drop interaction for inventory management on the client
 
 ### Data Persistence
 
-- Player inventory and equipment stored in JSON format
+- Player inventory and equipment persisted using JSON files
 - One JSON file per player
 - Load and save operations handled on the server
+- Persistence designed for simplicity and prototyping purposes
 
 ---
 
 ## Directory Structure
-
-```
-
 .
 ├── Assets/
 │   ├── Roboto_Mono.ttf
@@ -101,13 +106,13 @@ The project is not intended to be a complete game.
 │
 ├── Sources/
 │   ├── Client/
-│   │   ├── Networking, prediction, rendering, UI
-│   │   ├── Inventory and equipment (client-side)
-│   │   └── Snapshot and remote entity representations
+│   │   ├── Networking, prediction, rendering, and UI systems
+│   │   ├── Client-side inventory and equipment handling
+│   │   └── Snapshot definitions and remote entity representations
 │   │
 │   ├── Server/
-│   │   ├── Game world and server systems
-│   │   ├── Combat, input, and interest management
+│   │   ├── Game world and server-side systems
+│   │   ├── Combat, input processing, and interest management
 │   │   ├── Inventory and equipment logic
 │   │   └── Network server implementation
 │   │
@@ -128,7 +133,8 @@ The project is not intended to be a complete game.
 
 - C++17 compatible compiler
 - SFML library
-- Windows environment (MSYS2 / MinGW recommended)
+- Windows environment
+  - MSYS2 / MinGW is recommended
 
 ### Build
 
@@ -148,28 +154,29 @@ Build/GameClient.exe
 ## Current Limitations
 
 * No map loading or tile-based world representation
-* No collision system
-* No non-player character (NPC) logic
-* No database-backed persistence
-* Minimal visual representation for debugging purposes
-* No authentication or security mechanisms
+* No collision detection or resolution system
+* No non-player character (NPC) or AI logic
+* Persistence based solely on JSON files (no database integration)
+* Visuals intended only for debugging and development
+* No authentication, encryption, or security mechanisms
 
 ---
 
 ## Future Work
 
-* Tile-based map system
+* Tile-based or chunk-based map system
 * Collision detection and resolution
 * NPC and enemy AI systems
-* Skill and ability system
-* Improved snapshot interpolation
-* Database-backed persistence
-* Login and authentication system
+* Skill and ability framework
+* Improved snapshot interpolation and smoothing
+* Database-backed persistence layer
+* Login, authentication, and session management
 
 ---
 
 ## Notes
 
-This project prioritizes architectural clarity and system correctness over content and visual quality.
-The codebase is intended to remain readable and modular to support further experimentation and extension.
+This project prioritizes architectural soundness and correctness of core systems over gameplay content.
+The codebase is intentionally structured to remain readable, modular, and extensible, enabling further experimentation
+with multiplayer game programming concepts and techniques.
 ```
