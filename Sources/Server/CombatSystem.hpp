@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GameWorld.hpp"
+#include <vector>
 
 class Player;
 class DamageEntity;

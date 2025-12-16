@@ -1,5 +1,7 @@
 #pragma once
 
+#include <vector>
+
 class WorldCollision;
 class Player;
 class InputState;
@@ -12,4 +14,6 @@ public:
     PhysicsSystem(WorldCollision &_worldCollision);
 
     void updatePlayer(Player &player, const InputState &inputState, const float &dt);
+
+    void resolvePlayerCollisions(const std::vector<Player *> &players);
 };

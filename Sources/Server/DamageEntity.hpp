@@ -2,6 +2,8 @@
 
 #include "Entity.hpp"
 
+class Player;
+
 class DamageEntity : public Entity {
 protected:
     int   ownerId;
@@ -12,10 +14,13 @@ protected:
 
 public:
     DamageEntity(int _ownerId, const sf::Vector2f &_position, const sf::Vector2f &_size);
-
-    virtual bool canHitMultiple() const = 0;
+    virtual ~DamageEntity() = default;
 
     int getOwnerId() const;
-    virtual int getDamage() const;
+    int getDamage() const;
     float getKnockbackStrength() const;
+
+    virtual bool canHitMultiple() const = 0;
+    
+    virtual void onHit(Player &player) = 0;
 };

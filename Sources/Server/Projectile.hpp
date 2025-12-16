@@ -14,4 +14,6 @@ public:
     bool canHitMultiple() const override;
 
     sf::Vector2f getVelocity() const;
+
+    void onHit(Player &player) override;
 };

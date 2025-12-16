@@ -2,12 +2,14 @@
 
 #include "../Shared/Utils.hpp"
 
+#include "Player.hpp"
+
 SwordSlash::SwordSlash(int _ownerId, const sf::Vector2f &startPosition, const sf::Vector2f &_direction) 
 : DamageEntity(_ownerId, startPosition, { 40.0f, 40.0f }) {
     direction         = normalize(_direction);
     range             = 30.0f;
-    damage            = 10.0f;
-    knockbackStrength = 10.0f;
+    damage            = 20.0f;
+    knockbackStrength = 20.0f;
     lifeTimer         = 0.15f;
     displayTimer      = 0.15f;
 
@@ -33,4 +35,11 @@ bool SwordSlash::isDestroyed() const {
 void SwordSlash::destroy() {
     damage = 0;
     knockbackStrength = 0;
+}
+
+void SwordSlash::onHit(Player &player) {
+    player.takeDamage(damage);
+
+    sf::Vector2f direction = position - player.getPosition();
+    player.knockback(direction, knockbackStrength);
 }

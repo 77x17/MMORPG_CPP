@@ -96,6 +96,7 @@ void update(GameWorld &gameWorld, InputSystem &inputSystem, PhysicsSystem &physi
         }
     }
 
+    physicsSystem.resolvePlayerCollisions(gameWorld.getPlayers());
     combatSystem.handleCollision(gameWorld.getPlayers(), gameWorld.getDamageEntities());
 
     gameWorld.update(SERVER_TICK);

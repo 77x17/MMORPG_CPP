@@ -3,6 +3,8 @@
 #include "../Shared/Constants.hpp"
 #include "../Shared/Utils.hpp"
 
+#include "Player.hpp"
+
 Projectile::Projectile(int _ownerId, const sf::Vector2f &startPosition, const sf::Vector2f &direction) 
 : DamageEntity(_ownerId, startPosition, { 10.0f, 10.0f }) {
     velocity          = normalize(direction) * BULLET_SPEED;
@@ -25,4 +27,9 @@ bool Projectile::canHitMultiple() const {
 
 sf::Vector2f Projectile::getVelocity() const {
     return velocity;
+}
+
+void Projectile::onHit(Player &player) {
+    player.takeDamage(damage);
+    player.knockback(-velocity, knockbackStrength);
 }

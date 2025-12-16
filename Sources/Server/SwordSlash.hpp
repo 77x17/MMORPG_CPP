@@ -18,4 +18,6 @@ public:
     void destroy() override;
 
     bool canHitMultiple() const override;
+
+    void onHit(Player &player) override;
 };
