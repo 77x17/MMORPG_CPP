@@ -5,6 +5,9 @@
 #include "GameWorld.hpp"
 #include "Projectile.hpp"
 #include "SwordSlash.hpp"
+#include "WorldCollision.hpp"
+#include "PhysicsSystem.hpp"
+#include "WeaponSystem.hpp"
 
 constexpr float SEND_HZ      = 30.0f;
 constexpr float SEND_INTEVAL = 1.0f / SEND_HZ;
@@ -15,7 +18,7 @@ constexpr float SERVER_TICK  = 1.0f / SERVER_HZ;
 
 // === For server ===
 void syncGameWorldFromClients(GameWorld &gameWorld, InputSystem &inputSystem, NetworkServer &networkServer);
-void update(GameWorld &gameWorld, InputSystem &inputSystem, CombatSystem &combatSystem);
+void update(GameWorld &gameWorld, InputSystem &inputSystem, PhysicsSystem &physicsSystem, WeaponSystem &weaponSystem, CombatSystem &combatSystem);
 // === For client ===
 void syncInventoryToClient(GameWorld &gameWorld, NetworkServer &networkServer, int clientId);
 void syncEquipmentToClient(GameWorld &gameWorld, NetworkServer &networkServer, int clientId);
@@ -74,24 +77,22 @@ void syncGameWorldFromClients(GameWorld &gameWorld, InputSystem &inputSystem, Ne
 
 int nextProjectileId = 0;
 
-void update(GameWorld &gameWorld, InputSystem &inputSystem, CombatSystem &combatSystem) {
+void update(GameWorld &gameWorld, InputSystem &inputSystem, PhysicsSystem &physicsSystem, WeaponSystem &weaponSystem, CombatSystem &combatSystem) {
     for (Player *player : gameWorld.getPlayers()) {
+        InputState latestInput;
         std::vector<InputState> &inputQueue = inputSystem.getQueue(player->getId());
+
         if (!inputQueue.empty()) {
-            InputState latest = inputQueue.back();
+            latestInput = inputQueue.back();
             inputSystem.clearQueue(player->getId());
-
-            DamageEntity *damageEntity = player->updatePlayer(SERVER_TICK, latest);
-            if (damageEntity) {
-                damageEntity->setId(++nextProjectileId);
-                gameWorld.addDamageEntity(damageEntity);
-            }
-
-            player->lastProcessedInput = latest.seq;
+            player->lastProcessedInput = latestInput.seq;
         }
-        else {
-            InputState input;
-            player->updatePlayer(SERVER_TICK, input);
+
+        physicsSystem.updatePlayer(*player, latestInput, SERVER_TICK);
+
+        if (DamageEntity *damageEntity = weaponSystem.tryFire(*player, latestInput)) {
+            damageEntity->setId(++nextProjectileId);
+            gameWorld.addDamageEntity(damageEntity);
         }
     }
 
@@ -180,6 +181,9 @@ int main() {
     GameWorld      gameWorld;
     
     InputSystem    inputSystem;
+    WorldCollision worldCollision;
+    PhysicsSystem  physicsSystem(worldCollision);
+    WeaponSystem   weaponSystem;
     CombatSystem   combatSystem;
     InterestSystem interestSystem;
     
@@ -195,8 +199,8 @@ int main() {
         syncGameWorldFromClients(gameWorld, inputSystem, networkServer);
 
         if (accumulator >= SERVER_TICK) {
-            update(gameWorld, inputSystem, combatSystem);
-
+            update(gameWorld, inputSystem, physicsSystem, weaponSystem, combatSystem);
+            
             accumulator -= SERVER_TICK;
         }
 

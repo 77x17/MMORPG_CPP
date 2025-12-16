@@ -5,65 +5,24 @@
 #include "../Shared/Constants.hpp"
 #include "../Shared/Utils.hpp"
 
-#include "Projectile.hpp"
-#include "SwordSlash.hpp"
-
 Player::Player(int _id, const sf::Vector2f &startPosition) 
     : Entity(_id, sf::Vector2f(PLAYER_WIDTH, PLAYER_HEIGHT)), 
-      health(100), maxHealth(100), projectileCooldownTimer(0), inventory(36)
+      health(100), maxHealth(100), 
+      spawnPosition(startPosition)
 {
-    position           = startPosition;
+    position           = spawnPosition;
     knockback_strength = 10.0f;
 }
 
-DamageEntity* Player::updatePlayer(const float &dt, const InputState &input) {
+void Player::update(const float &dt) {
     if (isDestroyed()) {
         health    = maxHealth;
-        position  = sf::Vector2f(500.0f, 500.0f);
+        position  = spawnPosition;
         destroyed = false;
     }
 
-    // Check movement
-    if (input.movementDir.x != 0 || input.movementDir.y != 0) {
-        velocity = input.movementDir * PLAYER_SPEED;
-        position += velocity * dt;
-        // shape.move(velocity * dt);
-        oldShootDir = input.movementDir;
-    }
-    else {
-        velocity = { 0, 0 };
-    }
-
-    // Keep player inside the playground
-    if (position.x < 0) position.x = 0;
-    if (position.y < 0) position.y = 0;
-    if (position.x > 3200.0f) position.x = 3200.0f;
-    if (position.y > 3200.0f) position.y = 3200.0f;
-
-    // Check shooting
     if (projectileCooldownTimer > 0) projectileCooldownTimer -= dt;
-
-    if (input.isShooting && projectileCooldownTimer <= 0) {
-        projectileCooldownTimer = PROJECTILE_COOLDOWN_TIMER;
-        sf::Vector2f shootDir = input.movementDir;
-        if (shootDir.x == 0 && shootDir.y == 0) shootDir = oldShootDir;
-
-        int weapon = equipment.getWeapon().id;
-        if (weapon == 0) {
-            return new Projectile(id, position, shootDir);
-        }
-        else if (weapon == 1) {
-            return new SwordSlash(id, position, shootDir);
-        }
-        else {
-            // std::cout << "[Player] - Unknown weapon id: " << weapon << '\n';
-        }
-    }
-
-    return nullptr;
 }
-
-void Player::update(const float &dt) {}
 
 void Player::takeDamage(int amount) {
     health -= amount;
@@ -101,4 +60,20 @@ Inventory & Player::getInventory() {
 
 Equipment & Player::getEquipment() {
     return equipment;
+}
+
+AABB Player::buildAABB(const sf::Vector2f &atPosition) const {
+    return { atPosition, size };
+}
+
+void Player::setOldShootDir(const sf::Vector2f &newPosition) {
+    oldShootDir = newPosition;
+}
+
+void Player::setVelocity(const sf::Vector2f &newVelocity) {
+    velocity = newVelocity;
+}
+
+sf::Vector2f Player::getOldShootDir() const {
+    return oldShootDir;
 }

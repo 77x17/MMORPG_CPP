@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "Player.hpp"
-#include "DamageEntity.hpp"
+#include "DamageEntity.hpp" 
 
 class GameWorld {
 private:
@@ -13,6 +13,8 @@ private:
     std::vector<DamageEntity *> damageEntities;
 
 public:
+    GameWorld();
+
     void addPlayer(int id);
     void removePlayer(int id);
 

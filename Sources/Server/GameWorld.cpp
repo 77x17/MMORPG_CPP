@@ -2,6 +2,8 @@
 
 #include "InventoryManager.hpp"
 
+GameWorld::GameWorld() {}
+
 void GameWorld::addPlayer(int id) {
     Player *newPlayer = new Player(id, sf::Vector2f(500, 500));
 

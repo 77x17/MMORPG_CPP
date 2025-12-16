@@ -102,7 +102,7 @@ void NetworkClient::pollReceive() {
 
             }
             else if (status == sf::Socket::Disconnected) {
-                std::cout << "[Network] - TCP disconnected" << '\n';
+                // std::cout << "[Network] - TCP disconnected" << '\n';
             }
         }
 

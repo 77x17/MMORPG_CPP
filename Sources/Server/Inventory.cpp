@@ -1,6 +1,6 @@
 #include "Inventory.hpp"
 
-Inventory::Inventory(int _size) : size(_size) {
+Inventory::Inventory() {
     slots.assign(size, ItemSlot());
 }
 

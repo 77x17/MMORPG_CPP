@@ -2,8 +2,7 @@
 
 #include <stdexcept>
 
-Equipment::Equipment() {
-    size       = 8;
+Equipment::Equipment() {   
     helmet     = ItemSlot();
     chestplate = ItemSlot();
     leggings   = ItemSlot();

@@ -6,11 +6,11 @@
 
 class Inventory {
 private:
-    int size;
+    int size = 36;
     std::vector<ItemSlot> slots;
 
 public:
-    Inventory(int _size = 36);
+    Inventory();
 
     ItemSlot & operator [] (size_t i) {
         return slots[i];
