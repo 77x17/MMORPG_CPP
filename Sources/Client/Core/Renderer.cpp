@@ -2,6 +2,8 @@
 
 #include <SFML/Graphics.hpp>
 
+#include <cmath>
+
 #include "Client/Systems/Entity/EntityManager.hpp"
 #include "Client/Inventory/Inventory.hpp"
 #include "Client/Inventory/Equipment.hpp"
@@ -45,7 +47,11 @@ void Renderer::updateCamera(const EntityManager &entityManager, int clientId) {
     sf::Vector2f current = worldView.getCenter();
     sf::Vector2f target  = player.localPosition;
 
-    worldView.setCenter(current + (target - current) * 0.15f);
+    sf::Vector2f smooth = current + (target - current) * 0.15f;
+    smooth.x = std::floor(smooth.x);
+    smooth.y = std::floor(smooth.y);
+
+    worldView.setCenter(smooth);
 }
 
 void Renderer::drawPlayers(const EntityManager &entityManager, int clientId) {
@@ -148,7 +154,7 @@ void Renderer::renderUI(const Inventory &inventory, const Equipment &equipment) 
     position.setCharacterSize(10.0f);
     position.setFillColor(sf::Color::White);
     position.setPosition(10.0f, 10.0f);
-    position.setString(std::to_string(worldView.getCenter().x) + " " + std::to_string(worldView.getCenter().y));
+    position.setString(std::to_string(static_cast<int>(worldView.getCenter().x)) + " " + std::to_string(static_cast<int>(worldView.getCenter().y)));
 
     window.draw(position);
 }

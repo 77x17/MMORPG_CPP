@@ -14,6 +14,7 @@ SwordSlash::SwordSlash(int _ownerId, const sf::Vector2f &startPosition, const sf
     displayTimer      = 0.15f;
 
     setPosition(position + direction * range);
+    oldPosition = position;
 }
 
 void SwordSlash::update(const float &dt) {

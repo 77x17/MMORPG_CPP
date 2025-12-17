@@ -26,6 +26,8 @@ bool NetworkClient::connectTcp(int clientId, const float &timeoutSeconds) {
     loginPacket << "Login" << clientId;
     tcp.send(loginPacket);
 
+    std::cout << "Send login\n";
+
     return true;
 }
 
@@ -105,6 +107,20 @@ void NetworkClient::pollReceive() {
                         worldCollisionSnapshot.colliders.push_back({ position, size });
                     }
                 }
+                else if (type == "Chunk") {
+                    chunkSnapshot.appear = true;
+                    chunkSnapshot.chunks.clear();
+
+                    int chunkCount; packet >> chunkCount;
+                    for (int i = 0; i < chunkCount; ++i) {
+                        int x, y, size;
+                        packet >> x
+                               >> y
+                               >> size
+                               >> size;
+                        chunkSnapshot.chunks.push_back({ sf::Vector2f(x, y), sf::Vector2f(size, size) });
+                    }
+                } 
                 else {
                     std::cout << "[Network] - TCP msg type: " << type << '\n';
                 }
@@ -137,10 +153,10 @@ void NetworkClient::pollReceive() {
                         worldSnapshot.players.push_back(playerSnapshot); 
                     }
 
-                    int damageEntitiesCount; packet >> damageEntitiesCount;
+                    int damageEntityCount; packet >> damageEntityCount;
                     worldSnapshot.projectiles.clear();
                     worldSnapshot.swordSlashs.clear();
-                    for (int i = 0; i < damageEntitiesCount; ++i) {
+                    for (int i = 0; i < damageEntityCount; ++i) {
                         std::string type; packet >> type;
                         if (type == "Projectile") {
                             ProjectileSnapshot projectileSnapshot; 
@@ -175,20 +191,24 @@ void NetworkClient::pollReceive() {
     }
 }
 
-WorldSnapshot & NetworkClient::getWorldSnapshot() {
-    return worldSnapshot;
-}
-
-InventorySnapshot & NetworkClient::getInventorySnapshot() {
-    return inventorySnapshot;
+ChunkSnapshot & NetworkClient::getChunkSnapshot() {
+    return chunkSnapshot;
 }
 
 EquipmentSnapshot & NetworkClient::getEquipmentSnapshot() {
     return equipmentSnapshot;
 }
 
+InventorySnapshot & NetworkClient::getInventorySnapshot() {
+    return inventorySnapshot;
+}
+
 WorldCollisionSnapshot & NetworkClient::getWorldCollisionSnapshot() {
     return worldCollisionSnapshot;
+}
+
+WorldSnapshot & NetworkClient::getWorldSnapshot() {
+    return worldSnapshot;
 }
 
 void NetworkClient::close() {

@@ -10,15 +10,17 @@ Player::Player(int _id, const sf::Vector2f &startPosition)
       health(100), maxHealth(100), 
       spawnPosition(startPosition)
 {
+    oldPosition = spawnPosition;
     position = spawnPosition;
     velocity = impulse = { 0.0f, 0.0f };
 }
 
 void Player::update(const float &dt) {
     if (isDestroyed()) {
-        health    = maxHealth;
-        position  = spawnPosition;
-        destroyed = false;
+        health      = maxHealth;
+        oldPosition = position;
+        position    = spawnPosition;
+        destroyed   = false;
     }
 
     if (projectileCooldownTimer > 0) projectileCooldownTimer -= dt;

@@ -14,7 +14,8 @@ Projectile::Projectile(int _ownerId, const sf::Vector2f &startPosition, const sf
 }
 
 void Projectile::update(const float &dt) {
-    position  += velocity * dt;
+    oldPosition = position;
+    position   += velocity * dt;
     
     lifeTimer -= dt;
 

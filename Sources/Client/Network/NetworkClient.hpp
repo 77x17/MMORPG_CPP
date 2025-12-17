@@ -6,10 +6,11 @@
 #include <SFML/System/Vector2.hpp>
 #include <vector>
 
-#include "Client/Snapshots/WorldSnapshot.hpp"
-#include "Client/Snapshots/InventorySnapshot.hpp"
+#include "Client/Snapshots/ChunkSnapshot.hpp"
 #include "Client/Snapshots/EquipmentSnapshot.hpp"
+#include "Client/Snapshots/InventorySnapshot.hpp"
 #include "Client/Snapshots/WorldCollisionSnapshot.hpp"
+#include "Client/Snapshots/WorldSnapshot.hpp"
 
 class NetworkClient {
 private:
@@ -20,10 +21,12 @@ private:
     unsigned short     tcpPort;
     unsigned short     udpPort;
 
-    WorldSnapshot          worldSnapshot;
-    InventorySnapshot      inventorySnapshot;
+    ChunkSnapshot          chunkSnapshot;
     EquipmentSnapshot      equipmentSnapshot;
+    InventorySnapshot      inventorySnapshot;
     WorldCollisionSnapshot worldCollisionSnapshot;
+    WorldSnapshot          worldSnapshot;
+
 public:
     int assignedId = -1;
 
@@ -41,10 +44,11 @@ public:
     // non-blocking: poll for incoming packets
     void pollReceive();
 
-    WorldSnapshot & getWorldSnapshot();
-    InventorySnapshot & getInventorySnapshot();
+    ChunkSnapshot & getChunkSnapshot();
     EquipmentSnapshot & getEquipmentSnapshot();
+    InventorySnapshot & getInventorySnapshot();
     WorldCollisionSnapshot & getWorldCollisionSnapshot();
+    WorldSnapshot & getWorldSnapshot();
 
     void close();
 };

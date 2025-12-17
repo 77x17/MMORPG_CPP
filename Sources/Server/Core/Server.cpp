@@ -1,4 +1,5 @@
 #include "Server/Core/GameWorld.hpp"
+#include "Server/Core/Chunk/ChunkSystem.hpp"
 #include "Server/Entities/Player.hpp"
 #include "Server/Entities/Projectile.hpp"
 #include "Server/Entities/SwordSlash.hpp"
@@ -140,40 +141,49 @@ void syncGameWorldToClients(GameWorld &gameWorld, InterestSystem &interestSystem
         sf::Packet worldStatePacket;
         worldStatePacket << "WorldState";
         
-        std::vector<Player *> visiblePlayers = interestSystem.getVisiblePlayers(currentPlayer, gameWorld.getPlayers());
+        std::vector<Player *> visiblePlayers = interestSystem.getVisiblePlayers(currentPlayer, gameWorld.getPlayersInChunk(currentPlayer->getPosition()));
         worldStatePacket << (int)visiblePlayers.size();
         for (Player *player : visiblePlayers) {
             worldStatePacket << player->getId() 
-                                << player->getPosition().x 
-                                << player->getPosition().y 
-                                << player->getHealth() 
-                                << player->lastProcessedInput;
+                             << player->getPosition().x 
+                             << player->getPosition().y 
+                             << player->getHealth() 
+                             << player->lastProcessedInput;
         }
 
-        std::vector<DamageEntity *> visibleDamageEntities = interestSystem.getVisibleDamageEntities(currentPlayer, gameWorld.getDamageEntities());
+        std::vector<DamageEntity *> visibleDamageEntities = interestSystem.getVisibleDamageEntities(currentPlayer, gameWorld.getDamageEntitiesInChunk(currentPlayer->getPosition()));
         worldStatePacket << (int)visibleDamageEntities.size();
         for (DamageEntity *damageEntity : visibleDamageEntities) {
             Projectile *projectile = dynamic_cast<Projectile *>(damageEntity);
             if (projectile) {
                 worldStatePacket << "Projectile"
-                                    << projectile->getId() 
-                                    << projectile->getPosition().x 
-                                    << projectile->getPosition().y 
-                                    << projectile->getVelocity().x
-                                    << projectile->getVelocity().y
-                                    << projectile->getOwnerId();
+                                 << projectile->getId() 
+                                 << projectile->getPosition().x 
+                                 << projectile->getPosition().y 
+                                 << projectile->getVelocity().x
+                                 << projectile->getVelocity().y
+                                 << projectile->getOwnerId();
             }
 
             SwordSlash *swordSlash = dynamic_cast<SwordSlash *>(damageEntity);
             if (swordSlash) {
                 worldStatePacket << "SwordSlash"
-                                    << swordSlash->getId()
-                                    << swordSlash->getBounds().left
-                                    << swordSlash->getBounds().top
-                                    << swordSlash->getBounds().width
-                                    << swordSlash->getBounds().height
-                                    << swordSlash->getOwnerId();
+                                 << swordSlash->getId()
+                                 << swordSlash->getBounds().left
+                                 << swordSlash->getBounds().top
+                                 << swordSlash->getBounds().width
+                                 << swordSlash->getBounds().height
+                                 << swordSlash->getOwnerId();
             }
+        }
+
+        std::vector<ChunkCoord> chunks = gameWorld.getChunkInRange(currentPlayer->getId(), currentPlayer->getPosition());
+        worldStatePacket << (int)chunks.size();        
+        for (const ChunkCoord &chunk : chunks) {
+            worldStatePacket << chunk.getX() * CHUNK_SIZE
+                             << chunk.getY() * CHUNK_SIZE
+                             << CHUNK_SIZE
+                             << CHUNK_SIZE;
         }
 
         networkServer.sendToClientUdp(client, worldStatePacket);
@@ -219,19 +229,18 @@ int main() {
     }
    
     GameWorld      gameWorld;
-
+    
+    CombatSystem   combatSystem;
+    WeaponSystem   weaponSystem;
     InputSystem    inputSystem;
+    InterestSystem interestSystem;
     WorldCollision worldCollision;
     PhysicsSystem  physicsSystem(worldCollision);
-    WeaponSystem   weaponSystem;
-    CombatSystem   combatSystem;
-    InterestSystem interestSystem;
     
     loadCollisions(worldCollision);
 
-    float accumulator = 0.0f;
-   
     sf::Clock clock, sendClock;
+    float accumulator = 0.0f;
     while (true) {
         float dt = clock.restart().asSeconds();
         accumulator += dt;
@@ -241,9 +250,26 @@ int main() {
         syncGameWorldFromClients(gameWorld, inputSystem, networkServer, worldCollision);
 
         if (accumulator >= SERVER_TICK) {
+            accumulator -= SERVER_TICK;
             update(gameWorld, inputSystem, physicsSystem, weaponSystem, combatSystem);
             
-            accumulator -= SERVER_TICK;
+            for (ClientSession &client : networkServer.getClients()) {
+                Player *player = gameWorld.getPlayer(client.id);
+                if (player == nullptr) continue;
+                
+                std::vector<ChunkCoord> chunks = gameWorld.getChunkInRange(player->getId(), player->getPosition());
+                if (chunks.size() == 0) continue;
+                
+                sf::Packet chunkPacket;
+                chunkPacket << "Chunk" << (int)chunks.size();  
+                for (const ChunkCoord &chunk : chunks) {
+                    chunkPacket << chunk.getX() * CHUNK_SIZE
+                                << chunk.getY() * CHUNK_SIZE
+                                << CHUNK_SIZE
+                                << CHUNK_SIZE;
+                }
+                networkServer.sendToClientTcp(client.id, chunkPacket);
+            }
         }
 
         if (sendClock.getElapsedTime().asSeconds() >= SEND_INTEVAL) {

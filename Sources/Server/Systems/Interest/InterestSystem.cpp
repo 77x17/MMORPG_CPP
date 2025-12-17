@@ -18,8 +18,7 @@ std::vector<Player *> InterestSystem::getVisiblePlayers(Player *center, const st
 std::vector<DamageEntity *> InterestSystem::getVisibleDamageEntities(Player *center, const std::vector<DamageEntity *> damageEntities) {
     std::vector<DamageEntity *> visibleDamageEntities;
     for (DamageEntity *damageEntity : damageEntities) {
-        if (distance(center->getPosition(), damageEntity->getPosition()) <= INTEREST_RADIUS
-            || damageEntity->getOwnerId() == center->getId()) {
+        if (distance(center->getPosition(), damageEntity->getPosition()) <= INTEREST_RADIUS || damageEntity->getOwnerId() == center->getId()) {
             visibleDamageEntities.push_back(damageEntity);
         }
     }

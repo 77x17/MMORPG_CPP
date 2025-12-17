@@ -6,6 +6,7 @@ class Entity {
 protected:
     int          id;
     sf::Vector2f position;
+    sf::Vector2f oldPosition;
     sf::Vector2f size;
     bool         destroyed = false;
 
@@ -18,7 +19,9 @@ public:
     void draw(sf::RenderWindow &window);
 
     sf::Vector2f getPosition() const;
+    sf::Vector2f getOldPosition() const;
     void setPosition(const sf::Vector2f &newPosition);
+    void setOldPosition(const sf::Vector2f &newPosition);
     sf::FloatRect getBounds() const;
     int getId() const;
     void setId(int _id);

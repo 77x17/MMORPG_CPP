@@ -5,14 +5,14 @@
 #include "Shared/Constants.hpp"
 #include "Shared/Utils.hpp"
 
+#include "Client/Core/Renderer.hpp"
+#include "Client/Debug/DebugRenderer.hpp"
+#include "Client/Inventory/Inventory.hpp"
+#include "Client/Inventory/Equipment.hpp"
 #include "Client/Network/NetworkClient.hpp"
 #include "Client/Systems/Entity/EntityManager.hpp"
 #include "Client/Systems/Input/InputManager.hpp"
-#include "Client/Inventory/Inventory.hpp"
-#include "Client/Core/Renderer.hpp"
-#include "Client/Inventory/Equipment.hpp"
 #include "Client/Systems/World/WorldCollision.hpp"
-#include "Client/Debug/DebugRenderer.hpp"
 
 #include <iostream>
 
@@ -105,7 +105,8 @@ void connectingScreen(sf::RenderWindow &window, NetworkClient &networkClient, in
 int main() {
     bool isFullscreen = false;
     sf::RenderWindow window({ 800, 600 }, "[Client] - Login", sf::Style::Close);
-    
+    window.setVerticalSyncEnabled(true);
+
     sf::Font font;
     if (!font.loadFromFile("Assets/Roboto_Mono.ttf")) {
         font.loadFromFile("../Assets/Roboto_Mono.ttf");
@@ -166,6 +167,8 @@ int main() {
                             "[Client] - ID: " + std::to_string(clientId),
                             sf::Style::Fullscreen
                         );
+                        window.setVerticalSyncEnabled(true);
+
                         renderer.setCamera();
                     }
                     else {
@@ -174,6 +177,8 @@ int main() {
                             "[Client] - ID: " + std::to_string(clientId),
                             sf::Style::Close
                         );
+                        window.setVerticalSyncEnabled(true);
+
                         renderer.setCamera();
                     }
                 }
@@ -244,6 +249,12 @@ int main() {
             entityManager.applySnapshot(worldSnapshot, clientId, pendingInputs);
         }
 
+        ChunkSnapshot &chunkSnapshot = networkClient.getChunkSnapshot();
+        if (chunkSnapshot.appear) {
+            chunkSnapshot.appear = false;
+            debugRenderer.applySnapshot(chunkSnapshot);
+        }
+
         InventorySnapshot &inventorySnapshot = networkClient.getInventorySnapshot();
         if (inventorySnapshot.appear) {
             inventorySnapshot.appear = false;
@@ -278,20 +289,21 @@ int main() {
 
         if (clientAccumulator >= CLIENT_TICK) {
             clientAccumulator -= CLIENT_TICK;
-            entityManager.update(dt, clientId);
-            
-            window.clear(sf::Color(30.0f, 30.0f, 30.0f));
-            
-            renderer.render(entityManager, clientId);
-
-            if (debugRenderer.isEnabled()) {
-                debugRenderer.render(entityManager, worldCollision, clientId);
-            }
-
-            renderer.renderUI(inventory, equipment);
-
-            window.display();
+            entityManager.update(CLIENT_TICK, clientId);    
         }
+
+        window.clear(sf::Color(30.0f, 30.0f, 30.0f));
+        
+        renderer.render(entityManager, clientId);
+
+        if (debugRenderer.isEnabled()) {
+            debugRenderer.render(entityManager, worldCollision, clientId);
+        }
+
+        renderer.renderUI(inventory, equipment);
+
+        window.display();
+
         sf::sleep(sf::milliseconds(1));
     }
 

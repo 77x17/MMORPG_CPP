@@ -17,9 +17,18 @@ sf::Vector2f Entity::getPosition() const {
     return position;
 }
 
+sf::Vector2f Entity::getOldPosition() const {
+    return oldPosition;
+}
+
 void Entity::setPosition(const sf::Vector2f &newPosition) {
-    position = newPosition;
+    oldPosition = position;
+    position    = newPosition;
 } 
+
+void Entity::setOldPosition(const sf::Vector2f &newPosition) {
+    oldPosition = newPosition;
+}
 
 sf::FloatRect Entity::getBounds() const {
     return sf::FloatRect(position - size / 2.0f, size);

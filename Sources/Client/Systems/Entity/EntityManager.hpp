@@ -5,7 +5,6 @@
 
 #include "Shared/InputState.hpp"
 
-
 class WorldSnapshot;
 
 #include "Client/Entities/RemotePlayer.hpp"

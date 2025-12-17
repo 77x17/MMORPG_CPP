@@ -41,30 +41,38 @@ bool NetworkServer::start(unsigned short tcpPort, unsigned short udpPort) {
 }
 
 bool NetworkServer::isValidClientId(int id) const {
+    if (id < 0) return false;
+
     for (const ClientSession &client : clients) {
         if (client.id == id) return false;
+    }
+    for (const NewClientEvent & event : pendingNewClients) {
+        if (event.clientId == id) return false;
     }
     return true;
 }
 
 int NetworkServer::generateNewClientId() const {
-    int *flag = new int[clients.size() + 1]();
-    for (const ClientSession &client : clients) {
-        if (client.id <= (int)clients.size()) {
-            flag[client.id] = true;
+    int id = 0;
+    while (true) {
+        bool used = false;
+        for (const ClientSession &client : clients) {
+            if (client.id == id) { 
+                used = true;
+                break;
+            }
         }
+        for (const NewClientEvent & event : pendingNewClients) {
+            if (event.clientId == id) {
+                used = true;
+                break;
+            }
+        }
+        if (!used) return id;
+        ++id;
     }
 
-    int newId = -1;
-    for (size_t i = 0; i <= clients.size(); ++i) {
-        if (flag[i] == false) {
-            newId = i;
-            break;
-        }
-    }
-    delete[] flag;
-
-    return newId;
+    return id;
 }
 
 void NetworkServer::poll() {
@@ -104,10 +112,9 @@ void NetworkServer::poll() {
                             finalId = requestedId;
                         }
                         else {
-                            // finalId = generateNewClientId();
-                            
+                            finalId = generateNewClientId();
                         }
-                        
+
                         clients[i].id = finalId;
 
                         NewClientEvent newClientEvent;

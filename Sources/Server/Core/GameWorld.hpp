@@ -2,6 +2,8 @@
 
 #include <vector>
 
+#include "Server/Core/Chunk/ChunkSystem.hpp"
+
 class Player;
 class DamageEntity;
 
@@ -11,6 +13,8 @@ private:
     
     int nextProjectileId;
     std::vector<DamageEntity *> damageEntities;
+
+    ChunkSystem chunkSystem;
 
 public:
     GameWorld();
@@ -24,6 +28,10 @@ public:
 
     const std::vector<Player *> getPlayers() const;
     const std::vector<DamageEntity *> getDamageEntities() const;
+
+    const std::vector<Player *> getPlayersInChunk(const sf::Vector2f &centerPosition) const;
+    const std::vector<DamageEntity *> getDamageEntitiesInChunk(const sf::Vector2f &centerPosition) const;
+    std::vector<ChunkCoord> getChunkInRange(int clientId, const sf::Vector2f &centerPosition);
 
     Player * getPlayer(int clientId);
 
