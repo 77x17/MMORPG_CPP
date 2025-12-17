@@ -8,8 +8,9 @@
 
 #include "Server/Core/Chunk/ChunkCoord.hpp"
 #include "Server/Core/Chunk/ChunkCoordHash.hpp"
-#include "Server/Entities/Player.hpp"
-#include "Server/Entities/DamageEntity.hpp"
+
+class Player;
+class DamageEntity;
 
 constexpr int CHUNK_RANGE = 2;
 
@@ -29,11 +30,11 @@ public:
     void removePlayer(Player *player);
     void updatePlayer(Player *player, const sf::Vector2f &oldPosition);
 
-    void addDamageEntity(DamageEntity* entity);
-    void removeDamageEntity(DamageEntity* entity);
-    void updateDamageEntity(DamageEntity* entity, const sf::Vector2f& oldPosition);
+    void addDamageEntity(DamageEntity *entity);
+    void removeDamageEntity(DamageEntity *entity);
+    void updateDamageEntity(DamageEntity *entity, const sf::Vector2f &oldPosition);
 
-    std::vector<Player*> getPlayersInRange(const sf::Vector2f& position, int chunkRange = CHUNK_RANGE) const;
-    std::vector<DamageEntity*> getDamageEntitiesInRange(const sf::Vector2f& position, int chunkRange = CHUNK_RANGE) const;
-    std::vector<ChunkCoord> getChunkInRange(int clientId, const sf::Vector2f& position, int chunkRange = CHUNK_RANGE);
+    std::vector<Player *> getPlayersInRange(const sf::Vector2f &position, int chunkRange = CHUNK_RANGE) const;
+    std::vector<DamageEntity *> getDamageEntitiesInRange(const sf::Vector2f &position, int chunkRange = CHUNK_RANGE) const;
+    std::vector<ChunkCoord> getChunkInRange(int clientId, const sf::Vector2f &position, int chunkRange = CHUNK_RANGE);
 };

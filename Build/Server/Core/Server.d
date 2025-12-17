@@ -8,8 +8,8 @@ Build/Server/Core/Server.o: Sources/Server/Core/Server.cpp \
  Sources/Server/Systems/Inventory/Inventory.hpp \
  Sources/Server/Systems/Inventory/ItemSlot.hpp \
  Sources/Server/Systems/Inventory/Equipment.hpp \
- Sources/Server/Entities/DamageEntity.hpp \
  Sources/Server/Entities/Projectile.hpp \
+ Sources/Server/Entities/DamageEntity.hpp \
  Sources/Server/Entities/SwordSlash.hpp \
  Sources/Server/Network/NetworkServer.hpp \
  Sources/Server/Core/ClientSession.hpp \
@@ -23,5 +23,7 @@ Build/Server/Core/Server.o: Sources/Server/Core/Server.cpp \
  Sources/Server/Systems/Combat/WeaponSystem.hpp \
  Sources/Server/Systems/Input/InputSystem.hpp \
  Sources/Server/Systems/Interest/InterestSystem.hpp \
+ Sources/Server/Systems/Inventory/InventorySystem.hpp \
+ Sources/Server/Systems/Inventory/InventorySyncSystem.hpp \
  Sources/Server/Systems/Physics/WorldCollision.hpp \
  Sources/Server/Systems/Physics/PhysicsSystem.hpp

@@ -34,7 +34,4 @@ public:
     std::vector<ChunkCoord> getChunkInRange(int clientId, const sf::Vector2f &centerPosition);
 
     Player * getPlayer(int clientId);
-
-    bool moveItem(int clientId, int from, int to);
-    bool equipItem(int clientId, int fromInventory, int toEquipment);
 };

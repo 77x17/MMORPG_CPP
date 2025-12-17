@@ -90,25 +90,3 @@ Player * GameWorld::getPlayer(int clientId) {
     }
     return nullptr;
 }
-
-bool GameWorld::moveItem(int clientId, int from, int to) {
-    Player *player = getPlayer(clientId);
-    if (player == nullptr) return false;
-    
-    if (player->getInventory()[from].id != -1 || player->getInventory()[to].id != -1) {
-        std::swap(player->getInventory()[from].id, player->getInventory()[to].id);
-        return true;
-    }
-    return false;
-}
-
-bool GameWorld::equipItem(int clientId, int fromInventory, int toEquipment) {
-    Player *player = getPlayer(clientId);
-    if (player == nullptr) return false;
-
-    if (player->getInventory()[fromInventory].id != -1 || player->getEquipment()[toEquipment].id != -1) {
-        std::swap(player->getInventory()[fromInventory].id, player->getEquipment()[toEquipment].id);
-        return true;
-    }
-    return false;
-}

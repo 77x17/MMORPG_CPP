@@ -1,5 +1,8 @@
 #include "Server/Core/Chunk/ChunkSystem.hpp"
 
+#include "Server/Entities/Player.hpp"
+#include "Server/Entities/DamageEntity.hpp"
+
 ChunkCoord ChunkSystem::getChunk(const sf::Vector2f& pos) const {
     return {
         static_cast<int>(pos.x) / CHUNK_SIZE,

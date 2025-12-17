@@ -53,6 +53,9 @@ void DebugRenderer::drawChunks() {
 }
 
 void DebugRenderer::render(const EntityManager &entityManager, WorldCollision &worldCollision, int clientId) {
-    drawChunks();
+    if (enabled) {
+        drawChunks();
+    }
+    
     drawWorldCollision(worldCollision);
 }

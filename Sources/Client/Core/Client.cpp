@@ -296,7 +296,7 @@ int main() {
         
         renderer.render(entityManager, clientId);
 
-        if (debugRenderer.isEnabled()) {
+        if (debugRenderer.isEnabled() || true) { // for quick test
             debugRenderer.render(entityManager, worldCollision, clientId);
         }
 
