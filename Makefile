@@ -6,12 +6,20 @@ SFML_LIBS = -lsfml-system -lsfml-graphics -lsfml-window -lsfml-audio -lsfml-netw
 SRC_DIR   = Sources
 BUILD_DIR = Build
 
+INCLUDES = \
+	-I$(SRC_DIR) \
+	-I$(SRC_DIR)/Client \
+	-I$(SRC_DIR)/Server \
+	-I$(SRC_DIR)/Shared
+
 CLIENT_TARGET = $(BUILD_DIR)/GameClient.exe
 SERVER_TARGET = $(BUILD_DIR)/GameServer.exe
 
-SHARED_SRCS := $(wildcard $(SRC_DIR)/Shared/*.cpp)
-CLIENT_SRCS := $(wildcard $(SRC_DIR)/Client/*.cpp)
-SERVER_SRCS := $(wildcard $(SRC_DIR)/Server/*.cpp)
+# Windows CMD version
+# Find all .cpp recursively using Make wildcards
+SHARED_SRCS := $(wildcard $(SRC_DIR)/Shared/*.cpp $(SRC_DIR)/Shared/**/*.cpp)
+CLIENT_SRCS := $(wildcard $(SRC_DIR)/Client/*.cpp $(SRC_DIR)/Client/**/*.cpp $(SRC_DIR)/Client/**/**/*.cpp)
+SERVER_SRCS := $(wildcard $(SRC_DIR)/Server/*.cpp $(SRC_DIR)/Server/**/*.cpp $(SRC_DIR)/Server/**/**/*.cpp)
 
 SHARED_OBJS := $(SHARED_SRCS:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
 CLIENT_OBJS := $(CLIENT_SRCS:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
