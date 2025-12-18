@@ -14,10 +14,9 @@
 #include "Client/Systems/Input/InputManager.hpp"
 #include "Client/Systems/World/WorldCollision.hpp"
 
-#include <iostream>
+#include "Client/Utils/Constants.hpp"
 
-constexpr float CLIENT_HZ   = 60.0f;
-constexpr float CLIENT_TICK = 1 / CLIENT_HZ;
+#include <iostream>
 
 void loginScreen(sf::RenderWindow &window, int &clientId, sf::Font &font) {
     bool loginDone = false;
@@ -104,7 +103,7 @@ void connectingScreen(sf::RenderWindow &window, NetworkClient &networkClient, in
 
 int main() {
     bool isFullscreen = false;
-    sf::RenderWindow window({ 800, 600 }, "[Client] - Login", sf::Style::Close);
+    sf::RenderWindow window({ WINDOW_WIDTH, WINDOW_HEIGHT }, "[Client] - Login", sf::Style::Close);
     window.setVerticalSyncEnabled(true);
 
     sf::Font font;
@@ -173,7 +172,7 @@ int main() {
                     }
                     else {
                         window.create(
-                            sf::VideoMode(800, 600),
+                            sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT),
                             "[Client] - ID: " + std::to_string(clientId),
                             sf::Style::Close
                         );

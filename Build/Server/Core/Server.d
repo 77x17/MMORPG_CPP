@@ -1,8 +1,10 @@
 Build/Server/Core/Server.o: Sources/Server/Core/Server.cpp \
- Sources/Server/Core/GameWorld.hpp \
  Sources/Server/Core/Chunk/ChunkSystem.hpp \
  Sources/Server/Core/Chunk/ChunkCoord.hpp \
  Sources/Server/Core/Chunk/ChunkCoordHash.hpp \
+ Sources/Server/Core/Chunk/DebugChunkSyncSystem.hpp \
+ Sources/Server/Core/GameWorld.hpp \
+ Sources/Server/Core/GameWorldSynsSystem.hpp \
  Sources/Server/Entities/Player.hpp Sources/Shared/AABB.hpp \
  Sources/Server/Entities/Entity.hpp \
  Sources/Server/Systems/Inventory/Inventory.hpp \
@@ -21,9 +23,13 @@ Build/Server/Core/Server.o: Sources/Server/Core/Server.cpp \
  Sources/Server/Network/Events/EquipItemEvent.hpp \
  Sources/Server/Systems/Combat/CombatSystem.hpp \
  Sources/Server/Systems/Combat/WeaponSystem.hpp \
+ Sources/Server/Systems/Input/InputManager.hpp \
  Sources/Server/Systems/Input/InputSystem.hpp \
  Sources/Server/Systems/Interest/InterestSystem.hpp \
  Sources/Server/Systems/Inventory/InventorySystem.hpp \
  Sources/Server/Systems/Inventory/InventorySyncSystem.hpp \
+ Sources/Server/Systems/Physics/PhysicsSystem.hpp \
  Sources/Server/Systems/Physics/WorldCollision.hpp \
- Sources/Server/Systems/Physics/PhysicsSystem.hpp
+ Sources/Server/Systems/Physics/WorldCollisionSystem.hpp \
+ Sources/Server/Systems/Physics/WorldCollisionSyncSystem.hpp \
+ Sources/Server/Utils/Constants.hpp

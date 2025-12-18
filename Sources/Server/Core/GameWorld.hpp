@@ -26,8 +26,9 @@ public:
 
     void update(const float &dt);
 
-    const std::vector<Player *> getPlayers() const;
-    const std::vector<DamageEntity *> getDamageEntities() const;
+    const std::vector<Player *> & getPlayers() const;
+    std::vector<Player *> & getPlayers();
+    const std::vector<DamageEntity *> & getDamageEntities() const;
 
     const std::vector<Player *> getPlayersInChunk(const sf::Vector2f &centerPosition) const;
     const std::vector<DamageEntity *> getDamageEntitiesInChunk(const sf::Vector2f &centerPosition) const;

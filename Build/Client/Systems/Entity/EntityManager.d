@@ -6,6 +6,7 @@ Build/Client/Systems/Entity/EntityManager.o: \
  Sources/Client/Entities/RemoteSwordSlash.hpp \
  Sources/Client/Systems/Prediction/Interpolation.hpp \
  Sources/Shared/Utils.hpp Sources/Shared/Constants.hpp \
+ Sources/Server/Utils/Constants.hpp \
  Sources/Client/Snapshots/WorldSnapshot.hpp \
  Sources/Client/Snapshots/PlayerSnapshot.hpp \
  Sources/Client/Snapshots/ProjectileSnapshot.hpp \

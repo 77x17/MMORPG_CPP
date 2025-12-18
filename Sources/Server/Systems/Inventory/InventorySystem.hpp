@@ -1,14 +1,11 @@
 #pragma once
 
-class GameWorld;
+class Player;
 
 class InventorySystem {
-private:
-    GameWorld &gameWorld;
-
 public:
-    InventorySystem(GameWorld &_gameWorld);
+    InventorySystem() = default;
 
-    bool moveItem(int clientId, int from, int to);
-    bool equipItem(int clientId, int fromInventory, int toEquipment);
+    bool moveItem(Player *player, int from, int to);
+    bool equipItem(Player *player, int fromInventory, int toEquipment);
 };

@@ -1,0 +1,64 @@
+#include "Server/Core/GameWorldSynsSystem.hpp"
+
+#include "Server/Core/GameWorld.hpp"
+#include "Server/Network/NetworkServer.hpp"
+#include "Server/Systems/Interest/InterestSystem.hpp"
+
+#include "Server/Entities/Player.hpp"
+#include "Server/Entities/Projectile.hpp"
+#include "Server/Entities/SwordSlash.hpp"
+
+GameWorldSyncSystem::GameWorldSyncSystem(GameWorld &_gameWorld, NetworkServer &_networkServer, InterestSystem &_interestSystem)
+: gameWorld(_gameWorld), networkServer(_networkServer), interestSystem(_interestSystem) {
+
+}
+
+void GameWorldSyncSystem::syncToClients() {
+    for (ClientSession &client : networkServer.getClients()) {
+        if (client.udpPort == 0) continue;
+
+        Player *currentPlayer = gameWorld.getPlayer(client.id);
+        if (currentPlayer == nullptr) continue;
+
+        sf::Packet worldStatePacket;
+        worldStatePacket << "WorldState";
+        
+        std::vector<Player *> visiblePlayers = interestSystem.getVisiblePlayers(currentPlayer, gameWorld.getPlayersInChunk(currentPlayer->getPosition()));
+        worldStatePacket << (int)visiblePlayers.size();
+        for (Player *player : visiblePlayers) {
+            worldStatePacket << player->getId() 
+                             << player->getPosition().x 
+                             << player->getPosition().y 
+                             << player->getHealth() 
+                             << player->lastProcessedInput;
+        }
+
+        std::vector<DamageEntity *> visibleDamageEntities = interestSystem.getVisibleDamageEntities(currentPlayer, gameWorld.getDamageEntitiesInChunk(currentPlayer->getPosition()));
+        worldStatePacket << (int)visibleDamageEntities.size();
+        for (DamageEntity *damageEntity : visibleDamageEntities) {
+            Projectile *projectile = dynamic_cast<Projectile *>(damageEntity);
+            if (projectile) {
+                worldStatePacket << "Projectile"
+                                 << projectile->getId() 
+                                 << projectile->getPosition().x 
+                                 << projectile->getPosition().y 
+                                 << projectile->getVelocity().x
+                                 << projectile->getVelocity().y
+                                 << projectile->getOwnerId();
+            }
+
+            SwordSlash *swordSlash = dynamic_cast<SwordSlash *>(damageEntity);
+            if (swordSlash) {
+                worldStatePacket << "SwordSlash"
+                                 << swordSlash->getId()
+                                 << swordSlash->getBounds().left
+                                 << swordSlash->getBounds().top
+                                 << swordSlash->getBounds().width
+                                 << swordSlash->getBounds().height
+                                 << swordSlash->getOwnerId();
+            }
+        }
+
+        networkServer.sendToClientUdp(client, worldStatePacket);
+    }
+}

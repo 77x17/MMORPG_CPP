@@ -19,4 +19,5 @@ Build/Client/Core/Client.o: Sources/Client/Core/Client.cpp \
  Sources/Client/Entities/RemoteProjectile.hpp \
  Sources/Client/Entities/RemoteSwordSlash.hpp \
  Sources/Client/Systems/Input/InputManager.hpp \
- Sources/Client/Systems/World/WorldCollision.hpp
+ Sources/Client/Systems/World/WorldCollision.hpp \
+ Sources/Client/Utils/Constants.hpp

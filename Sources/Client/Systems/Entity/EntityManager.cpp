@@ -3,6 +3,7 @@
 
 #include "Shared/Utils.hpp"
 #include "Shared/Constants.hpp"
+#include "Server/Utils/Constants.hpp"
 
 #include "Client/Snapshots/WorldSnapshot.hpp"
 

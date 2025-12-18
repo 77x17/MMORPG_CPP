@@ -7,7 +7,7 @@
 
 std::vector<Player *> InterestSystem::getVisiblePlayers(Player *center, const std::vector<Player *> &players) {
     std::vector<Player *> visiblePlayers;
-    for (Player *player : players) {
+    for (Player *player : players) if (player != nullptr) {
         if (distance(center->getPosition(), player->getPosition()) <= INTEREST_RADIUS) {
             visiblePlayers.push_back(player);
         }
@@ -17,7 +17,7 @@ std::vector<Player *> InterestSystem::getVisiblePlayers(Player *center, const st
 
 std::vector<DamageEntity *> InterestSystem::getVisibleDamageEntities(Player *center, const std::vector<DamageEntity *> damageEntities) {
     std::vector<DamageEntity *> visibleDamageEntities;
-    for (DamageEntity *damageEntity : damageEntities) {
+    for (DamageEntity *damageEntity : damageEntities) if (damageEntity != nullptr) {
         if (distance(center->getPosition(), damageEntity->getPosition()) <= INTEREST_RADIUS || damageEntity->getOwnerId() == center->getId()) {
             visibleDamageEntities.push_back(damageEntity);
         }

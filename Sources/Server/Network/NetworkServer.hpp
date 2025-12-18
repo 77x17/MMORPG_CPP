@@ -20,7 +20,7 @@ private:
     sf::UdpSocket      udp;
     sf::SocketSelector selector;
 
-    std::vector<ClientSession> clients;
+    std::vector<ClientSession>     clients;
 
     std::vector<NewClientEvent>    pendingNewClients;
     std::vector<NewInputEvent>     pendingInputs;

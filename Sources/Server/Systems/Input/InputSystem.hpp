@@ -1,18 +1,17 @@
 #pragma once
 
-#include <unordered_map>
-#include <vector>
-
-#include "Shared/InputState.hpp"
+class InputManager;
+class GameWorld;
+class PhysicsSystem;
+class WeaponSystem;
+class DamageEntity;
 
 class InputSystem {
 private:
-    std::unordered_map<int, std::vector<InputState>> inputQueues;
+    int nextProjectileId = 0;
 
 public:
-    void pushInput(int clientId, const InputState &input);
+    InputSystem() = default;
 
-    std::vector<InputState> & getQueue(int clientId);
-
-    void clearQueue(int clientId);
+    void processPlayerInputs(InputManager &inputManager, GameWorld &gameWorld, PhysicsSystem &physicsSystem, WeaponSystem &weaponSystem);
 };

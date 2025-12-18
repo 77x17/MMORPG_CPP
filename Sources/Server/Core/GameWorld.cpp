@@ -64,11 +64,15 @@ void GameWorld::update(const float &dt) {
     }
 }
 
-const std::vector<Player *> GameWorld::getPlayers() const {
+const std::vector<Player *> & GameWorld::getPlayers() const {
     return players;
 }
 
-const std::vector<DamageEntity *> GameWorld::getDamageEntities() const {
+std::vector<Player *> & GameWorld::getPlayers() {
+    return players;
+}
+
+const std::vector<DamageEntity *> & GameWorld::getDamageEntities() const {
     return damageEntities;
 }
 
@@ -85,7 +89,7 @@ std::vector<ChunkCoord> GameWorld::getChunkInRange(int clientId, const sf::Vecto
 }
 
 Player * GameWorld::getPlayer(int clientId) {
-    for (Player *player : players) {
+    for (Player *player : players) if (player != nullptr) {
         if (player->getId() == clientId) return player;
     }
     return nullptr;

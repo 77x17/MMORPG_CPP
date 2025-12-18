@@ -1,5 +1,7 @@
-#include "Server/Core/GameWorld.hpp"
 #include "Server/Core/Chunk/ChunkSystem.hpp"
+#include "Server/Core/Chunk/DebugChunkSyncSystem.hpp"
+#include "Server/Core/GameWorld.hpp"
+#include "Server/Core/GameWorldSynsSystem.hpp"
 
 #include "Server/Entities/Player.hpp"
 #include "Server/Entities/Projectile.hpp"
@@ -9,40 +11,31 @@
 
 #include "Server/Systems/Combat/CombatSystem.hpp"
 #include "Server/Systems/Combat/WeaponSystem.hpp"
+#include "Server/Systems/Input/InputManager.hpp"
 #include "Server/Systems/Input/InputSystem.hpp"
 #include "Server/Systems/Interest/InterestSystem.hpp"
 #include "Server/Systems/Inventory/InventorySystem.hpp"
 #include "Server/Systems/Inventory/InventorySyncSystem.hpp"
-#include "Server/Systems/Physics/WorldCollision.hpp"
 #include "Server/Systems/Physics/PhysicsSystem.hpp"
+#include "Server/Systems/Physics/WorldCollision.hpp"
+#include "Server/Systems/Physics/WorldCollisionSystem.hpp"
+#include "Server/Systems/Physics/WorldCollisionSyncSystem.hpp"
 
-constexpr float SEND_HZ      = 30.0f;
-constexpr float SEND_INTEVAL = 1.0f / SEND_HZ;
-constexpr float SERVER_HZ    = 60.0f;
-constexpr float SERVER_TICK  = 1.0f / SERVER_HZ;
+#include "Server/Utils/Constants.hpp"
 
 #include <iostream>
 
-// === For server ===
-void syncGameWorldFromClients(GameWorld &gameWorld, InputSystem &inputSystem, InventorySystem &inventorySystem, InventorySyncSystem &inventorySyncSystem, NetworkServer &networkServer, WorldCollision &worldCollision);
-void update(GameWorld &gameWorld, InputSystem &inputSystem, PhysicsSystem &physicsSystem, WeaponSystem &weaponSystem, CombatSystem &combatSystem);
-void loadCollisions(WorldCollision &worldCollision);
-// === For client ===
-void syncGameWorldToClients(GameWorld &gameWorld, InterestSystem &interestSystem, NetworkServer &networkServer);
-void sendWorldCollisionToClient(WorldCollision &worldCollision, NetworkServer &networkServer, int clientId);
-void sendDebugChunkToClients(GameWorld &gameWorld, NetworkServer &networkServer);
-
-void syncGameWorldFromClients(GameWorld &gameWorld, InputSystem &inputSystem, InventorySystem &inventorySystem, InventorySyncSystem &inventorySyncSystem, NetworkServer &networkServer, WorldCollision &worldCollision) {
+void syncGameWorldFromClients(GameWorld &gameWorld, InputManager &inputManager, InventorySystem &inventorySystem, InventorySyncSystem &inventorySyncSystem, NetworkServer &networkServer, WorldCollisionSyncSystem &worldCollisionSyncSystem) {
     std::vector<NewClientEvent> & newClientEvents = networkServer.fetchNewClients();
     if (newClientEvents.size()) {
         for (NewClientEvent &event : newClientEvents) {
             gameWorld.addPlayer(event.clientId);
-            inputSystem.clearQueue(event.clientId);
+            inputManager.clearQueue(event.clientId);
 
             inventorySyncSystem.syncInventoryToClient(event.clientId);
             inventorySyncSystem.syncEquipmentToClient(event.clientId);
 
-            sendWorldCollisionToClient(worldCollision, networkServer, event.clientId);
+            worldCollisionSyncSystem.syncToClient(event.clientId);
         }
         newClientEvents.clear();
     }
@@ -50,7 +43,7 @@ void syncGameWorldFromClients(GameWorld &gameWorld, InputSystem &inputSystem, In
     std::vector<NewInputEvent> & newInputEvents = networkServer.fetchInputs();
     if (newInputEvents.size()) {
         for (NewInputEvent &event : newInputEvents) {
-            inputSystem.pushInput(event.clientId, event.input);
+            inputManager.pushInput(event.clientId, event.input);
         }
         newInputEvents.clear();
     }
@@ -66,7 +59,8 @@ void syncGameWorldFromClients(GameWorld &gameWorld, InputSystem &inputSystem, In
     std::vector<MoveItemEvent> & moveItemEvents = networkServer.fetchMoveItems();
     if (moveItemEvents.size()) {
         for (MoveItemEvent &event : moveItemEvents) {
-            if (inventorySystem.moveItem(event.clientId, event.from, event.to)) {
+            Player *player = gameWorld.getPlayer(event.clientId);
+            if (inventorySystem.moveItem(player, event.from, event.to)) {
                 inventorySyncSystem.syncInventoryToClient(event.clientId);
             }
         }
@@ -76,151 +70,13 @@ void syncGameWorldFromClients(GameWorld &gameWorld, InputSystem &inputSystem, In
     std::vector<EquipItemEvent> & equipItemEvents = networkServer.fetchEquipItems();
     if (equipItemEvents.size()) {
         for (EquipItemEvent &event : equipItemEvents) {
-            if (inventorySystem.equipItem(event.clientId, event.fromInventory, event.toEquipment)) {
+            Player *player = gameWorld.getPlayer(event.clientId);
+            if (inventorySystem.equipItem(player, event.fromInventory, event.toEquipment)) {
                 inventorySyncSystem.syncInventoryToClient(event.clientId);
                 inventorySyncSystem.syncEquipmentToClient(event.clientId);
             }
         }
         equipItemEvents.clear();
-    }
-}
-
-int nextProjectileId = 0;
-
-void update(GameWorld &gameWorld, InputSystem &inputSystem, PhysicsSystem &physicsSystem, WeaponSystem &weaponSystem, CombatSystem &combatSystem) {
-    for (Player *player : gameWorld.getPlayers()) {
-        InputState latestInput;
-        std::vector<InputState> &inputQueue = inputSystem.getQueue(player->getId());
-
-        if (!inputQueue.empty()) {
-            latestInput = inputQueue.back();
-            inputSystem.clearQueue(player->getId());
-            player->lastProcessedInput = latestInput.seq;
-        }
-
-        physicsSystem.updatePlayer(*player, latestInput, SERVER_TICK);
-
-        if (DamageEntity *damageEntity = weaponSystem.tryFire(*player, latestInput)) {
-            damageEntity->setId(++nextProjectileId);
-            gameWorld.addDamageEntity(damageEntity);
-        }
-    }
-
-    physicsSystem.resolvePlayerCollisions(gameWorld.getPlayers());
-    combatSystem.handleCollision(gameWorld.getPlayers(), gameWorld.getDamageEntities());
-
-    gameWorld.update(SERVER_TICK);
-}
-
-void syncGameWorldToClients(GameWorld &gameWorld, InterestSystem &interestSystem, NetworkServer &networkServer) {
-    for (ClientSession &client : networkServer.getClients()) {
-        if (client.udpPort == 0) continue;
-
-        Player *currentPlayer = nullptr;
-        for (Player *player : gameWorld.getPlayers()) {
-            if (player->getId() == client.id) currentPlayer = player;
-        }
-        sf::Packet worldStatePacket;
-        worldStatePacket << "WorldState";
-        
-        std::vector<Player *> visiblePlayers = interestSystem.getVisiblePlayers(currentPlayer, gameWorld.getPlayersInChunk(currentPlayer->getPosition()));
-        worldStatePacket << (int)visiblePlayers.size();
-        for (Player *player : visiblePlayers) {
-            worldStatePacket << player->getId() 
-                             << player->getPosition().x 
-                             << player->getPosition().y 
-                             << player->getHealth() 
-                             << player->lastProcessedInput;
-        }
-
-        std::vector<DamageEntity *> visibleDamageEntities = interestSystem.getVisibleDamageEntities(currentPlayer, gameWorld.getDamageEntitiesInChunk(currentPlayer->getPosition()));
-        worldStatePacket << (int)visibleDamageEntities.size();
-        for (DamageEntity *damageEntity : visibleDamageEntities) {
-            Projectile *projectile = dynamic_cast<Projectile *>(damageEntity);
-            if (projectile) {
-                worldStatePacket << "Projectile"
-                                 << projectile->getId() 
-                                 << projectile->getPosition().x 
-                                 << projectile->getPosition().y 
-                                 << projectile->getVelocity().x
-                                 << projectile->getVelocity().y
-                                 << projectile->getOwnerId();
-            }
-
-            SwordSlash *swordSlash = dynamic_cast<SwordSlash *>(damageEntity);
-            if (swordSlash) {
-                worldStatePacket << "SwordSlash"
-                                 << swordSlash->getId()
-                                 << swordSlash->getBounds().left
-                                 << swordSlash->getBounds().top
-                                 << swordSlash->getBounds().width
-                                 << swordSlash->getBounds().height
-                                 << swordSlash->getOwnerId();
-            }
-        }
-
-        std::vector<ChunkCoord> chunks = gameWorld.getChunkInRange(currentPlayer->getId(), currentPlayer->getPosition());
-        worldStatePacket << (int)chunks.size();        
-        for (const ChunkCoord &chunk : chunks) {
-            worldStatePacket << chunk.getX() * CHUNK_SIZE
-                             << chunk.getY() * CHUNK_SIZE
-                             << CHUNK_SIZE
-                             << CHUNK_SIZE;
-        }
-
-        networkServer.sendToClientUdp(client, worldStatePacket);
-    }
-}
-
-void loadCollisions(WorldCollision &worldCollision) {
-    worldCollision.addStaticCollider({
-        { 300.0f, 300.0f },
-        { 100.0f, 100.0f }
-    });
-    worldCollision.addStaticCollider({
-        { 300.0f, 400.0f },
-        { 100.0f, 100.0f }
-    });
-    worldCollision.addStaticCollider({
-        { 450.0f, 300.0f },
-        { 100.0f, 100.0f }
-    });
-    worldCollision.addStaticCollider({
-        { 200.0f, 500.0f },
-        { 100.0f, 100.0f }
-    });
-}
-
-void sendWorldCollisionToClient(WorldCollision &worldCollision, NetworkServer &networkServer, int clientId) {
-    sf::Packet worldCollisionPacket;
-    worldCollisionPacket << "WorldCollision";
-
-    const std::vector<AABB> &colliders = worldCollision.getColliders();
-    worldCollisionPacket << static_cast<int>(colliders.size());
-    for (const AABB &box : colliders) {
-        worldCollisionPacket << box.position.x << box.position.y << box.size.x << box.size.y;
-    }
-
-    networkServer.sendToClientTcp(clientId, worldCollisionPacket);
-}
-
-void sendDebugChunkToClients(GameWorld &gameWorld, NetworkServer &networkServer) {
-    for (ClientSession &client : networkServer.getClients()) {
-        Player *player = gameWorld.getPlayer(client.id);
-        if (player == nullptr) continue;
-        
-        std::vector<ChunkCoord> chunks = gameWorld.getChunkInRange(player->getId(), player->getPosition());
-        if (chunks.size() == 0) continue;
-        
-        sf::Packet chunkPacket;
-        chunkPacket << "Chunk" << (int)chunks.size();  
-        for (const ChunkCoord &chunk : chunks) {
-            chunkPacket << chunk.getX() * CHUNK_SIZE
-                        << chunk.getY() * CHUNK_SIZE
-                        << CHUNK_SIZE
-                        << CHUNK_SIZE;
-        }
-        networkServer.sendToClientTcp(client.id, chunkPacket);
     }
 }
 
@@ -230,18 +86,25 @@ int main() {
         return -1;
     }
    
-    GameWorld           gameWorld;
-
-    CombatSystem        combatSystem;
-    WeaponSystem        weaponSystem;
-    InputSystem         inputSystem;
-    InterestSystem      interestSystem;
-    InventorySystem     inventorySystem(gameWorld);
-    InventorySyncSystem inventorySyncSystem(gameWorld, networkServer);
-    WorldCollision      worldCollision;
-    PhysicsSystem       physicsSystem(worldCollision);
+    GameWorld       gameWorld;
+    WorldCollision  worldCollision;
+    InputManager    inputManager;
     
-    loadCollisions(worldCollision);
+    CombatSystem         combatSystem;
+    WeaponSystem         weaponSystem;
+    InputSystem          inputSystem;
+    InterestSystem       interestSystem;
+    InventorySystem      inventorySystem;
+    PhysicsSystem        physicsSystem(worldCollision);
+    WorldCollisionSystem worldCollisionSystem(worldCollision);
+
+    
+    DebugChunkSyncSystem     debugChunkSyncSystem(gameWorld, networkServer);
+    GameWorldSyncSystem      gameWorldSyncSystem(gameWorld, networkServer, interestSystem);
+    InventorySyncSystem      inventorySyncSystem(gameWorld, networkServer);
+    WorldCollisionSyncSystem worldCollisionSyncSystem(worldCollision, networkServer);
+
+    worldCollisionSystem.loadStaticCollisions();
 
     sf::Clock clock, sendClock;
     float accumulator = 0.0f;
@@ -251,19 +114,25 @@ int main() {
 
         networkServer.poll();
 
-        syncGameWorldFromClients(gameWorld, inputSystem, inventorySystem, inventorySyncSystem, networkServer, worldCollision);
+        syncGameWorldFromClients(gameWorld, inputManager, inventorySystem, inventorySyncSystem, networkServer, worldCollisionSyncSystem);
 
         if (accumulator >= SERVER_TICK) {
             accumulator -= SERVER_TICK;
-            update(gameWorld, inputSystem, physicsSystem, weaponSystem, combatSystem);
-            
-            sendDebugChunkToClients(gameWorld, networkServer);
+
+            inputSystem.processPlayerInputs(inputManager, gameWorld, physicsSystem, weaponSystem);
+
+            physicsSystem.resolvePlayerCollisions(gameWorld.getPlayers());
+            combatSystem.handleCollision(gameWorld.getPlayers(), gameWorld.getDamageEntities());
+
+            gameWorld.update(SERVER_TICK);
         }
-
+        
         if (sendClock.getElapsedTime().asSeconds() >= SEND_INTEVAL) {
-            syncGameWorldToClients(gameWorld, interestSystem, networkServer);
-
             sendClock.restart();
+
+            gameWorldSyncSystem.syncToClients();
+
+            debugChunkSyncSystem.syncToClients();
         }
 
         sf::sleep(sf::milliseconds(1));

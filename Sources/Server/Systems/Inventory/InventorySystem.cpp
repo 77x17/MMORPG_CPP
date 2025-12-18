@@ -7,13 +7,7 @@
 #include "Server/Systems/Inventory/Inventory.hpp"
 #include "Server/Systems/Inventory/Equipment.hpp"
 
-InventorySystem::InventorySystem(GameWorld &_gameWorld) 
-: gameWorld(_gameWorld) {
-
-}
-
-bool InventorySystem::moveItem(int clientId, int from, int to) {
-    Player *player = gameWorld.getPlayer(clientId);
+bool InventorySystem::moveItem(Player *player, int from, int to) {
     if (player == nullptr) return false;
 
     Inventory &inventory = player->getInventory();
@@ -24,8 +18,7 @@ bool InventorySystem::moveItem(int clientId, int from, int to) {
     return false;
 }
 
-bool InventorySystem::equipItem(int clientId, int fromInventory, int toEquipment) {
-    Player *player = gameWorld.getPlayer(clientId);
+bool InventorySystem::equipItem(Player *player, int fromInventory, int toEquipment) {
     if (player == nullptr) return false;
 
     Inventory &inventory = player->getInventory();
