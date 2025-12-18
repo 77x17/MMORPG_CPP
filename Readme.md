@@ -1,181 +1,150 @@
-# C++ Client–Server Multiplayer Game Prototype
+# C++ Client–Server Multiplayer Game Engine
 
-This repository contains a C++ client–server multiplayer game prototype developed as a personal learning and experimentation project.
-The project focuses on implementing core systems commonly found in real-time online games, with particular attention to
-networking, server-authoritative simulation, state synchronization, and modular software architecture.
+![Language](https://img.shields.io/badge/language-C%2B%2B17-blue.svg)
+![Library](https://img.shields.io/badge/library-SFML-green.svg)
+![Platform](https://img.shields.io/badge/platform-Windows-lightgrey.svg)
 
-Visual fidelity and game content are considered secondary to system correctness and architectural clarity.
+A robust prototype of a real-time multiplayer game engine built from scratch using C++ and SFML. This project demonstrates core concepts of network programming, server-authoritative architecture, state synchronization, and custom game physics.
 
----
-
-## Project Objectives
-
-The primary objectives of this project are to study, design, and implement:
-
-- Client–server architecture for real-time multiplayer games
-- Server-authoritative world simulation
-- Client-side prediction and state reconciliation
-- Snapshot-based world synchronization
-- Modular and extensible game system architecture
-- Basic persistence mechanisms for player-related data
-
-This project is not intended to be a complete or production-ready game.
+Unlike typical game projects that rely on Unity or Unreal, this project implements the low-level systems manually to understand the "how" and "why" behind multiplayer game architecture.
 
 ---
 
-## Implemented Systems
+## 🌟 Key Features
 
-### Networking
+### 📡 Networking & Architecture
+- **Server-Authoritative Model:** The server owns the game state; clients are merely "dumb" terminals that send inputs and render the state.
+- **Protocol:** Custom packet handling over TCP/UDP sockets (using SFML Network).
+- **Snapshot Synchronization:** The server broadcasts world snapshots to clients at a fixed tick rate.
+- **Interest Management:** Bandwidth optimization by only sending entity data relevant to specific clients (based on proximity/chunks).
+- **Event System:** Discrete event handling for actions like `EquipItem`, `MoveItem`, `NewClient`, `DeleteClient`.
 
-- Client–server communication using both TCP and UDP
-- Server-managed client connection lifecycle
-- Unique client identifier assignment on connection
-- Client-to-server input transmission
-- Server-to-client world snapshot broadcasting
-- Snapshot-based synchronization model
+### 🎮 Client-Side Simulation
+- **Client-Side Prediction:** Immediate local movement response to hide latency.
+- **Reconciliation:** Correcting local state if it diverges from the authoritative server snapshot.
+- **Entity Interpolation:** Smooth rendering of remote entities between snapshot updates.
+- **UI & Rendering:**
+  - Inventory UI with Drag & Drop support.
+  - Debug rendering layer (hitboxes, chunks, vectors).
 
-### Client-side Simulation
-
-- Client-side movement prediction
-- Input buffering and reconciliation against authoritative snapshots
-- Snapshot interpolation infrastructure
-- Decoupling of simulation logic and rendering logic
-- Camera system following the local player using SFML views
-
-### Rendering
-
-- Rendering implemented using SFML
-- Clear separation between:
-  - World-space rendering
-  - Screen-space (UI) rendering
-- Dedicated rendering pipeline for debug visualization
-- Minimalistic visual representations intended for development and debugging
-
-### Entity Management
-
-- Centralized client-side entity management system
-- Management of the following remote entities:
-  - Player characters
-  - Projectiles
-  - Melee attack entities (sword slashes)
-- Snapshot application for entity state updates
-- Per-frame entity update logic on the client
-
-### Server-side Game Logic
-
-- Fully server-authoritative game world simulation
-- Input processing pipeline on the server
-- Combat system handling damage and attack resolution
-- Interest management system for limiting irrelevant updates
-- Event-based server architecture
-- Entity lifetime creation, update, and destruction
-
-### Inventory and Equipment System
-
-- Slot-based inventory system
-- Dedicated equipment slots for player characters
-- Inventory and equipment logic implemented exclusively on the server
-- Inventory and equipment state synchronized to clients
-- Client-side inventory user interface
-- Drag-and-drop interaction for inventory management on the client
-
-### Data Persistence
-
-- Player inventory and equipment persisted using JSON files
-- One JSON file per player
-- Load and save operations handled on the server
-- Persistence designed for simplicity and prototyping purposes
+### ⚔️ Gameplay & Systems
+- **Combat System:**
+  - Melee attacks (Sword Slashes) with hitbox detection.
+  - Projectile system for ranged attacks.
+  - Health and Damage handling on the server.
+- **Inventory & Equipment:**
+  - Slot-based inventory managed strictly on the server to prevent cheating.
+  - Equipment slots that modify player stats/appearance.
+  - JSON-based persistence for player data (Inventory/Stats).
+- **Physics & World:**
+  - **Chunk System:** Infinite/Tiled world management (loading/unloading chunks).
+  - **AABB Collision:** Custom axis-aligned bounding box collision detection and resolution.
+  - **Physics System:** Gravity, velocity, and friction handling.
 
 ---
 
-## Directory Structure
+## 📂 Project Structure
+
+The project is divided into Client, Server, and Shared codebases.
 
 ```bash
 .
-├── Assets/
-│   ├── Roboto_Mono.ttf
-│   └── Data/
-│       └── Players/
-│           ├── player_0.json
-│           ├── player_1.json
-│           └── player_2.json
-│
-├── Build/
+├── Assets/                 # Fonts and JSON Data (Player persistence)
+├── Build/                  # Compiled executables
 │   ├── GameClient.exe
-│   ├── GameServer.exe
-│   ├── Client/
-│   └── Server/
-│
+│   └── GameServer.exe
 ├── Sources/
-│   ├── Client/
-│   │   ├── Networking, prediction, rendering, and UI systems
-│   │   ├── Client-side inventory and equipment handling
-│   │   └── Snapshot definitions and remote entity representations
+│   ├── Client/             # Client-side Logic
+│   │   ├── Core/           # Main loop, Renderer
+│   │   ├── Debug/          # Debug visualization tools
+│   │   ├── Entities/       # Remote representations (interpolated)
+│   │   ├── Inventory/      # UI logic for items
+│   │   ├── Network/        # Socket handling & Snapshot parsing
+│   │   ├── Snapshots/      # Data structures for received world state
+│   │   ├── Systems/        # Prediction, Input, Interpolation
+│   │   └── UI/             # User Interface elements
 │   │
-│   ├── Server/
-│   │   ├── Game world and server-side systems
-│   │   ├── Combat, input processing, and interest management
-│   │   ├── Inventory and equipment logic
-│   │   └── Network server implementation
+│   ├── Server/             # Server-side Logic
+│   │   ├── Core/           # Game Loop, World State
+│   │   ├── Chunk/          # Map management & Spatial hashing
+│   │   ├── Entities/       # Authoritative Entity logic (AI, Player)
+│   │   ├── Network/        # Packet broadcasting & Event handling
+│   │   └── Systems/        # ECS-style systems
+│   │       ├── Combat/     # Damage calculation
+│   │       ├── Input/      # Processing client requests
+│   │       ├── Interest/   # Culling network traffic
+│   │       ├── Inventory/  # Item logic & Persistence
+│   │       └── Physics/    # Collision & Movement
 │   │
-│   └── Shared/
-│       ├── Shared constants
-│       ├── Input state definitions
-│       └── Utility functions
-│
-└── Makefile
-````
----
-
-## Build and Execution
-
-### Requirements
-
-- C++17 compatible compiler
-- SFML library
-- Windows environment
-  - MSYS2 / MinGW is recommended
-
-### Build
-
-```bash
-make
-````
-
-### Run
-
-```bash
-Build/GameServer.exe
-Build/GameClient.exe
+│   └── Shared/             # Common Utils, Constants, Math, AABB
+└── Makefile                # Build configuration
 ```
 
 ---
 
-## Current Limitations
+## 🛠️ Build & Installation
 
-* No map loading or tile-based world representation
-* No collision detection or resolution system
-* No non-player character (NPC) or AI logic
-* Persistence based solely on JSON files (no database integration)
-* Visuals intended only for debugging and development
-* No authentication, encryption, or security mechanisms
+### Prerequisites
+- **Compiler:** g++ (MinGW-w64 recommended) supporting C++17.
+- **Library:** SFML 2.5+.
+- **Make:** GNU Make.
+
+### Compilation
+The project uses a Makefile to handle separate builds for Client and Server.
+
+```bash
+# Build both Client and Server
+make
+
+# Clean build artifacts
+make clean
+```
+
+### Running the Game
+1. **Start the Server** (Must run first):
+   ```bash
+   ./Build/GameServer.exe
+   ```
+2. **Start one or multiple Clients**:
+   ```bash
+   ./Build/GameClient.exe
+   ```
 
 ---
 
-## Future Work
+## 🧠 What I Learned & Engineering Challenges
 
-* Tile-based or chunk-based map system
-* Collision detection and resolution
-* NPC and enemy AI systems
-* Skill and ability framework
-* Improved snapshot interpolation and smoothing
-* Database-backed persistence layer
-* Login, authentication, and session management
+Developing this engine provided deep insights into systems programming:
+
+1.  **Latency Compensation Techniques:**
+    *   *Challenge:* Without prediction, movement feels sluggish.
+    *   *Solution:* Implemented Client-side Prediction and Reconciliation to store input history and replay it when server correction arrives.
+
+2.  **Bandwidth Optimization (Interest Management):**
+    *   *Challenge:* Sending the entire world state to every player kills performance.
+    *   *Solution:* Implemented a `ChunkSystem` and `InterestSystem` to only sync entities within the player's view range.
+
+3.  **Memory Management & Pointers:**
+    *   Extensive use of smart pointers and raw pointers for Entity management to avoid memory leaks while maintaining performance in the game loop.
+
+4.  **Concurrency & Sockets:**
+    *   Handling non-blocking sockets and ensuring the server processes inputs from multiple clients fairly within a fixed timestep tick.
+
+5.  **Data Persistence:**
+    *   Designing a JSON serialization system to save/load player states (Inventory, Position) securely on the server side.
 
 ---
 
-## Notes
+## 🚀 Roadmap & Future Work
 
-This project prioritizes architectural soundness and correctness of core systems over gameplay content.
-The codebase is intentionally structured to remain readable, modular, and extensible, enabling further experimentation
-with multiplayer game programming concepts and techniques.
+- [ ] **Database Integration:** Migrate from JSON files to SQLite/MySQL for robust data handling.
+- [ ] **Advanced AI:** Implement Behavior Trees or State Machines for smarter Enemies.
+- [ ] **Security:** Add handshake authentication and basic packet encryption.
+- [ ] **Asset Pipeline:** Replace debug primitives with Sprite animations and Tilemaps.
+- [ ] **Chat System:** Implement a TCP-based chat overlaid on the game.
+
+---
+
+## 📝 License
+
+This project is for educational purposes. Feel free to use the code to learn about multiplayer game architecture.
