@@ -5,7 +5,7 @@
 class Entity {
 protected:
     int          id;
-    sf::Vector2f position;
+    sf::Vector2f position = { 0.0f, 0.0f };
     sf::Vector2f oldPosition;
     sf::Vector2f size;
     bool         destroyed = false;

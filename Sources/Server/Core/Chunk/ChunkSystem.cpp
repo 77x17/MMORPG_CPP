@@ -2,12 +2,31 @@
 
 #include "Server/Entities/Player.hpp"
 #include "Server/Entities/DamageEntity.hpp"
+#include "Server/Entities/Enemy.hpp"
 
 ChunkCoord ChunkSystem::getChunk(const sf::Vector2f& pos) const {
     return {
         static_cast<int>(pos.x) / CHUNK_SIZE,
         static_cast<int>(pos.y) / CHUNK_SIZE
     };
+}
+
+std::vector<ChunkCoord> ChunkSystem::getChunkInRange(int clientId, const sf::Vector2f& position, int range) {
+    std::vector<ChunkCoord> result;
+    ChunkCoord center = getChunk(position);
+
+    if (center == previousChunk[clientId]) {
+        return std::vector<ChunkCoord>();
+    }
+    previousChunk[clientId] = center;
+
+    for (int dx = -range; dx <= range; ++dx) {
+        for (int dy = -range; dy <= range; ++dy) {
+            ChunkCoord chunk( center.getX() + dx, center.getY() + dy );
+            result.push_back(chunk);
+        }
+    }
+    return result;
 }
 
 void ChunkSystem::addPlayer(Player* player) {
@@ -30,6 +49,22 @@ void ChunkSystem::updatePlayer(Player* player, const sf::Vector2f& oldPosition) 
     }
 }
 
+std::vector<Player*> ChunkSystem::getPlayersInRange(const sf::Vector2f& position, int range) const {
+    std::vector<Player*> result;
+    ChunkCoord center = getChunk(position);
+
+    for (int dx = -range; dx <= range; ++dx) {
+        for (int dy = -range; dy <= range; ++dy) {
+            ChunkCoord chunk( center.getX() + dx, center.getY() + dy );
+            auto it = playerChunks.find(chunk);
+            if (it != playerChunks.end()) {
+                result.insert(result.end(), it->second.begin(), it->second.end());
+            }
+        }
+    }
+    return result;
+}
+
 void ChunkSystem::addDamageEntity(DamageEntity* entity) {
     damageEntityChunks[getChunk(entity->getPosition())].insert(entity);
 }
@@ -49,22 +84,6 @@ void ChunkSystem::updateDamageEntity(DamageEntity* entity, const sf::Vector2f& o
     }
 }
 
-std::vector<Player*> ChunkSystem::getPlayersInRange(const sf::Vector2f& position, int range) const {
-    std::vector<Player*> result;
-    ChunkCoord center = getChunk(position);
-
-    for (int dx = -range; dx <= range; ++dx) {
-        for (int dy = -range; dy <= range; ++dy) {
-            ChunkCoord chunk( center.getX() + dx, center.getY() + dy );
-            auto it = playerChunks.find(chunk);
-            if (it != playerChunks.end()) {
-                result.insert(result.end(), it->second.begin(), it->second.end());
-            }
-        }
-    }
-    return result;
-}
-
 std::vector<DamageEntity*> ChunkSystem::getDamageEntitiesInRange(const sf::Vector2f& position, int range) const {
     std::vector<DamageEntity*> result;
     ChunkCoord center = getChunk(position);
@@ -81,19 +100,37 @@ std::vector<DamageEntity*> ChunkSystem::getDamageEntitiesInRange(const sf::Vecto
     return result;
 }
 
-std::vector<ChunkCoord> ChunkSystem::getChunkInRange(int clientId, const sf::Vector2f& position, int range) {
-    std::vector<ChunkCoord> result;
-    ChunkCoord center = getChunk(position);
+void ChunkSystem::addEnemy(Enemy* enemy) {
+    ChunkCoord chunk = getChunk(enemy->getPosition());
+    enemyChunks[chunk].insert(enemy);
+}
 
-    if (center == previousChunk[clientId]) {
-        return std::vector<ChunkCoord>();
+void ChunkSystem::removeEnemy(Enemy* enemy) {
+    ChunkCoord chunk = getChunk(enemy->getPosition());
+    enemyChunks[chunk].erase(enemy);
+}
+
+void ChunkSystem::updateEnemy(Enemy* enemy, const sf::Vector2f& oldPosition) {
+    ChunkCoord oldChunk = getChunk(oldPosition);
+    ChunkCoord newChunk = getChunk(enemy->getPosition());
+
+    if (!(oldChunk == newChunk)) {
+        enemyChunks[oldChunk].erase(enemy);
+        enemyChunks[newChunk].insert(enemy);
     }
-    previousChunk[clientId] = center;
+}
+
+std::vector<Enemy*> ChunkSystem::getEnemiesInRange(const sf::Vector2f& position, int range) const {
+    std::vector<Enemy*> result;
+    ChunkCoord center = getChunk(position);
 
     for (int dx = -range; dx <= range; ++dx) {
         for (int dy = -range; dy <= range; ++dy) {
             ChunkCoord chunk( center.getX() + dx, center.getY() + dy );
-            result.push_back(chunk);
+            auto it = enemyChunks.find(chunk);
+            if (it != enemyChunks.end()) {
+                result.insert(result.end(), it->second.begin(), it->second.end());
+            }
         }
     }
     return result;

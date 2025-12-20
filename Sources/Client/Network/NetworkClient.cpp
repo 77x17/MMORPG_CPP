@@ -182,6 +182,17 @@ void NetworkClient::pollReceive() {
                             std::cout << "[Network] - Unknown type in DamageEntity: " << type << '\n';
                         }
                     }
+
+                    int enemyCount; packet >> enemyCount;
+                    worldSnapshot.enemies.clear();
+                    for (int i = 0; i < enemyCount; ++i) {
+                        EnemySnapshot enemySnapshot;
+                        packet >> enemySnapshot.id
+                               >> enemySnapshot.x
+                               >> enemySnapshot.y
+                               >> enemySnapshot.hp;
+                        worldSnapshot.enemies.push_back(enemySnapshot);
+                    }
                 }
                 else {
                     std::cout << "[Network] - UDP packet type: " << type << '\n';

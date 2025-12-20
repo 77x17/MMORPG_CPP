@@ -20,4 +20,5 @@ public:
     bool canHitMultiple() const override;
 
     void onHit(Player &player) override;
+    void onHit(Enemy  &enemy ) override;
 };

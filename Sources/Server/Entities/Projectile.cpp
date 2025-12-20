@@ -3,6 +3,7 @@
 #include "Shared/Constants.hpp"
 #include "Shared/Utils.hpp"
 
+#include "Server/Entities/Enemy.hpp"
 #include "Server/Entities/Player.hpp"
 
 Projectile::Projectile(int _ownerId, const sf::Vector2f &startPosition, const sf::Vector2f &direction) 
@@ -34,4 +35,10 @@ void Projectile::onHit(Player &player) {
     player.takeDamage(damage);
     sf::Vector2f direction = normalize(velocity);
     player.applyImpulse(direction * knockbackStrength);
+}
+
+void Projectile::onHit(Enemy &enemy) {
+    enemy.takeDamage(damage);
+    sf::Vector2f direction = normalize(velocity);
+    enemy.applyImpulse(direction * knockbackStrength);
 }

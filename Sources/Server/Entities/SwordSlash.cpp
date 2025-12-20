@@ -2,6 +2,7 @@
 
 #include "Shared/Utils.hpp"
 
+#include "Server/Entities/Enemy.hpp"
 #include "Server/Entities/Player.hpp"
 
 SwordSlash::SwordSlash(int _ownerId, const sf::Vector2f &startPosition, const sf::Vector2f &_direction) 
@@ -43,4 +44,11 @@ void SwordSlash::onHit(Player &player) {
 
     sf::Vector2f direction = normalize(player.getPosition() - position);
     player.applyImpulse(direction * knockbackStrength);
+}
+
+void SwordSlash::onHit(Enemy &enemy) {
+    enemy.takeDamage(damage);
+
+    sf::Vector2f direction = normalize(enemy.getPosition() - position);
+    enemy.applyImpulse(direction * knockbackStrength);
 }

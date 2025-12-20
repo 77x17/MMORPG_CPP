@@ -17,20 +17,18 @@ Player::Player(int _id, const sf::Vector2f &startPosition)
 
 void Player::update(const float &dt) {
     if (isDestroyed()) {
-        health      = maxHealth;
-        oldPosition = position;
-        position    = spawnPosition;
-        destroyed   = false;
+        respawn();
     }
 
     if (projectileCooldownTimer > 0) projectileCooldownTimer -= dt;
 
-    constexpr float DECAY = 15.0f;
-    impulse *= std::exp(-DECAY * dt);
+    decayImpulse(dt);
+}
 
-    if (fabs(impulse.x) < 0.1f && fabs(impulse.y) < 0.1f) {
-        impulse = {0.0f, 0.0f};
-    }
+void Player::respawn() {
+    destroyed = false;
+    health    = maxHealth;
+    setPosition(spawnPosition);
 }
 
 void Player::takeDamage(int amount) {
@@ -47,6 +45,15 @@ void Player::applyImpulse(const sf::Vector2f &_impulse) {
     impulse += _impulse;
 }
 
+void Player::decayImpulse(const float &dt) {
+    constexpr float DECAY = 15.0f;
+    impulse *= std::exp(-DECAY * dt);
+
+    if (fabs(impulse.x) < 0.1f && fabs(impulse.y) < 0.1f) {
+        impulse = { 0.0f, 0.0f };
+    }
+}
+
 int Player::getHealth() const {
     return health;
 }
@@ -57,6 +64,10 @@ const sf::Vector2f & Player::getOldShootDir() const {
 
 const sf::Vector2f & Player::getImpulse() const {
     return impulse;
+}
+
+const float & Player::getProjectileCooldownTimer() const {
+    return projectileCooldownTimer;
 }
 
 Inventory & Player::getInventory() {
@@ -77,4 +88,8 @@ void Player::setOldShootDir(const sf::Vector2f &newPosition) {
 
 void Player::setVelocity(const sf::Vector2f &newVelocity) {
     velocity = newVelocity;
+}
+
+void Player::resetProjectileCooldownTimer() {
+    projectileCooldownTimer = PROJECTILE_COOLDOWN_TIME;
 }

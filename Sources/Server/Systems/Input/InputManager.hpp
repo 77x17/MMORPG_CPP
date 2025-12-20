@@ -7,12 +7,16 @@
 
 class InputManager {
 private:
-    std::unordered_map<int, std::vector<InputState>> inputQueues;
+    std::unordered_map<int, std::vector<InputState>> clientQueues;
+    std::unordered_map<int, std::vector<InputState>> enemyQueues;
 
 public:
-    void pushInput(int clientId, const InputState &input);
+    void pushClientInput(int clientId, const InputState &input);
+    void pushEnemyInput(int enemyId, const InputState &input);
 
-    std::vector<InputState> & getQueue(int clientId);
+    std::vector<InputState> & getClientQueue(int clientId);
+    std::vector<InputState> & getEnemyQueue(int enemyId);
 
-    void clearQueue(int clientId);
+    void clearClientQueue(int clientId);
+    void clearEnemyQueue(int enemyId);
 };

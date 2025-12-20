@@ -8,7 +8,7 @@
 #include "Client/Snapshots/WorldSnapshot.hpp"
 
 void EntityManager::applySnapshot(const WorldSnapshot &snapshot, int clientId, std::vector<InputState> &pendingInputs) {
-    std::unordered_map<int, RemotePlayer> newPlayers;
+    std::unordered_map<int, RemotePlayer> newRemotePlayers;
     for (const PlayerSnapshot &playerSnapshot : snapshot.players) {
         RemotePlayer remotePlayer;
         remotePlayer.id             = playerSnapshot.id;
@@ -45,11 +45,12 @@ void EntityManager::applySnapshot(const WorldSnapshot &snapshot, int clientId, s
             }
         }
 
-        newPlayers[remotePlayer.id] = remotePlayer;
+        newRemotePlayers[remotePlayer.id] = remotePlayer;
     }
-    remotePlayers.swap(newPlayers);
+    remotePlayers.swap(newRemotePlayers);
 
-    std::unordered_map<int, RemoteProjectile> newProjectiles;
+
+    std::unordered_map<int, RemoteProjectile> newRemoteProjectiles;
     for (const ProjectileSnapshot &projectilesSnapshot : snapshot.projectiles) {
         RemoteProjectile remoteProjectile;
         remoteProjectile.id             = projectilesSnapshot.id;
@@ -65,18 +66,19 @@ void EntityManager::applySnapshot(const WorldSnapshot &snapshot, int clientId, s
             remoteProjectile.localPosition = remoteProjectile.serverPosition;
         }
 
-        newProjectiles[remoteProjectile.id] = remoteProjectile;
+        newRemoteProjectiles[remoteProjectile.id] = remoteProjectile;
     }
 
-    for (auto &[id, remoteProjectile] : newProjectiles) {
+    for (auto &[id, remoteProjectile] : newRemoteProjectiles) {
         remoteProjectiles[id] = remoteProjectile;
     }
 
     for (auto it = remoteProjectiles.begin(); it != remoteProjectiles.end(); ) {
-        it = ((newProjectiles.count(it->first) == 0) ? remoteProjectiles.erase(it) : ++it);
+        it = ((newRemoteProjectiles.count(it->first) == 0) ? remoteProjectiles.erase(it) : ++it);
     }
 
-    std::unordered_map<int, RemoteSwordSlash> newSwordSlashs;
+
+    std::unordered_map<int, RemoteSwordSlash> newRemoteSwordSlashs;
     for (const SwordSlashSnapshot &swordSlashSnapshot : snapshot.swordSlashs) {
         RemoteSwordSlash remoteSwordSlash;
         remoteSwordSlash.id             = swordSlashSnapshot.id;
@@ -87,16 +89,36 @@ void EntityManager::applySnapshot(const WorldSnapshot &snapshot, int clientId, s
 
         remoteSwordSlash.localPosition = remoteSwordSlash.serverPosition;
 
-        newSwordSlashs[remoteSwordSlash.id] = remoteSwordSlash;
+        newRemoteSwordSlashs[remoteSwordSlash.id] = remoteSwordSlash;
     }
 
-    for (auto &[id, remoteSwordSlash] : newSwordSlashs) {
+    for (auto &[id, remoteSwordSlash] : newRemoteSwordSlashs) {
         remoteSwordSlashs[id] = remoteSwordSlash;
     }
 
     for (auto it = remoteSwordSlashs.begin(); it != remoteSwordSlashs.end(); ) {
-        it = ((newSwordSlashs.count(it->first) == 0) ? remoteSwordSlashs.erase(it) : ++it);
+        it = ((newRemoteSwordSlashs.count(it->first) == 0) ? remoteSwordSlashs.erase(it) : ++it);
     }
+
+
+    std::unordered_map<int, RemoteEnemy> newRemoteEnemies;
+    for (const EnemySnapshot &enemySnapshot : snapshot.enemies) {
+        RemoteEnemy remoteEnemy;
+        remoteEnemy.id             = enemySnapshot.id;
+        remoteEnemy.serverPosition = { enemySnapshot.x, enemySnapshot.y };
+        remoteEnemy.serverVelocity = { 0.0f, 0.0f };
+        remoteEnemy.hp             = enemySnapshot.hp;
+
+        if (remoteEnemies.count(remoteEnemy.id)) {
+            remoteEnemy.localPosition = remoteEnemies[remoteEnemy.id].localPosition;
+        }
+        else {
+            remoteEnemy.localPosition = remoteEnemy.serverPosition;
+        }
+
+        newRemoteEnemies[remoteEnemy.id] = remoteEnemy;
+    }
+    remoteEnemies.swap(newRemoteEnemies);
 }
 
 void EntityManager::update(const float &dt, int clientId) {
@@ -109,6 +131,14 @@ void EntityManager::update(const float &dt, int clientId) {
         remoteProjectile.localPosition += remoteProjectile.velocity * dt;
         remoteProjectile.localPosition = lerp(remoteProjectile.localPosition, remoteProjectile.serverPosition, 0.5f);
     }
+
+    for (auto &[id, remoteEnemy] : remoteEnemies) {
+        remoteEnemy.localPosition = lerp(remoteEnemy.localPosition, remoteEnemy.serverPosition, 0.2f);
+    }
+}
+
+const std::unordered_map<int, RemoteEnemy> & EntityManager::getEnemies() const {
+    return remoteEnemies;
 }
 
 const std::unordered_map<int, RemotePlayer> & EntityManager::getPlayers() const {

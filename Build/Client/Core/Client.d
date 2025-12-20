@@ -11,11 +11,13 @@ Build/Client/Core/Client.o: Sources/Client/Core/Client.cpp \
  Sources/Client/Snapshots/InventorySnapshot.hpp \
  Sources/Client/Snapshots/WorldCollisionSnapshot.hpp \
  Sources/Client/Snapshots/WorldSnapshot.hpp \
+ Sources/Client/Snapshots/EnemySnapshot.hpp \
  Sources/Client/Snapshots/PlayerSnapshot.hpp \
  Sources/Client/Snapshots/ProjectileSnapshot.hpp \
  Sources/Client/Snapshots/SwordSlashSnapshot.hpp \
  Sources/Client/Systems/Entity/EntityManager.hpp \
- Sources/Shared/InputState.hpp Sources/Client/Entities/RemotePlayer.hpp \
+ Sources/Shared/InputState.hpp Sources/Client/Entities/RemoteEnemy.hpp \
+ Sources/Client/Entities/RemotePlayer.hpp \
  Sources/Client/Entities/RemoteProjectile.hpp \
  Sources/Client/Entities/RemoteSwordSlash.hpp \
  Sources/Client/Systems/Input/InputManager.hpp \

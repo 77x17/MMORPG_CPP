@@ -2,6 +2,7 @@
 
 #include "Server/Entities/Entity.hpp"
 
+class Enemy;
 class Player;
 
 class DamageEntity : public Entity {
@@ -23,4 +24,5 @@ public:
     virtual bool canHitMultiple() const = 0;
     
     virtual void onHit(Player &player) = 0;
+    virtual void onHit(Enemy  &enemy) = 0;
 };

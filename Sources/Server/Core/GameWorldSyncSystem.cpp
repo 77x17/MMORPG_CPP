@@ -4,6 +4,7 @@
 #include "Server/Network/NetworkServer.hpp"
 #include "Server/Systems/Interest/InterestSystem.hpp"
 
+#include "Server/Entities/Enemy.hpp"
 #include "Server/Entities/Player.hpp"
 #include "Server/Entities/Projectile.hpp"
 #include "Server/Entities/SwordSlash.hpp"
@@ -24,7 +25,7 @@ void GameWorldSyncSystem::syncToClients() {
         worldStatePacket << "WorldState";
         
         std::vector<Player *> visiblePlayers = interestSystem.getVisiblePlayers(currentPlayer, gameWorld.getPlayersInChunk(currentPlayer->getPosition()));
-        worldStatePacket << (int)visiblePlayers.size();
+        worldStatePacket << static_cast<int>(visiblePlayers.size());
         for (Player *player : visiblePlayers) {
             worldStatePacket << player->getId() 
                              << player->getPosition().x 
@@ -34,7 +35,7 @@ void GameWorldSyncSystem::syncToClients() {
         }
 
         std::vector<DamageEntity *> visibleDamageEntities = interestSystem.getVisibleDamageEntities(currentPlayer, gameWorld.getDamageEntitiesInChunk(currentPlayer->getPosition()));
-        worldStatePacket << (int)visibleDamageEntities.size();
+        worldStatePacket << static_cast<int>(visibleDamageEntities.size());
         for (DamageEntity *damageEntity : visibleDamageEntities) {
             Projectile *projectile = dynamic_cast<Projectile *>(damageEntity);
             if (projectile) {
@@ -57,6 +58,15 @@ void GameWorldSyncSystem::syncToClients() {
                                  << swordSlash->getBounds().height
                                  << swordSlash->getOwnerId();
             }
+        }
+        
+        std::vector<Enemy *> visibleEnemy = interestSystem.getVisibleEnemies(currentPlayer, gameWorld.getEnemiesInChunk(currentPlayer->getPosition()));
+        worldStatePacket << static_cast<int>(visibleEnemy.size());
+        for (Enemy *enemy : visibleEnemy) {
+            worldStatePacket << enemy->getId()
+                             << enemy->getPosition().x
+                             << enemy->getPosition().y
+                             << enemy->getHealth();
         }
 
         networkServer.sendToClientUdp(client, worldStatePacket);

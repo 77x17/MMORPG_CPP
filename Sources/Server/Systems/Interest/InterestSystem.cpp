@@ -2,6 +2,7 @@
 
 #include "Shared/Utils.hpp"
 
+#include "Server/Entities/Enemy.hpp"
 #include "Server/Entities/Player.hpp"
 #include "Server/Entities/DamageEntity.hpp"
 
@@ -23,4 +24,14 @@ std::vector<DamageEntity *> InterestSystem::getVisibleDamageEntities(Player *cen
         }
     }
     return visibleDamageEntities;
+}
+
+std::vector<Enemy *> InterestSystem::getVisibleEnemies(Player *center, const std::vector<Enemy* > enemies) {
+    std::vector<Enemy *> visibleEnemies;
+    for (Enemy *enemy : enemies) if (enemy != nullptr) {
+        if (distance(center->getPosition(), enemy->getPosition()) <= INTEREST_RADIUS) {
+            visibleEnemies.push_back(enemy);
+        }
+    }
+    return visibleEnemies;
 }

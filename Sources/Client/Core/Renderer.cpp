@@ -54,6 +54,19 @@ void Renderer::updateCamera(const EntityManager &entityManager, int clientId) {
     worldView.setCenter(smooth);
 }
 
+void Renderer::drawEnemies(const EntityManager &entityManager) {
+    sf::RectangleShape enemiesShape({ 40, 40 }); enemiesShape.setOrigin(20, 20);
+    for (auto &[id, enemy] : entityManager.getEnemies()) {
+        enemiesShape.setPosition(enemy.localPosition);
+        enemiesShape.setFillColor(sf::Color::Black);
+
+        enemiesShape.setOutlineColor(sf::Color::White);
+        enemiesShape.setOutlineThickness(1.0f);
+
+        window.draw(enemiesShape);
+    }
+}
+
 void Renderer::drawPlayers(const EntityManager &entityManager, int clientId) {
     sf::RectangleShape playerShape({ 40, 40 }); playerShape.setOrigin(20, 20);
     for (auto &[id, player] : entityManager.getPlayers()) {
@@ -72,7 +85,7 @@ void Renderer::drawPlayers(const EntityManager &entityManager, int clientId) {
     }
 }
 
-void Renderer::drawWorld(const EntityManager &entityManager, int clientId) {
+void Renderer::drawDamageEntities(const EntityManager &entityManager, int clientId) {
     sf::CircleShape projectileShape(5); projectileShape.setOrigin(5, 5);
     for (auto &[id, projectile] : entityManager.getProjectiles()) {
         projectileShape.setPosition(projectile.localPosition);
@@ -91,9 +104,24 @@ void Renderer::drawWorld(const EntityManager &entityManager, int clientId) {
 
         window.draw(swordSlashShape);
     }
+}
+
+void Renderer::drawNametags(const EntityManager &entityManager) {
+    sf::Text nametag;
+    nametag.setFont(font);
+    nametag.setCharacterSize(12);
+
+    for (auto &[id, enemy] : entityManager.getEnemies()) {
+        nametag.setString(std::to_string(enemy.id) + ". HP: " + std::to_string(enemy.hp));
+        sf::FloatRect bounds = nametag.getLocalBounds();
+        nametag.setOrigin(bounds.left + bounds.width / 2.0f,
+                          bounds.top  + bounds.height      );
+        nametag.setPosition(enemy.localPosition - sf::Vector2f(0, 30));
+        window.draw(nametag);
+    }
 
     for (auto &[id, player] : entityManager.getPlayers()) {
-        sf::Text nametag(std::to_string(player.id) + ". HP: " + std::to_string(player.hp), font, 12);
+        nametag.setString(std::to_string(player.id) + ". HP: " + std::to_string(player.hp));
         sf::FloatRect bounds = nametag.getLocalBounds();
         nametag.setOrigin(bounds.left + bounds.width / 2.0f,
                           bounds.top  + bounds.height      );
@@ -141,8 +169,10 @@ void Renderer::render(const EntityManager &entityManager, int clientId) {
 
     drawBackground();
 
+    drawEnemies(entityManager);
     drawPlayers(entityManager, clientId);
-    drawWorld(entityManager, clientId);
+    drawDamageEntities(entityManager, clientId);
+    drawNametags(entityManager);
 }
 
 void Renderer::renderUI(const Inventory &inventory, const Equipment &equipment) {

@@ -11,6 +11,7 @@
 
 class Player;
 class DamageEntity;
+class Enemy;
 
 constexpr int CHUNK_RANGE = 2;
 
@@ -19,6 +20,7 @@ private:
     std::unordered_map<int, ChunkCoord> previousChunk;
     std::unordered_map<ChunkCoord, std::unordered_set<Player *>, ChunkCoordHash> playerChunks;
     std::unordered_map<ChunkCoord, std::unordered_set<DamageEntity *>, ChunkCoordHash> damageEntityChunks;
+    std::unordered_map<ChunkCoord, std::unordered_set<Enemy *>, ChunkCoordHash> enemyChunks;
 
 private:
     ChunkCoord getChunk(const sf::Vector2f &position) const;
@@ -26,15 +28,20 @@ private:
 public:
     ChunkSystem() = default;
     
+    std::vector<ChunkCoord> getChunkInRange(int clientId, const sf::Vector2f &position, int chunkRange = CHUNK_RANGE);
+
     void addPlayer(Player *player);
     void removePlayer(Player *player);
     void updatePlayer(Player *player, const sf::Vector2f &oldPosition);
+    std::vector<Player *> getPlayersInRange(const sf::Vector2f &position, int chunkRange = CHUNK_RANGE) const;
 
     void addDamageEntity(DamageEntity *entity);
     void removeDamageEntity(DamageEntity *entity);
     void updateDamageEntity(DamageEntity *entity, const sf::Vector2f &oldPosition);
-
-    std::vector<Player *> getPlayersInRange(const sf::Vector2f &position, int chunkRange = CHUNK_RANGE) const;
     std::vector<DamageEntity *> getDamageEntitiesInRange(const sf::Vector2f &position, int chunkRange = CHUNK_RANGE) const;
-    std::vector<ChunkCoord> getChunkInRange(int clientId, const sf::Vector2f &position, int chunkRange = CHUNK_RANGE);
+
+    void addEnemy(Enemy *enemy);
+    void removeEnemy(Enemy *enemy);
+    void updateEnemy(Enemy *enemy, const sf::Vector2f &oldPosition);
+    std::vector<Enemy *> getEnemiesInRange(const sf::Vector2f &position, int chunkRange = CHUNK_RANGE) const;
 };

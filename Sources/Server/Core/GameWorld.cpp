@@ -1,5 +1,8 @@
 #include "Server/Core/GameWorld.hpp"
 
+#include "Shared/Utils.hpp"
+
+#include "Server/Entities/Enemy.hpp"
 #include "Server/Entities/Player.hpp"
 #include "Server/Entities/DamageEntity.hpp" 
 
@@ -7,7 +10,33 @@
 
 GameWorld::GameWorld() {}
 
-#include <iostream>
+void GameWorld::addEnemy(int id) {
+    Enemy *newEnemy = new Enemy(id, sf::Vector2f(300, 200));
+    
+    enemies.push_back(newEnemy);
+    chunkSystem.addEnemy(newEnemy);
+}
+
+void GameWorld::removeEnemy(int id) {
+    for (size_t i = 0; i < enemies.size(); ++i) {
+        if (enemies[i]->getId() == id) {
+            chunkSystem.removeEnemy(enemies[i]);
+
+            delete enemies[i];
+            enemies.erase(enemies.begin() + i);
+
+            break;
+        }
+    }
+}
+
+std::vector<Enemy *> & GameWorld::getEnemies() {
+    return enemies;
+}
+
+const std::vector<Enemy *> GameWorld::getEnemiesInChunk(const sf::Vector2f &centerPosition) const {
+    return chunkSystem.getEnemiesInRange(centerPosition);
+}
 
 void GameWorld::addPlayer(int id) {
     Player *newPlayer = new Player(id, sf::Vector2f(500, 500));
@@ -30,6 +59,7 @@ void GameWorld::removePlayer(int id) {
             InventoryManager::saveEquipment(players[i]->getId(), players[i]->getEquipment());
             
             chunkSystem.removePlayer(players[i]);
+
             delete players[i];
             players.erase(players.begin() + i);
 
@@ -44,12 +74,12 @@ void GameWorld::addDamageEntity(DamageEntity *newDamageEntity) {
 }
 
 void GameWorld::update(const float &dt) {
-    for (Player* player : players) {
+    for (Player *player : players) {
         player->update(dt);
         chunkSystem.updatePlayer(player, player->getOldPosition());
     }
 
-    for (DamageEntity* damageEntity : damageEntities) {
+    for (DamageEntity *damageEntity : damageEntities) {
         damageEntity->update(dt);
         chunkSystem.updateDamageEntity(damageEntity, damageEntity->getOldPosition());
     }
@@ -57,10 +87,16 @@ void GameWorld::update(const float &dt) {
     for (size_t i = 0; i < damageEntities.size(); ++i) {
         if (damageEntities[i]->isDestroyed()) {
             chunkSystem.removeDamageEntity(damageEntities[i]);
+
             delete damageEntities[i];
             damageEntities.erase(damageEntities.begin() + i);
             --i;
         }
+    }
+
+    for (Enemy *enemy : enemies) {
+        enemy->update(dt);
+        chunkSystem.updateEnemy(enemy, enemy->getOldPosition());
     }
 }
 
@@ -78,6 +114,25 @@ const std::vector<DamageEntity *> & GameWorld::getDamageEntities() const {
 
 const std::vector<Player *> GameWorld::getPlayersInChunk(const sf::Vector2f &centerPosition) const {
     return chunkSystem.getPlayersInRange(centerPosition);
+}
+
+Player * GameWorld::findNearestPlayer(const sf::Vector2f &position) {
+    Player *nearestPlayer = nullptr;
+    float nearestDistance = -1;
+    for (Player *player : players) if (player != nullptr) {
+        if (nearestDistance == -1) {
+            nearestPlayer = player;
+            nearestDistance = distance(position, player->getPosition());
+            continue;
+        }
+        
+        float currentDistance = distance(position, player->getPosition());
+        if (currentDistance < nearestDistance) {
+            nearestPlayer = player;
+            nearestDistance = currentDistance;
+        }
+    }
+    return nearestPlayer;
 }
 
 const std::vector<DamageEntity *> GameWorld::getDamageEntitiesInChunk(const sf::Vector2f &centerPosition) const {

@@ -3,12 +3,14 @@
 #include "Server/Core/GameWorld.hpp"
 #include "Server/Core/GameWorldSynsSystem.hpp"
 
+#include "Server/Entities/EnemiesManager.hpp"
 #include "Server/Entities/Player.hpp"
 #include "Server/Entities/Projectile.hpp"
 #include "Server/Entities/SwordSlash.hpp"
 
 #include "Server/Network/NetworkServer.hpp"
 
+#include "Server/Systems/AI/EnemyAISystem.hpp"
 #include "Server/Systems/Combat/CombatSystem.hpp"
 #include "Server/Systems/Combat/WeaponSystem.hpp"
 #include "Server/Systems/Input/InputManager.hpp"
@@ -22,6 +24,7 @@
 #include "Server/Systems/Physics/WorldCollisionSyncSystem.hpp"
 
 #include "Server/Utils/Constants.hpp"
+#include "Server/Utils/Random.hpp"
 
 #include <iostream>
 
@@ -30,7 +33,7 @@ void syncGameWorldFromClients(GameWorld &gameWorld, InputManager &inputManager, 
     if (newClientEvents.size()) {
         for (NewClientEvent &event : newClientEvents) {
             gameWorld.addPlayer(event.clientId);
-            inputManager.clearQueue(event.clientId);
+            inputManager.clearClientQueue(event.clientId);
 
             inventorySyncSystem.syncInventoryToClient(event.clientId);
             inventorySyncSystem.syncEquipmentToClient(event.clientId);
@@ -43,7 +46,7 @@ void syncGameWorldFromClients(GameWorld &gameWorld, InputManager &inputManager, 
     std::vector<NewInputEvent> & newInputEvents = networkServer.fetchInputs();
     if (newInputEvents.size()) {
         for (NewInputEvent &event : newInputEvents) {
-            inputManager.pushInput(event.clientId, event.input);
+            inputManager.pushClientInput(event.clientId, event.input);
         }
         newInputEvents.clear();
     }
@@ -90,6 +93,9 @@ int main() {
     WorldCollision  worldCollision;
     InputManager    inputManager;
     
+    EnemiesManager       enemiesManager(gameWorld);
+
+    EnemyAISystem        enemyAISystem;
     CombatSystem         combatSystem;
     WeaponSystem         weaponSystem;
     InputSystem          inputSystem;
@@ -98,12 +104,16 @@ int main() {
     PhysicsSystem        physicsSystem(worldCollision);
     WorldCollisionSystem worldCollisionSystem(worldCollision);
 
-    
     DebugChunkSyncSystem     debugChunkSyncSystem(gameWorld, networkServer);
     GameWorldSyncSystem      gameWorldSyncSystem(gameWorld, networkServer, interestSystem);
     InventorySyncSystem      inventorySyncSystem(gameWorld, networkServer);
     WorldCollisionSyncSystem worldCollisionSyncSystem(worldCollision, networkServer);
 
+    uint64_t seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+
+    Random::seed(seed);
+
+    enemiesManager.loadStaticEnemies();
     worldCollisionSystem.loadStaticCollisions();
 
     sf::Clock clock, sendClock;
@@ -115,14 +125,21 @@ int main() {
         networkServer.poll();
 
         syncGameWorldFromClients(gameWorld, inputManager, inventorySystem, inventorySyncSystem, networkServer, worldCollisionSyncSystem);
-
+    
         if (accumulator >= SERVER_TICK) {
             accumulator -= SERVER_TICK;
 
+            enemyAISystem.update(SERVER_TICK, gameWorld, inputManager);
+
             inputSystem.processPlayerInputs(inputManager, gameWorld, physicsSystem, weaponSystem);
+            inputSystem.processEnemyInputs(inputManager, gameWorld, physicsSystem, weaponSystem);
 
             physicsSystem.resolvePlayerCollisions(gameWorld.getPlayers());
+            physicsSystem.resolveEnemyCollisions(gameWorld.getEnemies());
+            physicsSystem.resolvePlayerWithEnemyCollisions(gameWorld.getPlayers(), gameWorld.getEnemies());
+
             combatSystem.handleCollision(gameWorld.getPlayers(), gameWorld.getDamageEntities());
+            combatSystem.handleCollision(gameWorld.getEnemies(), gameWorld.getDamageEntities());
 
             gameWorld.update(SERVER_TICK);
         }

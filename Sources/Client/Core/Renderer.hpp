@@ -24,8 +24,10 @@ private:
 private:
     void updateCamera(const EntityManager &entityManager, int clientId);
 
+    void drawEnemies(const EntityManager &entityManager);
     void drawPlayers(const EntityManager &entityManager, int clientId);
-    void drawWorld(const EntityManager &entityManager, int clientId);
+    void drawDamageEntities(const EntityManager &entityManager, int clientId);
+    void drawNametags(const EntityManager &entityManager);
     void drawUI(const Inventory &inventory, const Equipment& equipment);
     
     void buildBackground();

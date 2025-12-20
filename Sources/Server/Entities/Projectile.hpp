@@ -16,4 +16,5 @@ public:
     sf::Vector2f getVelocity() const;
 
     void onHit(Player &player) override;
+    void onHit(Enemy  &enemy ) override;
 };
