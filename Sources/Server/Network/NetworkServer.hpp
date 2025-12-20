@@ -37,7 +37,6 @@ public:
     bool start(unsigned short tcpPort, unsigned short udpPort);
 
     bool isValidClientId(int id) const;
-    int generateNewClientId() const;
 
     void poll();
 

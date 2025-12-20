@@ -52,29 +52,6 @@ bool NetworkServer::isValidClientId(int id) const {
     return true;
 }
 
-int NetworkServer::generateNewClientId() const {
-    int id = 0;
-    while (true) {
-        bool used = false;
-        for (const ClientSession &client : clients) {
-            if (client.id == id) { 
-                used = true;
-                break;
-            }
-        }
-        for (const NewClientEvent & event : pendingNewClients) {
-            if (event.clientId == id) {
-                used = true;
-                break;
-            }
-        }
-        if (!used) return id;
-        ++id;
-    }
-
-    return id;
-}
-
 void NetworkServer::poll() {
     // === Non-blocking: Accept new TCP clients / read TCP inputs ===
     if (selector.wait(sf::milliseconds(1))) {
@@ -107,24 +84,22 @@ void NetworkServer::poll() {
                     if (type == "Login") {
                         int requestedId; packet >> requestedId;
 
-                        int finalId;
-                        if (requestedId != -1 && isValidClientId(requestedId)) {
-                            finalId = requestedId;
+                        if (isValidClientId(requestedId) == false) {
+                            sf::Packet packet; packet << std::string("Login_Fail");
+                            tcpSocket.send(packet);
                         }
-                        else {
-                            finalId = generateNewClientId();
+                        else {   
+                            clients[i].id = requestedId;
+    
+                            NewClientEvent newClientEvent;
+                            newClientEvent.clientId = requestedId;
+                            pendingNewClients.push_back(newClientEvent);
+    
+                            sf::Packet packet; packet << std::string("Assign_ID") << requestedId;
+                            tcpSocket.send(packet);
+    
+                            std::cout << "[Network] - Client connected ID = " << requestedId << '\n';
                         }
-
-                        clients[i].id = finalId;
-
-                        NewClientEvent newClientEvent;
-                        newClientEvent.clientId = finalId;
-                        pendingNewClients.push_back(newClientEvent);
-
-                        sf::Packet packet; packet << std::string("Assign_ID") << finalId;
-                        tcpSocket.send(packet);
-
-                        std::cout << "[Network] - Client connected ID = " << finalId << '\n';
                     }
                     else if (type == "MoveItem") {
                         int from, to;
@@ -142,17 +117,18 @@ void NetworkServer::poll() {
                 }
                 else 
                 if (status == sf::Socket::Disconnected) {
-                    std::cout << "[Network] - Client TCP disconnected ID = " << clients[i].id << '\n';
-                    
                     selector.remove(tcpSocket);
                     tcpSocket.disconnect();
-
+                    
                     delete clients[i].tcp;
                     
-                    DeleteClientEvent deleteClientEvent;
-                    deleteClientEvent.clientId = clients[i].id;
-                    pendingDeleteClients.push_back(deleteClientEvent);
-
+                    if (clients[i].id != -1) {
+                        std::cout << "[Network] - Client TCP disconnected ID = " << clients[i].id << '\n';
+                        DeleteClientEvent deleteClientEvent;
+                        deleteClientEvent.clientId = clients[i].id;
+                        pendingDeleteClients.push_back(deleteClientEvent);
+                    }
+                    
                     clients.erase(clients.begin() + i);
                     --i;
                 }

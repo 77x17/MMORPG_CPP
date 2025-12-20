@@ -28,5 +28,5 @@ public:
     void toggle();
     bool isEnabled() const;
 
-    void render(const EntityManager &entityManager, WorldCollision &worldCollision, int clientId);
+    void render(const EntityManager &entityManager, WorldCollision &worldCollision);
 };

@@ -6,7 +6,7 @@ class Player;
 class DamageEntity;
 class Enemy;
 
-constexpr float INTEREST_RADIUS = 500.0f;
+constexpr float INTEREST_RADIUS = 1000.0f;
 
 class InterestSystem {
 public:

@@ -14,19 +14,13 @@ NetworkClient::~NetworkClient() {
     close();
 }
 
-bool NetworkClient::connectTcp(int clientId, const float &timeoutSeconds) {
+bool NetworkClient::connectTcp(const float &timeoutSeconds) {
     if (tcp.connect(host, tcpPort, sf::seconds(timeoutSeconds)) != sf::Socket::Done) {
         // std::cout << "[Network] - Cannot connect TCP" << '\n';
         return false;
     }
     tcp.setBlocking(false);
     selector.add(tcp);
-
-    sf::Packet loginPacket;
-    loginPacket << "Login" << clientId;
-    tcp.send(loginPacket);
-
-    std::cout << "Send login\n";
 
     return true;
 }
@@ -43,10 +37,14 @@ bool NetworkClient::bindUdp() {
     return true;
 }
 
-bool NetworkClient::connectAll(int clientId, const float& timeoutSeconds) {
-    if (connectTcp(clientId, timeoutSeconds) && bindUdp()) {
+bool NetworkClient::connectAll(const float& timeoutSeconds) {
+    if (isConnected) {
+        return true;
+    }
+
+    if (connectTcp(timeoutSeconds) && bindUdp()) {
         std::cout << "[Network] - Connected to server..." << '\n';
-        return true;    
+        return isConnected = true;    
     }
 
     return false;
@@ -62,7 +60,13 @@ void NetworkClient::sendTcpPacket(sf::Packet &packet) {
     tcp.send(packet);
 }
 
-void NetworkClient::pollReceive() {
+void NetworkClient::sendLogin(int clientId) {
+    sf::Packet loginPacket;
+    loginPacket << "Login" << clientId;
+    tcp.send(loginPacket);
+}
+
+int NetworkClient::pollLogin() {
     if (selector.wait(sf::milliseconds(1))) {
         if (selector.isReady(tcp)) {
             sf::Packet packet; sf::Socket::Status status = tcp.receive(packet);
@@ -75,8 +79,25 @@ void NetworkClient::pollReceive() {
                     sf::Packet assignUdp;
                     assignUdp << std::string("Assign_UDP") << assignedId;
                     udp.send(assignUdp, host, udpPort);
+                    
+                    return assignedId;
                 }
-                else if (type == "Inventory") {
+                else if (type == "Login_Fail") {
+                    return -2;
+                }
+            }
+        }
+    }
+    return -1;
+}
+
+void NetworkClient::pollReceive() {
+    if (selector.wait(sf::milliseconds(1))) {
+        if (selector.isReady(tcp)) {
+            sf::Packet packet; sf::Socket::Status status = tcp.receive(packet);
+            if (status == sf::Socket::Done) {
+                std::string type; packet >> type;
+                if (type == "Inventory") {
                     inventorySnapshot.appear = true;
                     inventorySnapshot.itemIds.clear();
                     
@@ -200,6 +221,10 @@ void NetworkClient::pollReceive() {
             }
         }
     }
+}
+
+int NetworkClient::getClientId() const {
+    return assignedId;
 }
 
 ChunkSnapshot & NetworkClient::getChunkSnapshot() {

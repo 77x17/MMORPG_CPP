@@ -5,6 +5,7 @@
 #include "Shared/Constants.hpp"
 #include "Shared/Utils.hpp"
 
+#include "Client/Core/Login.hpp"
 #include "Client/Core/Renderer.hpp"
 #include "Client/Debug/DebugRenderer.hpp"
 #include "Client/Inventory/Inventory.hpp"
@@ -15,114 +16,25 @@
 #include "Client/Systems/World/WorldCollision.hpp"
 
 #include "Client/Utils/Constants.hpp"
+#include "Client/Utils/Font.hpp"
 
 #include <iostream>
 
-void loginScreen(sf::RenderWindow &window, int &clientId, sf::Font &font) {
-    bool loginDone = false;
-    std::string inputClientId;
-
-    sf::Clock caretClock;
-    bool caretVisible = true;
-    while (window.isOpen() && not loginDone) {
-        sf::Event event;
-        while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed) {
-                window.close();
-                exit(0);
-            }
-
-            if (event.type == sf::Event::TextEntered) {
-                if (event.text.unicode == 8) { // Backspace
-                    if (!inputClientId.empty()) {
-                        inputClientId.pop_back();
-                    }
-                }
-                else if (event.text.unicode == 13) { // Enter
-                    if (!inputClientId.empty()) {
-                        loginDone = true;
-                    }
-                }
-                else if (isdigit(event.text.unicode) && inputClientId.size() < 16) {
-                    inputClientId += static_cast<char>(event.text.unicode);
-                }
-            }
-        }
-
-        if (caretClock.getElapsedTime().asSeconds() > 0.3f) {
-            caretVisible = !caretVisible;
-            caretClock.restart();
-        }
-
-        window.clear(sf::Color(30, 30, 30));
-
-        sf::Text inputText;
-        inputText.setFont(font);
-        inputText.setCharacterSize(24);
-        inputText.setPosition(100, 200);
-        inputText.setString("Client ID: " + inputClientId + (caretVisible ? '|' : ' '));
-        window.draw(inputText);
-
-        window.display();
-    }
-
-    clientId = std::stoi(inputClientId);
-}
-
-void connectingScreen(sf::RenderWindow &window, NetworkClient &networkClient, int &clientId, sf::Font &font) {
-    sf::Clock dotClock;
-    int dotCount = 0;
-    while (window.isOpen() && !networkClient.connectAll(clientId)) {
-        sf::Event event;
-        while (window.pollEvent(event)) {
-            if (event.type == sf::Event::Closed) {
-                window.close();
-                exit(0);
-            }
-        }
-
-        if (dotClock.getElapsedTime().asSeconds() > 0.1f) {
-            dotCount = (dotCount + 1) % 4; // 0 -> 3
-            dotClock.restart();
-        }
-
-        window.clear(sf::Color(30, 30, 30));
-
-        sf::Text connectingText;
-        connectingText.setFont(font);
-        connectingText.setCharacterSize(24);
-        connectingText.setFillColor(sf::Color::White);
-        connectingText.setPosition(100, 200);
-        std::string dots(dotCount, '.');
-        connectingText.setString("Connecting to server " + dots);
-        window.draw(connectingText);
-
-        window.display();
-    }
-}
+sf::Font Font::font;
 
 int main() {
     bool isFullscreen = false;
     sf::RenderWindow window({ WINDOW_WIDTH, WINDOW_HEIGHT }, "[Client] - Login", sf::Style::Close);
     window.setVerticalSyncEnabled(true);
 
-    sf::Font font;
-    if (!font.loadFromFile("Assets/Roboto_Mono.ttf")) {
-        font.loadFromFile("../Assets/Roboto_Mono.ttf");
-    }
+    Font::loadFromFile("Assets/Roboto_Mono.ttf");
     
-    int clientId;
-    loginScreen(window, clientId, font);
-
     NetworkClient networkClient("127.0.0.1", 55001, 55002);
-    connectingScreen(window, networkClient, clientId, font);
-
-    while (networkClient.assignedId == -1) {
-        networkClient.pollReceive();
-    }
     
-    clientId = networkClient.assignedId;
-    window.setTitle("[Client] - ID: " + std::to_string(clientId));
+    Login login;
+    login.connecting(window, networkClient);
+    
+    window.setTitle("[Client] - ID: " + std::to_string(networkClient.getClientId()));
 
     EntityManager entityManager;
     Inventory inventory;
@@ -163,7 +75,7 @@ int main() {
                     if (isFullscreen) {
                         window.create(
                             sf::VideoMode::getDesktopMode(),
-                            "[Client] - ID: " + std::to_string(clientId),
+                            "[Client] - ID: " + std::to_string(networkClient.getClientId()),
                             sf::Style::Fullscreen
                         );
                         window.setVerticalSyncEnabled(true);
@@ -173,7 +85,7 @@ int main() {
                     else {
                         window.create(
                             sf::VideoMode(WINDOW_WIDTH, WINDOW_HEIGHT),
-                            "[Client] - ID: " + std::to_string(clientId),
+                            "[Client] - ID: " + std::to_string(networkClient.getClientId()),
                             sf::Style::Close
                         );
                         window.setVerticalSyncEnabled(true);
@@ -233,8 +145,8 @@ int main() {
 
                 networkClient.sendInputPacket(input.seq, input.movementDir, input.isShooting);
             
-                if (entityManager.getPlayers().count(clientId) > 0) {
-                    RemotePlayer &localPlayer = entityManager.getPlayer(clientId);
+                if (entityManager.getPlayers().count(networkClient.getClientId()) > 0) {
+                    RemotePlayer &localPlayer = entityManager.getPlayer(networkClient.getClientId());
                     localPlayer.localPosition += normalize(input.movementDir) * PLAYER_SPEED * dt;
                 }
             }
@@ -245,7 +157,7 @@ int main() {
         WorldSnapshot &worldSnapshot = networkClient.getWorldSnapshot();
         if (worldSnapshot.appear) {
             worldSnapshot.appear = false;
-            entityManager.applySnapshot(worldSnapshot, clientId, pendingInputs);
+            entityManager.applySnapshot(worldSnapshot, networkClient.getClientId(), pendingInputs);
         }
 
         ChunkSnapshot &chunkSnapshot = networkClient.getChunkSnapshot();
@@ -288,15 +200,15 @@ int main() {
 
         if (clientAccumulator >= CLIENT_TICK) {
             clientAccumulator -= CLIENT_TICK;
-            entityManager.update(CLIENT_TICK, clientId);    
+            entityManager.update(CLIENT_TICK, networkClient.getClientId());    
         }
 
         window.clear(sf::Color(30.0f, 30.0f, 30.0f));
         
-        renderer.render(entityManager, clientId);
+        renderer.render(entityManager, networkClient.getClientId());
 
         if (debugRenderer.isEnabled() || true) { // for quick test
-            debugRenderer.render(entityManager, worldCollision, clientId);
+            debugRenderer.render(entityManager, worldCollision);
         }
 
         renderer.renderUI(inventory, equipment);
