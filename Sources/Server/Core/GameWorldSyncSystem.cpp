@@ -9,6 +9,8 @@
 #include "Server/Entities/Projectile.hpp"
 #include "Server/Entities/SwordSlash.hpp"
 
+#include "Server/Systems/Log/LogSystem.hpp"
+
 GameWorldSyncSystem::GameWorldSyncSystem(GameWorld &_gameWorld, NetworkServer &_networkServer, InterestSystem &_interestSystem)
 : gameWorld(_gameWorld), networkServer(_networkServer), interestSystem(_interestSystem) {
 

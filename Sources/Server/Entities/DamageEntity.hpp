@@ -25,4 +25,5 @@ public:
     
     virtual void onHit(Player &player) = 0;
     virtual void onHit(Enemy  &enemy) = 0;
+    virtual std::string getName() const = 0;
 };

@@ -30,7 +30,7 @@ public:
     void update(const float &dt) override;
 
     void respawn();
-    void takeDamage(int amount);
+    void takeDamage(int damage);
     void applyImpulse(const sf::Vector2f &_impulse);
     void decayImpulse(const float &dt);
     

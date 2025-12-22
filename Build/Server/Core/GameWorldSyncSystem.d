@@ -21,4 +21,5 @@ Build/Server/Core/GameWorldSyncSystem.o: \
  Sources/Server/Systems/Inventory/Equipment.hpp \
  Sources/Server/Entities/Projectile.hpp \
  Sources/Server/Entities/DamageEntity.hpp \
- Sources/Server/Entities/SwordSlash.hpp
+ Sources/Server/Entities/SwordSlash.hpp \
+ Sources/Server/Systems/Log/LogSystem.hpp

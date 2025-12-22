@@ -21,4 +21,6 @@ public:
 
     void onHit(Player &player) override;
     void onHit(Enemy  &enemy ) override;
+
+    std::string getName() const override;
 };

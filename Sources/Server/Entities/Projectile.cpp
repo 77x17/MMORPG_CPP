@@ -42,3 +42,7 @@ void Projectile::onHit(Enemy &enemy) {
     sf::Vector2f direction = normalize(velocity);
     enemy.applyImpulse(direction * knockbackStrength);
 }
+
+std::string Projectile::getName() const {
+    return "PROJECTILE";
+}

@@ -1,6 +1,6 @@
 #include "Server/Entities/Player.hpp"
 
-#include <iostream>
+#include "Server/Systems/Log/LogSystem.hpp"
 
 #include "Shared/Constants.hpp"
 #include "Shared/Utils.hpp"
@@ -31,14 +31,13 @@ void Player::respawn() {
     setPosition(spawnPosition);
 }
 
-void Player::takeDamage(int amount) {
-    health -= amount;
+void Player::takeDamage(int damage) {
+    health -= damage;
     if (health <= 0) {
         health = 0;
         destroy();
-        // std::cout << "Player " << id << " DIED!" << '\n';
+        LogSystem::addMessage("[Player] ID: " + std::to_string(id) + " died!");
     }
-    // std::cout << "Player " << id << " took " << amount << " dmg. HP: " << health << '\n';
 }
 
 void Player::applyImpulse(const sf::Vector2f &_impulse) {

@@ -6,20 +6,29 @@
 #include "Server/Entities/Player.hpp"
 #include "Server/Entities/DamageEntity.hpp" 
 
+#include "Server/Events/EventBus.hpp"
+
 #include "Server/Systems/Inventory/InventoryManager.hpp"
 
-GameWorld::GameWorld() {}
+GameWorld::GameWorld(EventBus &_eventBus) 
+: eventBus(_eventBus) {
+
+}
 
 void GameWorld::addEnemy(int id) {
     Enemy *newEnemy = new Enemy(id, sf::Vector2f(300, 200));
     
     enemies.push_back(newEnemy);
     chunkSystem.addEnemy(newEnemy);
+
+    // eventBus.publish(EnemySpawnedEvent(newEnemy->getId()));
 }
 
 void GameWorld::removeEnemy(int id) {
     for (size_t i = 0; i < enemies.size(); ++i) {
         if (enemies[i]->getId() == id) {
+            // eventBus.publish(EnemyRemovedEvent(id));
+
             chunkSystem.removeEnemy(enemies[i]);
 
             delete enemies[i];
@@ -31,6 +40,10 @@ void GameWorld::removeEnemy(int id) {
 }
 
 std::vector<Enemy *> & GameWorld::getEnemies() {
+    return enemies;
+}
+
+const std::vector<Enemy *> & GameWorld::getEnemies() const {
     return enemies;
 }
 
@@ -50,6 +63,8 @@ void GameWorld::addPlayer(int id) {
     
     players.push_back(newPlayer);
     chunkSystem.addPlayer(newPlayer);
+
+    // eventBus.publish(PlayerSpawnedEvent(id));
 }
 
 void GameWorld::removePlayer(int id) {
@@ -59,6 +74,8 @@ void GameWorld::removePlayer(int id) {
             InventoryManager::saveEquipment(players[i]->getId(), players[i]->getEquipment());
             
             chunkSystem.removePlayer(players[i]);
+
+            // eventBus.publish(PlayerRemovedEvent(id));
 
             delete players[i];
             players.erase(players.begin() + i);
@@ -144,6 +161,13 @@ std::vector<ChunkCoord> GameWorld::getChunkInRange(int clientId, const sf::Vecto
 }
 
 Player * GameWorld::getPlayer(int clientId) {
+    for (Player *player : players) if (player != nullptr) {
+        if (player->getId() == clientId) return player;
+    }
+    return nullptr;
+}
+
+const Player * GameWorld::getPlayer(int clientId) const {
     for (Player *player : players) if (player != nullptr) {
         if (player->getId() == clientId) return player;
     }

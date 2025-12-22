@@ -7,4 +7,5 @@ Build/Server/Network/NetworkServer.o: \
  Sources/Shared/InputState.hpp \
  Sources/Server/Network/Events/DeleteClientEvent.hpp \
  Sources/Server/Network/Events/MoveItemEvent.hpp \
- Sources/Server/Network/Events/EquipItemEvent.hpp
+ Sources/Server/Network/Events/EquipItemEvent.hpp \
+ Sources/Server/Systems/Log/LogSystem.hpp

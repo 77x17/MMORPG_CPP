@@ -8,8 +8,6 @@
 #include "Server/Systems/Input/InputManager.hpp"
 #include "Server/Utils/Random.hpp"
 
-#include <iostream>
-
 void EnemyAISystem::update(const float &dt, GameWorld &gameWorld, InputManager &inputManager) {
     for (Enemy *enemy : gameWorld.getEnemies()) if (enemy != nullptr) {
         InputState input;

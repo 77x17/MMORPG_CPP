@@ -3,12 +3,18 @@
 #include "Server/Core/GameWorld.hpp"
 #include "Server/Core/GameWorldSynsSystem.hpp"
 
+#include "Server/Debug/DebugSystem.hpp"
+
 #include "Server/Entities/EnemiesManager.hpp"
 #include "Server/Entities/Player.hpp"
 #include "Server/Entities/Projectile.hpp"
 #include "Server/Entities/SwordSlash.hpp"
 
+#include "Server/Events/EventBus.hpp"
+
 #include "Server/Network/NetworkServer.hpp"
+
+#include "Server/Renderer/Renderer.hpp"
 
 #include "Server/Systems/AI/EnemyAISystem.hpp"
 #include "Server/Systems/Combat/CombatSystem.hpp"
@@ -18,6 +24,7 @@
 #include "Server/Systems/Interest/InterestSystem.hpp"
 #include "Server/Systems/Inventory/InventorySystem.hpp"
 #include "Server/Systems/Inventory/InventorySyncSystem.hpp"
+#include "Server/Systems/Log/LogSystem.hpp"
 #include "Server/Systems/Physics/PhysicsSystem.hpp"
 #include "Server/Systems/Physics/WorldCollision.hpp"
 #include "Server/Systems/Physics/WorldCollisionSystem.hpp"
@@ -25,8 +32,10 @@
 
 #include "Server/Utils/Constants.hpp"
 #include "Server/Utils/Random.hpp"
+#include "Server/Utils/Font.hpp"
 
-#include <iostream>
+sf::Font Font::font;
+std::deque<std::string> LogSystem::logs;
 
 void syncGameWorldFromClients(GameWorld &gameWorld, InputManager &inputManager, InventorySystem &inventorySystem, InventorySyncSystem &inventorySyncSystem, NetworkServer &networkServer, WorldCollisionSyncSystem &worldCollisionSyncSystem) {
     std::vector<NewClientEvent> & newClientEvents = networkServer.fetchNewClients();
@@ -88,8 +97,10 @@ int main() {
     if (!networkServer.start(55001, 55002)) {
         return -1;
     }
-   
-    GameWorld       gameWorld;
+
+    EventBus eventBus;
+    
+    GameWorld       gameWorld(eventBus);
     WorldCollision  worldCollision;
     InputManager    inputManager;
     
@@ -110,17 +121,64 @@ int main() {
     WorldCollisionSyncSystem worldCollisionSyncSystem(worldCollision, networkServer);
 
     uint64_t seed = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-
     Random::seed(seed);
 
     enemiesManager.loadStaticEnemies();
     worldCollisionSystem.loadStaticCollisions();
 
+    sf::RenderWindow window({ WINDOW_WIDTH, WINDOW_HEIGHT }, "[Server]", sf::Style::Close);
+    window.setVerticalSyncEnabled(true);
+    bool isFullscreen = false;
+    Renderer renderer(window);
+    Font::loadFromFile("Assets/Roboto_Mono.ttf");
+
+    DebugSystem debugSystem(eventBus);
+
     sf::Clock clock, sendClock;
     float accumulator = 0.0f;
-    while (true) {
+    while (window.isOpen()) {
         float dt = clock.restart().asSeconds();
         accumulator += dt;
+
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed) {
+                networkServer.close();
+                window.close();
+            }
+            else if (event.type == sf::Event::KeyPressed) {
+                if (event.key.code == sf::Keyboard::Escape) {
+                    networkServer.close();
+                    window.close();
+                }
+                else if (event.key.code == sf::Keyboard::F11) {
+                    isFullscreen = !isFullscreen;
+
+                    if (isFullscreen) {
+                        window.create( sf::VideoMode::getDesktopMode(), "[Server]", sf::Style::None);
+                        window.setVerticalSyncEnabled(true);
+                        renderer.resize();
+                    }
+                    else {
+                        window.create({ WINDOW_WIDTH, WINDOW_HEIGHT }, "[Server]", sf::Style::Close);
+                        window.setVerticalSyncEnabled(true);
+                        renderer.resize();
+                    }
+                }
+            }
+            else if (event.type == sf::Event::MouseWheelScrolled) {
+                renderer.handleScroll(event);
+            }
+            else if (event.type == sf::Event::MouseButtonPressed) {
+                renderer.handleMousePressed(event);
+            }
+            else if (event.type == sf::Event::MouseButtonReleased) {
+                renderer.handleMouseReleased(event);
+            }
+            else if (event.type == sf::Event::MouseMoved) {
+                renderer.handleMouseMoved(event);
+            }
+        }
 
         networkServer.poll();
 
@@ -152,7 +210,11 @@ int main() {
             debugChunkSyncSystem.syncToClients();
         }
 
-        sf::sleep(sf::milliseconds(1));
+        window.clear(sf::Color(30.0f, 30.0f, 30.0f));
+        
+        renderer.render(debugSystem.getSnapshot(gameWorld, networkServer));
+
+        window.display();
     }
 
     return 0;

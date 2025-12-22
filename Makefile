@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -Wall -g -std=c++17
+CXXFLAGS = -Wall -g -std=c++20
 
 SFML_LIBS = -lsfml-system -lsfml-graphics -lsfml-window -lsfml-audio -lsfml-network
 

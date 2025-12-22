@@ -45,6 +45,7 @@ public:
 
     ClientSession & getClient(int clientId);
     std::vector<ClientSession> & getClients();
+    const std::vector<ClientSession> & getClients() const;
 
     std::vector<NewClientEvent>    & fetchNewClients();
     std::vector<NewInputEvent>     & fetchInputs();

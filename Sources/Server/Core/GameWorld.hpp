@@ -8,6 +8,8 @@ class Enemy;
 class Player;
 class DamageEntity;
 
+class EventBus;
+
 class GameWorld {
 private:
     std::vector<Enemy *> enemies;
@@ -16,19 +18,23 @@ private:
 
     ChunkSystem chunkSystem;
 
+    EventBus &eventBus;
+
 public:
-    GameWorld();
+    GameWorld(EventBus &_eventBus);
 
     void addEnemy(int id);
     void removeEnemy(int id);
     std::vector<Enemy *> & getEnemies();
+    const std::vector<Enemy *> & getEnemies() const;
     const std::vector<Enemy *> getEnemiesInChunk(const sf::Vector2f &centerPosition) const;
 
     void addPlayer(int id);
     void removePlayer(int id);
     Player * getPlayer(int clientId);
-    const std::vector<Player *> & getPlayers() const;
+    const Player * getPlayer(int clientId) const;
     std::vector<Player *> & getPlayers();
+    const std::vector<Player *> & getPlayers() const;
     const std::vector<Player *> getPlayersInChunk(const sf::Vector2f &centerPosition) const;
     Player * findNearestPlayer(const sf::Vector2f &position);
 

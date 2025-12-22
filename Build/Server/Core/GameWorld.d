@@ -9,4 +9,5 @@ Build/Server/Core/GameWorld.o: Sources/Server/Core/GameWorld.cpp \
  Sources/Server/Systems/Inventory/ItemSlot.hpp \
  Sources/Server/Systems/Inventory/Equipment.hpp \
  Sources/Server/Entities/DamageEntity.hpp \
+ Sources/Server/Events/EventBus.hpp Sources/Server/Events/Event.hpp \
  Sources/Server/Systems/Inventory/InventoryManager.hpp

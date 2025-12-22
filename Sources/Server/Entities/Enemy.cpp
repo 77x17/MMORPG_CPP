@@ -3,7 +3,7 @@
 #include "Shared/Constants.hpp"
 #include "Shared/Utils.hpp"
 
-#include <iostream>
+#include "Server/Systems/Log/LogSystem.hpp"
 
 Enemy::Enemy(int id, const sf::Vector2f &startPosition) 
 : Entity(id, sf::Vector2f( ENEMY_WIDTH, ENEMY_HEIGHT )),
@@ -41,6 +41,8 @@ void Enemy::takeDamage(int damage) {
     if (health <= 0) {
         health = 0;
         destroy();
+
+        LogSystem::addMessage("[Enemy] ID: " + std::to_string(id) + " died!");
     }
 }
 

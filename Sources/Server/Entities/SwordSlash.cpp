@@ -52,3 +52,7 @@ void SwordSlash::onHit(Enemy &enemy) {
     sf::Vector2f direction = normalize(enemy.getPosition() - position);
     enemy.applyImpulse(direction * knockbackStrength);
 }
+
+std::string SwordSlash::getName() const {
+    return "SWORDSLASH";
+}

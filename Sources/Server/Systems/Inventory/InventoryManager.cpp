@@ -7,8 +7,6 @@
 
 #include "Server/Systems/Inventory/json.hpp"
 
-#include <iostream>
-
 using json = nlohmann::json;
 
 static json loadPlayerJson(int playerId) {
