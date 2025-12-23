@@ -38,57 +38,47 @@ sf::Font Font::font;
 std::deque<std::string> LogSystem::logs;
 
 void syncGameWorldFromClients(GameWorld &gameWorld, InputManager &inputManager, InventorySystem &inventorySystem, InventorySyncSystem &inventorySyncSystem, NetworkServer &networkServer, WorldCollisionSyncSystem &worldCollisionSyncSystem) {
-    std::vector<NewClientEvent> & newClientEvents = networkServer.fetchNewClients();
-    if (newClientEvents.size()) {
-        for (NewClientEvent &event : newClientEvents) {
-            gameWorld.addPlayer(event.clientId);
-            inputManager.clearClientQueue(event.clientId);
+    std::vector<NetworkEvent> events;
+    networkServer.fetchEvents(events);
+    for (NetworkEvent &event : events) {
+        switch (event.type) {
+            case NetworkEventType::NewClient:
+                gameWorld.addPlayer(event.clientId);
+                inputManager.clearClientQueue(event.clientId);
 
-            inventorySyncSystem.syncInventoryToClient(event.clientId);
-            inventorySyncSystem.syncEquipmentToClient(event.clientId);
-
-            worldCollisionSyncSystem.syncToClient(event.clientId);
-        }
-        newClientEvents.clear();
-    }
-
-    std::vector<NewInputEvent> & newInputEvents = networkServer.fetchInputs();
-    if (newInputEvents.size()) {
-        for (NewInputEvent &event : newInputEvents) {
-            inputManager.pushClientInput(event.clientId, event.input);
-        }
-        newInputEvents.clear();
-    }
-
-    std::vector<DeleteClientEvent> & deleteClientEvents = networkServer.fetchDeleteClients();
-    if (deleteClientEvents.size()) {
-        for (DeleteClientEvent &event : deleteClientEvents) {
-            gameWorld.removePlayer(event.clientId);
-        }
-        deleteClientEvents.clear();
-    }
-
-    std::vector<MoveItemEvent> & moveItemEvents = networkServer.fetchMoveItems();
-    if (moveItemEvents.size()) {
-        for (MoveItemEvent &event : moveItemEvents) {
-            Player *player = gameWorld.getPlayer(event.clientId);
-            if (inventorySystem.moveItem(player, event.from, event.to)) {
-                inventorySyncSystem.syncInventoryToClient(event.clientId);
-            }
-        }
-        moveItemEvents.clear();
-    }
-
-    std::vector<EquipItemEvent> & equipItemEvents = networkServer.fetchEquipItems();
-    if (equipItemEvents.size()) {
-        for (EquipItemEvent &event : equipItemEvents) {
-            Player *player = gameWorld.getPlayer(event.clientId);
-            if (inventorySystem.equipItem(player, event.fromInventory, event.toEquipment)) {
                 inventorySyncSystem.syncInventoryToClient(event.clientId);
                 inventorySyncSystem.syncEquipmentToClient(event.clientId);
-            }
+
+                worldCollisionSyncSystem.syncToClient(event.clientId);
+
+                break;
+            case NetworkEventType::Input:
+                inputManager.pushClientInput(event.clientId, event.input);
+                
+                break;
+            case NetworkEventType::Disconnect:
+                gameWorld.removePlayer(event.clientId);
+
+                break;
+            case NetworkEventType::MoveItem:
+                
+                if (Player *player = gameWorld.getPlayer(event.clientId);
+                    player != nullptr && inventorySystem.moveItem(player, event.from, event.to)) {
+                    inventorySyncSystem.syncInventoryToClient(event.clientId);
+                }
+
+                break;
+            case NetworkEventType::EquipItem:
+                if (Player *player = gameWorld.getPlayer(event.clientId);
+                    player != nullptr && inventorySystem.equipItem(player, event.from, event.to)) {
+                    inventorySyncSystem.syncInventoryToClient(event.clientId);
+                    inventorySyncSystem.syncEquipmentToClient(event.clientId);
+                }
+            
+                break;
+            default:
+                break;
         }
-        equipItemEvents.clear();
     }
 }
 
@@ -127,7 +117,7 @@ int main() {
     worldCollisionSystem.loadStaticCollisions();
 
     sf::RenderWindow window({ WINDOW_WIDTH, WINDOW_HEIGHT }, "[Server]", sf::Style::Close);
-    window.setVerticalSyncEnabled(true);
+    
     bool isFullscreen = false;
     Renderer renderer(window);
     Font::loadFromFile("Assets/Roboto_Mono.ttf");
@@ -180,10 +170,9 @@ int main() {
             }
         }
 
-        networkServer.poll();
-
         syncGameWorldFromClients(gameWorld, inputManager, inventorySystem, inventorySyncSystem, networkServer, worldCollisionSyncSystem);
-    
+        networkServer.cleanupDisconnectedClients();
+
         if (accumulator >= SERVER_TICK) {
             accumulator -= SERVER_TICK;
 

@@ -11,10 +11,7 @@ Build/Server/Systems/Inventory/InventorySyncSystem.o: \
  Sources/Server/Systems/Inventory/ItemSlot.hpp \
  Sources/Server/Systems/Inventory/Equipment.hpp \
  Sources/Server/Network/NetworkServer.hpp \
- Sources/Server/Core/ClientSession.hpp \
- Sources/Server/Network/Events/NewClientEvent.hpp \
- Sources/Server/Network/Events/NewInputEvent.hpp \
- Sources/Shared/InputState.hpp \
- Sources/Server/Network/Events/DeleteClientEvent.hpp \
- Sources/Server/Network/Events/MoveItemEvent.hpp \
- Sources/Server/Network/Events/EquipItemEvent.hpp
+ Sources/Server/Network/ClientSession.hpp \
+ Sources/Server/Utils/ThreadSafeQueue/ThreadSafeQueue.hpp \
+ Sources/Server/Network/NetworkEvent.hpp Sources/Shared/InputState.hpp \
+ Sources/Server/Network/OutgoingPacket.hpp

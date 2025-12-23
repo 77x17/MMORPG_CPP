@@ -1,44 +1,58 @@
 #pragma once
 
+#include <thread>
+#include <atomic>
+
 #include <SFML/Network/TcpListener.hpp>
 #include <SFML/Network/UdpSocket.hpp>
 #include <SFML/Network/SocketSelector.hpp>
 #include <SFML/Network/Packet.hpp>
 #include <vector>
 
-#include "Server/Core/ClientSession.hpp"
+#include "Server/Network/ClientSession.hpp"
 
-#include "Server/Network/Events/NewClientEvent.hpp"
-#include "Server/Network/Events/NewInputEvent.hpp"
-#include "Server/Network/Events/DeleteClientEvent.hpp"
-#include "Server/Network/Events/MoveItemEvent.hpp"
-#include "Server/Network/Events/EquipItemEvent.hpp"
+#include "Server/Utils/ThreadSafeQueue/ThreadSafeQueue.hpp"
+#include "Server/Network/NetworkEvent.hpp"
+#include "Server/Network/OutgoingPacket.hpp"
 
 class NetworkServer {
 private:
+    // === THREAD ===
+    std::thread networkThread;
+    std::atomic<bool> running{ false };
+
+    // === SOCKET ===
     sf::TcpListener    listener;
     sf::UdpSocket      udp;
     sf::SocketSelector selector;
 
-    std::vector<ClientSession>     clients;
+    std::vector<ClientSession> clients;
 
-    std::vector<NewClientEvent>    pendingNewClients;
-    std::vector<NewInputEvent>     pendingInputs;
-    std::vector<DeleteClientEvent> pendingDeleteClients;
-    std::vector<MoveItemEvent>     pendingMoveItems;
-    std::vector<EquipItemEvent>    pendingEquipItems;
+    // === QUEUE ===
+    ThreadSafeQueue<NetworkEvent>   incomingEvents;
+    ThreadSafeQueue<OutgoingPacket> outgoingPackets;
+
+private:
+    // === THREAD ===
+    void networkLoop();
+    bool pollTcp();
+    bool pollUdp();
+    bool flushOutgoing();
+
+    bool runTcp(unsigned short port);
+    bool bindUdp(unsigned short port);
+
+    void acceptClient();
+    void handleTcpPacket(ClientSession &client);
 
 public:
     NetworkServer() = default;
     ~NetworkServer();
 
-    bool runTcp(unsigned short port);
-    bool bindUdp(unsigned short port);
     bool start(unsigned short tcpPort, unsigned short udpPort);
+    void stop();
 
     bool isValidClientId(int id) const;
-
-    void poll();
 
     void sendToClientUdp(ClientSession &client, sf::Packet &packet);
     void sendToClientTcp(int clientId, sf::Packet &packet);
@@ -47,11 +61,10 @@ public:
     std::vector<ClientSession> & getClients();
     const std::vector<ClientSession> & getClients() const;
 
-    std::vector<NewClientEvent>    & fetchNewClients();
-    std::vector<NewInputEvent>     & fetchInputs();
-    std::vector<DeleteClientEvent> & fetchDeleteClients();
-    std::vector<MoveItemEvent>     & fetchMoveItems();
-    std::vector<EquipItemEvent>    & fetchEquipItems();
+    void fetchEvents(std::vector<NetworkEvent> &outEvents);
+    void sendAsync(int clientId, sf::Packet &packet, bool udp);
+
+    void cleanupDisconnectedClients();
 
     void close();
 };

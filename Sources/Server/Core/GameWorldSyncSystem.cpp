@@ -71,6 +71,7 @@ void GameWorldSyncSystem::syncToClients() {
                              << enemy->getHealth();
         }
 
+        networkServer.sendAsync(client.id, worldStatePacket, true);
         networkServer.sendToClientUdp(client, worldStatePacket);
     }
 }

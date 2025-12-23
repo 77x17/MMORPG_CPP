@@ -4,6 +4,8 @@
 #include "Server/Entities/DamageEntity.hpp"
 #include "Server/Entities/Enemy.hpp"
 
+#include <iostream>
+
 ChunkCoord ChunkSystem::getChunk(const sf::Vector2f& pos) const {
     return {
         static_cast<int>(pos.x) / CHUNK_SIZE,
@@ -36,6 +38,12 @@ void ChunkSystem::addPlayer(Player* player) {
 
 void ChunkSystem::removePlayer(Player* player) {
     ChunkCoord chunk = getChunk(player->getPosition());
+    playerChunks[chunk].erase(player);
+
+    chunk = getChunk(player->getOldPosition());
+    if (playerChunks[chunk].find(player) != playerChunks[chunk].end()) {
+        std::cout << "VCLVCLVCLVCLVCL\n";
+    }
     playerChunks[chunk].erase(player);
 }
 
@@ -70,8 +78,11 @@ void ChunkSystem::addDamageEntity(DamageEntity* entity) {
 }
 
 void ChunkSystem::removeDamageEntity(DamageEntity* entity) {
-    ChunkCoord c = getChunk(entity->getPosition());
-    damageEntityChunks[c].erase(entity);
+    ChunkCoord chunk = getChunk(entity->getPosition());
+    damageEntityChunks[chunk].erase(entity);
+
+    chunk = getChunk(entity->getOldPosition());
+    damageEntityChunks[chunk].erase(entity);
 }
 
 void ChunkSystem::updateDamageEntity(DamageEntity* entity, const sf::Vector2f& oldPosition) {
@@ -107,6 +118,9 @@ void ChunkSystem::addEnemy(Enemy* enemy) {
 
 void ChunkSystem::removeEnemy(Enemy* enemy) {
     ChunkCoord chunk = getChunk(enemy->getPosition());
+    enemyChunks[chunk].erase(enemy);
+    
+    chunk = getChunk(enemy->getOldPosition());
     enemyChunks[chunk].erase(enemy);
 }
 

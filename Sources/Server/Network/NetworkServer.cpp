@@ -2,6 +2,8 @@
 
 #include <SFML/Network/Packet.hpp>
 
+#include <algorithm>
+
 #include "Server/Systems/Log/LogSystem.hpp"
 
 NetworkServer::~NetworkServer() {
@@ -35,10 +37,50 @@ bool NetworkServer::start(unsigned short tcpPort, unsigned short udpPort) {
     if (!(runTcp(tcpPort) && bindUdp(udpPort))) {
         return false;
     } 
+
+    running = true;
+    networkThread = std::thread(&NetworkServer::networkLoop, this);
     LogSystem::addMessage("[Network] Server running TCP on port " + std::to_string(tcpPort) + "...");  
     LogSystem::addMessage("[Network] Server running UDP on port " + std::to_string(udpPort) + "...");     
 
     return true;
+}
+
+void NetworkServer::stop() {
+    running = false;
+    if (networkThread.joinable()) {
+        networkThread.join();
+    }
+}
+
+void NetworkServer::networkLoop() {
+    while (running) {
+        bool didWork = false;
+
+        didWork |= flushOutgoing();
+        didWork |= pollTcp();
+        didWork |= pollUdp();
+
+        if (!didWork) {
+            std::this_thread::sleep_for(std::chrono::microseconds(100));
+        }
+    }
+}
+
+bool NetworkServer::flushOutgoing() {
+    bool didWork = false;
+    OutgoingPacket outgoingPacket;
+    while (outgoingPackets.tryPop(outgoingPacket)) {
+        ClientSession &client = getClient(outgoingPacket.clientId);
+        if (outgoingPacket.useUdp) {
+            udp.send(outgoingPacket.packet, client.udpId, client.udpPort);
+        }
+        else {
+            client.tcp->send(outgoingPacket.packet);
+        }
+        didWork = true;
+    }
+    return didWork;
 }
 
 bool NetworkServer::isValidClientId(int id) const {
@@ -47,112 +89,149 @@ bool NetworkServer::isValidClientId(int id) const {
     for (const ClientSession &client : clients) {
         if (client.id == id) return false;
     }
-    for (const NewClientEvent & event : pendingNewClients) {
-        if (event.clientId == id) return false;
-    }
+    // for (const NewClientEvent & event : pendingNewClients) {
+    //     if (event.clientId == id) return false;
+    // }
     return true;
 }
 
-void NetworkServer::poll() {
-    // === Non-blocking: Accept new TCP clients / read TCP inputs ===
-    if (selector.wait(sf::milliseconds(1))) {
-        // === Accept new client ===
-        if (selector.isReady(listener)) {
-            sf::TcpSocket *newTcp = new sf::TcpSocket();
-            if (listener.accept(*newTcp) == sf::Socket::Done) {
-                newTcp->setBlocking(false);
+void NetworkServer::acceptClient() {
+    sf::TcpSocket *newTcp = new sf::TcpSocket();
+    if (listener.accept(*newTcp) == sf::Socket::Done) {
+        newTcp->setBlocking(false);
 
-                // === Pending create new player ===
-                ClientSession newClient;
-                newClient.id  = -1;
-                newClient.tcp = newTcp;
-                clients.push_back(newClient);
-                selector.add(*newTcp);
+        // === Pending create new player ===
+        ClientSession newClient;
+        newClient.id  = -1;
+        newClient.tcp = newTcp;
+        clients.push_back(newClient);
+        selector.add(*newTcp);
 
-                LogSystem::addMessage("[Network] Pending TCP from: " + newTcp->getRemoteAddress().toString() + ":" + std::to_string(newTcp->getRemotePort()));
+        LogSystem::addMessage("[Network] Pending TCP from: " + newTcp->getRemoteAddress().toString() + ":" + std::to_string(newTcp->getRemotePort()));
+    }
+    else {
+        delete newTcp;
+    }
+}
+
+void NetworkServer::handleTcpPacket(ClientSession &client) {
+    sf::Packet         packet;
+    sf::Socket::Status status = client.tcp->receive(packet);
+    if (status == sf::Socket::Done) {
+        std::string type; packet >> type;
+        if (type == "Login") {
+            int requestedId; packet >> requestedId;
+
+            if (isValidClientId(requestedId) == false) {
+                sf::Packet packet; packet << std::string("Login_Fail");
+                client.tcp->send(packet);
             }
-            else {
-                delete newTcp;
+            else {   
+                client.id = requestedId;
+
+                NetworkEvent event;
+                event.type = NetworkEventType::NewClient;
+                event.clientId = requestedId;
+                incomingEvents.push(event);
+
+                sf::Packet packet; packet << std::string("Assign_ID") << requestedId;
+
+                sendAsync(requestedId, packet, false);
+                
+                LogSystem::addMessage("[Network] Register ID: " + std::to_string(requestedId) + " for: " + client.tcp->getRemoteAddress().toString() + ":" + std::to_string(client.tcp->getRemotePort()));
             }
         }
+        else if (type == "MoveItem") {
+            int from, to;
+            packet >> from >> to;
+            
+            NetworkEvent event;
+            event.type = NetworkEventType::MoveItem;
+            event.from = from, event.to = to;
+            incomingEvents.push(event);
+        }
+        else if (type == "EquipItem") {
+            int fromInventory, toEquipment;
+            packet >> fromInventory >> toEquipment;
+            
+            NetworkEvent event;
+            event.type = NetworkEventType::EquipItem;
+            event.from = fromInventory, event.to = toEquipment;
+            incomingEvents.push(event);
+        }
+        else if (type == "TcpPing") {
+            uint64_t clientTime; packet >> clientTime;
+            
+            sf::Packet replyPacket;
+            replyPacket << "TcpPing" << clientTime;
 
-        // === Handle client packets ===
-        for (size_t i = 0; i < clients.size(); ++i) {
-            sf::TcpSocket &tcpSocket = *clients[i].tcp;
-            if (selector.isReady(tcpSocket)) {
-                sf::Packet         packet;
-                sf::Socket::Status status = tcpSocket.receive(packet);
-                if (status == sf::Socket::Done) {
-                    std::string type; packet >> type;
-                    if (type == "Login") {
-                        int requestedId; packet >> requestedId;
+            client.tcp->send(replyPacket);
+        }
+        else {
+            LogSystem::addMessage("[Network] TCP received undefine type " + type);
+        }
+    }
+    else if (status == sf::Socket::Disconnected) {
+        LogSystem::addMessage("[Network] Disconnected TCP from " + client.tcp->getRemoteAddress().toString() + ":" + std::to_string(client.tcp->getRemotePort()));
+        selector.remove(*client.tcp);
+        
+        client.tcp->disconnect();
+        
+        client.state = ClientState::Disconnected;
+        
+        if (client.id != -1) {
+            NetworkEvent event;
+            event.type = NetworkEventType::Disconnect;
+            event.clientId = client.id;
+            incomingEvents.push(event);
+        }
+    }
+}
 
-                        if (isValidClientId(requestedId) == false) {
-                            sf::Packet packet; packet << std::string("Login_Fail");
-                            tcpSocket.send(packet);
-                        }
-                        else {   
-                            clients[i].id = requestedId;
-    
-                            NewClientEvent newClientEvent;
-                            newClientEvent.clientId = requestedId;
-                            pendingNewClients.push_back(newClientEvent);
-    
-                            sf::Packet packet; packet << std::string("Assign_ID") << requestedId;
-                            tcpSocket.send(packet);
-                            
-                            LogSystem::addMessage("[Network] Register ID: " + std::to_string(requestedId) + " for: " + tcpSocket.getRemoteAddress().toString() + ":" + std::to_string(tcpSocket.getRemotePort()));
-                        }
-                    }
-                    else if (type == "MoveItem") {
-                        int from, to;
-                        packet >> from >> to;
-                        pendingMoveItems.push_back({ clients[i].id, from, to });
-                    }
-                    else if (type == "EquipItem") {
-                        int fromInventory, toEquipment;
-                        packet >> fromInventory >> toEquipment;
-                        pendingEquipItems.push_back({ clients[i].id, fromInventory, toEquipment });
-                    }
-                    else if (type == "TcpPing") {
-                        sendToClientTcp(clients[i].id, packet);
-                    }
-                    else {
-                        LogSystem::addMessage("[Network] TCP received undefine type " + type);
-                    }
-                }
-                else 
-                if (status == sf::Socket::Disconnected) {
-                    LogSystem::addMessage("[Network] Disconnected TCP from " + tcpSocket.getRemoteAddress().toString() + ":" + std::to_string(tcpSocket.getRemotePort()));
-                    selector.remove(tcpSocket);
-                    
-                    tcpSocket.disconnect();
-                    
-                    delete clients[i].tcp;
-                    
-                    if (clients[i].id != -1) {
-                        DeleteClientEvent deleteClientEvent;
-                        deleteClientEvent.clientId = clients[i].id;
-                        pendingDeleteClients.push_back(deleteClientEvent);
-                    }
+bool NetworkServer::pollTcp() {
+    bool didWork = false;
+    // === Non-blocking: Accept new TCP clients / read TCP inputs ===
+    // if (selector.wait(sf::microseconds(50))) {
+    if (selector.wait(sf::milliseconds(0))) {
+        if (selector.isReady(listener)) {
+            acceptClient();
+            didWork = true;
+        }
 
-                    
-                    clients.erase(clients.begin() + i);
-                    --i;
-                }
+        for (ClientSession &client : clients) {
+            if (selector.isReady(*client.tcp)) {
+                handleTcpPacket(client);
+                didWork = true;
             }
         }
     }
+    return didWork;
+}
 
+bool NetworkServer::pollUdp() {
+    bool didWork = false;
     // === Receive UDP ===
-    while (true) {
+    for (int i = 0; i < 16; ++i) {
         sf::Packet         packet;
         sf::IpAddress      sender;
         unsigned short     senderPort;
         sf::Socket::Status status = udp.receive(packet, sender, senderPort);
         if (status != sf::Socket::Done) break;
 
+        didWork = true;
+
         std::string type; packet >> type;
+        // === UDP Ping === 
+        if (type == "UdpPing") {
+            uint64_t clientTime; packet >> clientTime;
+            
+            sf::Packet replyPacket;
+            replyPacket << "UdpPing" << clientTime;
+
+            udp.send(replyPacket, sender, senderPort);
+            continue;
+        }
+        // === Gameplay ===
         if (type == "Assign_UDP") {
             int clientId; packet >> clientId;
             for (ClientSession &client : clients) {
@@ -165,27 +244,20 @@ void NetworkServer::poll() {
             }
         }
         else if (type == "Input") {
-            int clientId;
-            InputState input;
-
-            packet >> clientId
-                   >> input.seq
-                   >> input.movementDir.x
-                   >> input.movementDir.y
-                   >> input.isShooting;
-
-            NewInputEvent newInputEvent;
-            newInputEvent.clientId = clientId;
-            newInputEvent.input    = input;
-            pendingInputs.push_back(newInputEvent);
-        }
-        else if (type == "UdpPing") {
-            udp.send(packet, sender, senderPort);
+            NetworkEvent event;
+            event.type = NetworkEventType::Input;
+            packet >> event.clientId
+                   >> event.input.seq
+                   >> event.input.movementDir.x
+                   >> event.input.movementDir.y
+                   >> event.input.isShooting;
+            incomingEvents.push(event);
         }
         else {
             LogSystem::addMessage("[Network] UDP received undefine type: " + type);
         }
     }
+    return didWork;
 }
 
 void NetworkServer::sendToClientUdp(ClientSession &client, sf::Packet &packet) {    
@@ -218,24 +290,27 @@ const std::vector<ClientSession> & NetworkServer::getClients() const {
     return clients;
 }
 
-std::vector<NewClientEvent> & NetworkServer::fetchNewClients() {
-    return pendingNewClients;
+void NetworkServer::fetchEvents(std::vector<NetworkEvent> &outEvents) {
+    incomingEvents.drain(outEvents);
 }
 
-std::vector<NewInputEvent> & NetworkServer::fetchInputs() {
-    return pendingInputs;
+void NetworkServer::sendAsync(int clientId, sf::Packet &packet, bool udp) {
+    outgoingPackets.push({ clientId, udp, packet });
 }
 
-std::vector<DeleteClientEvent> & NetworkServer::fetchDeleteClients() {
-    return pendingDeleteClients;
-}
-
-std::vector<MoveItemEvent> & NetworkServer::fetchMoveItems() {
-    return pendingMoveItems;
-}
-
-std::vector<EquipItemEvent> & NetworkServer::fetchEquipItems() {
-    return pendingEquipItems;
+void NetworkServer::cleanupDisconnectedClients() {
+    clients.erase(
+        std::remove_if(clients.begin(), clients.end(), 
+            [] (ClientSession &client) {
+                if (client.state == ClientState::Disconnected) {
+                    delete client.tcp;
+                    return true;
+                }
+                return false;
+            }
+        ),
+        clients.end()
+    );
 }
 
 void NetworkServer::close() {

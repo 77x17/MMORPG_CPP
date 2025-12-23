@@ -61,6 +61,7 @@ public:
     // non-blocking: poll for incoming packets
     void pollTCP();
     void pollUDP();
+    void poll();
 
     int getClientId() const;
 

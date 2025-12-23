@@ -91,7 +91,10 @@ void InGameState::update(float dt) {
         }
     }
 
-    networkClient.pollUDP();
+    networkClient.poll();
+
+    // networkClient.pollTCP();
+    // networkClient.pollUDP();
     
     WorldSnapshot &worldSnapshot = networkClient.getWorldSnapshot();
     if (worldSnapshot.appear) {
@@ -99,7 +102,6 @@ void InGameState::update(float dt) {
         entityManager.applySnapshot(worldSnapshot, networkClient.getClientId(), pendingInputs);
     }
     
-    networkClient.pollTCP();
 
     ChunkSnapshot &chunkSnapshot = networkClient.getChunkSnapshot();
     if (chunkSnapshot.appear) {

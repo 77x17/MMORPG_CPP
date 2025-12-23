@@ -12,11 +12,8 @@ Build/Server/Debug/DebugSystem.o: Sources/Server/Debug/DebugSystem.cpp \
  Sources/Server/Systems/Inventory/Equipment.hpp \
  Sources/Server/Events/EventBus.hpp Sources/Server/Events/Event.hpp \
  Sources/Server/Network/NetworkServer.hpp \
- Sources/Server/Core/ClientSession.hpp \
- Sources/Server/Network/Events/NewClientEvent.hpp \
- Sources/Server/Network/Events/NewInputEvent.hpp \
- Sources/Shared/InputState.hpp \
- Sources/Server/Network/Events/DeleteClientEvent.hpp \
- Sources/Server/Network/Events/MoveItemEvent.hpp \
- Sources/Server/Network/Events/EquipItemEvent.hpp \
+ Sources/Server/Network/ClientSession.hpp \
+ Sources/Server/Utils/ThreadSafeQueue/ThreadSafeQueue.hpp \
+ Sources/Server/Network/NetworkEvent.hpp Sources/Shared/InputState.hpp \
+ Sources/Server/Network/OutgoingPacket.hpp \
  Sources/Server/Systems/Log/LogSystem.hpp
