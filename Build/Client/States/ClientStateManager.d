@@ -5,6 +5,8 @@ Build/Client/States/ClientStateManager.o: \
  Sources/Client/States/ClientStateType.hpp \
  Sources/Client/Network/NetworkClient.hpp \
  Sources/Client/Network/LoginStatusType.hpp \
+ Sources/Client/PingTracker/TcpPingTracker.hpp \
+ Sources/Client/PingTracker/UdpPingTracker.hpp \
  Sources/Client/Snapshots/ChunkSnapshot.hpp Sources/Shared/AABB.hpp \
  Sources/Client/Snapshots/EquipmentSnapshot.hpp \
  Sources/Client/Snapshots/InventorySnapshot.hpp \
@@ -21,9 +23,11 @@ Build/Client/States/ClientStateManager.o: \
  Sources/Client/Entities/RemotePlayer.hpp \
  Sources/Client/Entities/RemoteProjectile.hpp \
  Sources/Client/Entities/RemoteSwordSlash.hpp \
+ Sources/Client/FPSCounter/FPSCounter.hpp \
  Sources/Client/Inventory/Inventory.hpp \
  Sources/Client/Inventory/ItemSlot.hpp \
  Sources/Client/Inventory/Equipment.hpp \
- Sources/Client/Renderer/Renderer.hpp Sources/Client/UI/InventoryUI.hpp \
+ Sources/Client/Renderer/DebugInfo.hpp \
  Sources/Client/Renderer/DebugRenderer.hpp \
+ Sources/Client/Renderer/Renderer.hpp Sources/Client/UI/InventoryUI.hpp \
  Sources/Client/World/WorldCollision.hpp

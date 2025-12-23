@@ -37,14 +37,13 @@ InventoryUI &Renderer::getInventoryUI() {
 }
 
 void Renderer::updateCamera(const EntityManager &entityManager, int clientId) {
-    if (not entityManager.findPlayer(clientId)) {
+    const RemotePlayer *player = entityManager.getPlayer(clientId);
+    if (player == nullptr) {
         return;
     }
 
-    const RemotePlayer &player = entityManager.getPlayer(clientId);
-
     sf::Vector2f current = worldView.getCenter();
-    sf::Vector2f target  = player.localPosition;
+    sf::Vector2f target  = player->localPosition;
 
     sf::Vector2f smooth = current + (target - current) * 0.15f;
     smooth.x = std::floor(smooth.x);
@@ -180,13 +179,4 @@ void Renderer::render(const EntityManager &entityManager, int clientId) {
 void Renderer::renderUI(const Inventory &inventory, const Equipment &equipment) {
     window.setView(uiView);
     drawUI(inventory, equipment);
-
-    sf::Text position;
-    position.setFont(font);
-    position.setCharacterSize(10.0f);
-    position.setFillColor(sf::Color::White);
-    position.setPosition(10.0f, 10.0f);
-    position.setString(std::to_string(static_cast<int>(worldView.getCenter().x)) + " " + std::to_string(static_cast<int>(worldView.getCenter().y)));
-
-    window.draw(position);
 }

@@ -8,6 +8,9 @@
 
 #include "Client/Network/LoginStatusType.hpp"
 
+#include "Client/PingTracker/TcpPingTracker.hpp"
+#include "Client/PingTracker/UdpPingTracker.hpp"
+
 #include "Client/Snapshots/ChunkSnapshot.hpp"
 #include "Client/Snapshots/EquipmentSnapshot.hpp"
 #include "Client/Snapshots/InventorySnapshot.hpp"
@@ -32,6 +35,9 @@ private:
     WorldCollisionSnapshot worldCollisionSnapshot;
     WorldSnapshot          worldSnapshot;
 
+    TcpPingTracker tcpPingTracker;
+    UdpPingTracker udpPingTracker;
+
 public:
     int assignedId = -1;
 
@@ -41,6 +47,8 @@ public:
     bool connectTcp(const float &timeoutSeconds);
     bool bindUdp();
     bool connectAll(const float &timeoutSeconds = 1.0f);
+
+    void update(float dt);
 
     // non-blocking: send input via TCP
     void sendInputPacket(int seq, const sf::Vector2f &moveDir, bool isShooting);
@@ -63,6 +71,9 @@ public:
     InventorySnapshot & getInventorySnapshot();
     WorldCollisionSnapshot & getWorldCollisionSnapshot();
     WorldSnapshot & getWorldSnapshot();
+
+    int getTcpPing() const;
+    int getUdpPing() const;
 
     void close();
 };

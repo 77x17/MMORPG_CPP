@@ -50,6 +50,24 @@ bool NetworkClient::connectAll(const float& timeoutSeconds) {
     return false;
 }
 
+void NetworkClient::update(float dt) {
+    tcpPingTracker.update(dt);
+    udpPingTracker.update(dt);
+
+    if (tcpPingTracker.shouldSendPing()) {
+        sf::Packet packet;
+        packet << "TcpPing" << TcpPingTracker::nowMs();
+        tcp.send(packet);
+        tcpPingTracker.onPingSent();
+    }
+    if (udpPingTracker.shouldSendPing()) {
+        sf::Packet packet;
+        uint64_t time = udpPingTracker.onPingSent();
+        packet << "UdpPing" << time;
+        udp.send(packet, host, udpPort);
+    }
+}
+
 void NetworkClient::sendInputPacket(int seq, const sf::Vector2f &moveDir, bool isShooting) {
     sf::Packet packet;
     packet << std::string("Input") << assignedId << seq << moveDir.x << moveDir.y << isShooting;
@@ -147,6 +165,10 @@ void NetworkClient::pollTCP() {
             chunkSnapshot.chunks.push_back({ sf::Vector2f(x, y), sf::Vector2f(size, size) });
         }
     } 
+    else if (type == "TcpPing") {
+        uint64_t timeMs; packet >> timeMs;
+        tcpPingTracker.onPingResponse(timeMs);
+    }
     else {
         std::cout << "[Network] - Unknown pollReceive() TCP msg type: " << type << '\n';
     }
@@ -224,6 +246,10 @@ void NetworkClient::pollUDP() {
             worldSnapshot.enemies.push_back(enemySnapshot);
         }
     }
+    else if (type == "UdpPing") {
+        uint64_t timeMs; packet >> timeMs;
+        udpPingTracker.onPingResponse(timeMs);
+    }
     else {
         std::cout << "[Network] - Unknown UDP packet type: " << type << '\n';
     }
@@ -259,6 +285,14 @@ WorldCollisionSnapshot & NetworkClient::getWorldCollisionSnapshot() {
 
 WorldSnapshot & NetworkClient::getWorldSnapshot() {
     return worldSnapshot;
+}
+
+int NetworkClient::getTcpPing() const {
+    return tcpPingTracker.getPing();
+}
+
+int NetworkClient::getUdpPing() const {
+    return udpPingTracker.getPing();
 }
 
 void NetworkClient::close() {

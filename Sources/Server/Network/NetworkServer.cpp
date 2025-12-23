@@ -114,6 +114,9 @@ void NetworkServer::poll() {
                         packet >> fromInventory >> toEquipment;
                         pendingEquipItems.push_back({ clients[i].id, fromInventory, toEquipment });
                     }
+                    else if (type == "TcpPing") {
+                        sendToClientTcp(clients[i].id, packet);
+                    }
                     else {
                         LogSystem::addMessage("[Network] TCP received undefine type " + type);
                     }
@@ -175,6 +178,9 @@ void NetworkServer::poll() {
             newInputEvent.clientId = clientId;
             newInputEvent.input    = input;
             pendingInputs.push_back(newInputEvent);
+        }
+        else if (type == "UdpPing") {
+            udp.send(packet, sender, senderPort);
         }
         else {
             LogSystem::addMessage("[Network] UDP received undefine type: " + type);

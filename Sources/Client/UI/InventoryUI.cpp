@@ -51,7 +51,7 @@ void InventoryUI::setStartPosition(const float &width, const float &height) {
     float subWidth  = (40.0f + 5.0f) * 9 + 5.0f + (40.0f + 5.0f) * 5 + 5.0f + 10.0f;
     float subHeight = (40.0f + 5.0f) * 5 + 5.0f;
     background.setPosition(
-        width / 2 - subWidth / 2, 
+        width  / 2 - subWidth  / 2, 
         height / 2 - subHeight / 2
     );
 

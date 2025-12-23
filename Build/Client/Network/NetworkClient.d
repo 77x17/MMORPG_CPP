@@ -2,6 +2,8 @@ Build/Client/Network/NetworkClient.o: \
  Sources/Client/Network/NetworkClient.cpp \
  Sources/Client/Network/NetworkClient.hpp \
  Sources/Client/Network/LoginStatusType.hpp \
+ Sources/Client/PingTracker/TcpPingTracker.hpp \
+ Sources/Client/PingTracker/UdpPingTracker.hpp \
  Sources/Client/Snapshots/ChunkSnapshot.hpp Sources/Shared/AABB.hpp \
  Sources/Client/Snapshots/EquipmentSnapshot.hpp \
  Sources/Client/Snapshots/InventorySnapshot.hpp \

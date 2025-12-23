@@ -2,19 +2,32 @@
 
 #include <SFML/Graphics/RectangleShape.hpp>
 
-#include "Client/Entities/RemotePlayer.hpp"
-#include "Client/Entities/EntityManager.hpp"
 #include "Client/World/WorldCollision.hpp"
+
 #include "Client/Snapshots/ChunkSnapshot.hpp"
+
+#include "Client/Renderer/DebugInfo.hpp"
+
+#include "Client/Utils/Font.hpp"
 
 #include <iostream>
 
 DebugRenderer::DebugRenderer(sf::RenderWindow &_window) 
 : window(_window) {
+    informationText.setFont(Font::getFont());
+    informationText.setCharacterSize(10.0f);
+    informationText.setFillColor(sf::Color::White);
+    informationText.setPosition(10.0f, 10.0f);
+    
+    setCamera();
 }
 
 void DebugRenderer::applySnapshot(ChunkSnapshot & chunkSnapshot) {
     chunks = chunkSnapshot.chunks;
+}
+
+void DebugRenderer::setCamera() {
+    uiView = window.getDefaultView();
 }
 
 void DebugRenderer::toggle() {
@@ -58,10 +71,32 @@ void DebugRenderer::drawChunks() {
     }
 }
 
-void DebugRenderer::render(const EntityManager &entityManager, WorldCollision &worldCollision) {
+void DebugRenderer::drawInformation(const DebugInfo& debugInfo) {
+    std::string informationString;
+    informationString  =   "[X - Y]: " + std::to_string(static_cast<int>(debugInfo.playerPosition.x)) + " - " + std::to_string(static_cast<int>(debugInfo.playerPosition.y));
+    informationString += "\n[FPS]  : " + std::to_string(static_cast<int>(debugInfo.fps));
+    informationString += "\n[PING] : TCP " + std::to_string(static_cast<int>(debugInfo.tcpPing)) + " ms | UDP " + std::to_string(static_cast<int>(debugInfo.udpPing)) + " ms";
+    informationText.setString(informationString);
+
+    window.draw(informationText);
+}
+
+void DebugRenderer::drawUI(const DebugInfo& debugInfo) {
+    sf::View oldView = window.getView();
+
+    window.setView(uiView);
+
+    drawInformation(debugInfo);
+
+    window.setView(oldView);
+}
+
+void DebugRenderer::render(WorldCollision &worldCollision, const DebugInfo& debugInfo) {
     drawWorldCollision(worldCollision);
-    
+
     if (enabled) {
         drawChunks();
+     
+        drawUI(debugInfo);
     }
 }

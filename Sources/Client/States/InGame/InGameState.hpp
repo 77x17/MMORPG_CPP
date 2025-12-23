@@ -8,11 +8,14 @@ class NetworkClient;
 
 #include "Client/Entities/EntityManager.hpp"
 
+#include "Client/FPSCounter/FPSCounter.hpp"
+
 #include "Client/Inventory/Inventory.hpp"
 #include "Client/Inventory/Equipment.hpp"
 
-#include "Client/Renderer/Renderer.hpp"
+#include "Client/Renderer/DebugInfo.hpp"
 #include "Client/Renderer/DebugRenderer.hpp"
+#include "Client/Renderer/Renderer.hpp"
 
 #include "Client/World/WorldCollision.hpp"
 
@@ -29,6 +32,7 @@ private:
 
     // === Render ===
     Renderer      renderer;
+    DebugInfo     debugInfo;
     DebugRenderer debugRenderer;
 
     // === Input Prediction ===
@@ -36,6 +40,8 @@ private:
     std::vector<InputState> pendingInputs;
 
     float clientAccumulator = 0.0f;
+
+    FPSCounter fpsCounter;
 
 public:
     InGameState(sf::RenderWindow &_window, NetworkClient &_networkClient);

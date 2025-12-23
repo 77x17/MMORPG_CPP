@@ -31,8 +31,6 @@ public:
     const std::unordered_map<int, RemoteProjectile> & getProjectiles() const;
     const std::unordered_map<int, RemoteSwordSlash> & getSwordSlashs() const;
 
-    bool findPlayer(int myId) const;
-
-    RemotePlayer & getPlayer(int myId);
-    const RemotePlayer & getPlayer(int myId) const;
+    RemotePlayer * getPlayer(int myId);
+    const RemotePlayer * getPlayer(int myId) const;
 };

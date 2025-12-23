@@ -27,6 +27,7 @@ void InGameState::handleEvent(const sf::Event &event) {
         }
         else if (event.key.code == sf::Keyboard::F11) {
             renderer.setCamera();
+            debugRenderer.setCamera();
         }
         else if (event.key.code == sf::Keyboard::F3) {
             debugRenderer.toggle();
@@ -83,9 +84,9 @@ void InGameState::update(float dt) {
 
             networkClient.sendInputPacket(input.seq, input.movementDir, input.isShooting);
         
-            if (entityManager.getPlayers().count(networkClient.getClientId()) > 0) {
-                RemotePlayer &localPlayer = entityManager.getPlayer(networkClient.getClientId());
-                localPlayer.localPosition += normalize(input.movementDir) * PLAYER_SPEED * dt;
+            RemotePlayer *localPlayer = entityManager.getPlayer(networkClient.getClientId());
+            if (localPlayer != nullptr) {
+                localPlayer->localPosition += normalize(input.movementDir) * PLAYER_SPEED * dt;
             }
         }
     }
@@ -141,6 +142,17 @@ void InGameState::update(float dt) {
         clientAccumulator -= CLIENT_TICK;
         entityManager.update(CLIENT_TICK, networkClient.getClientId());    
     }
+
+    fpsCounter.update();
+    networkClient.update(dt);
+
+    RemotePlayer *player = entityManager.getPlayer(networkClient.getClientId());
+    if (player != nullptr) {
+        debugInfo.playerPosition = player->localPosition;
+    }
+    debugInfo.fps     = fpsCounter.getFPS();
+    debugInfo.tcpPing = networkClient.getTcpPing();
+    debugInfo.udpPing = networkClient.getUdpPing();
 }
 
 void InGameState::render(sf::RenderWindow &window) {
@@ -149,7 +161,7 @@ void InGameState::render(sf::RenderWindow &window) {
     renderer.render(entityManager, networkClient.getClientId());
 
     // if (debugRenderer.isEnabled()) {
-        debugRenderer.render(entityManager, worldCollision);
+        debugRenderer.render(worldCollision, debugInfo);
     // }
 
     renderer.renderUI(inventory, equipment);

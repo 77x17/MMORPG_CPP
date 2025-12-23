@@ -2,12 +2,13 @@
 
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/Graphics/View.hpp>
+#include <SFML/Graphics/Text.hpp>
 
 #include "Shared/AABB.hpp"
 
-class EntityManager;
 class WorldCollision;
 class ChunkSnapshot;
+class DebugInfo;
 
 class DebugRenderer {
 private:
@@ -16,17 +17,24 @@ private:
 
     std::vector<AABB> chunks;
 
+    sf::View uiView;
+
+    sf::Text informationText;
+
 private:
     void drawWorldCollision(WorldCollision &worldCollision);
     void drawChunks();
+    void drawInformation(const DebugInfo& debugInfo);
+    void drawUI(const DebugInfo& debugInfo);
 
 public:
     DebugRenderer(sf::RenderWindow &_window);
 
     void applySnapshot(ChunkSnapshot & chunkSnapshot);
+    void setCamera();
 
     void toggle();
     bool isEnabled() const;
 
-    void render(const EntityManager &entityManager, WorldCollision &worldCollision);
+    void render(WorldCollision &worldCollision, const DebugInfo& debugInfo);
 };

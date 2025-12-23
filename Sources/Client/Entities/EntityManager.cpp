@@ -153,14 +153,18 @@ const std::unordered_map<int, RemoteSwordSlash> & EntityManager::getSwordSlashs(
     return remoteSwordSlashs;
 }
 
-bool EntityManager::findPlayer(int myId) const {
-    return remotePlayers.count(myId) > 0;
+RemotePlayer * EntityManager::getPlayer(int id) {
+    auto it = remotePlayers.find(id);
+    if (it == remotePlayers.end()) {
+        return nullptr;
+    }
+    return &it->second;
 }
 
-RemotePlayer & EntityManager::getPlayer(int myId) {
-    return remotePlayers.at(myId);
-}
-
-const RemotePlayer & EntityManager::getPlayer(int myId) const {
-    return remotePlayers.at(myId);
+const RemotePlayer * EntityManager::getPlayer(int id) const {
+    const auto it = remotePlayers.find(id);
+    if (it == remotePlayers.end()) {
+        return nullptr;
+    }
+    return &it->second;
 }
