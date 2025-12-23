@@ -6,6 +6,8 @@
 #include <SFML/System/Vector2.hpp>
 #include <vector>
 
+#include "Client/Network/LoginStatusType.hpp"
+
 #include "Client/Snapshots/ChunkSnapshot.hpp"
 #include "Client/Snapshots/EquipmentSnapshot.hpp"
 #include "Client/Snapshots/InventorySnapshot.hpp"
@@ -15,6 +17,8 @@
 class NetworkClient {
 private:
     bool isConnected = false;
+    LoginStatus loginStatus = LoginStatus::None;
+
     sf::TcpSocket      tcp;
     sf::UdpSocket      udp;
     sf::SocketSelector selector;
@@ -42,12 +46,17 @@ public:
     void sendInputPacket(int seq, const sf::Vector2f &moveDir, bool isShooting);
     void sendTcpPacket(sf::Packet &packet);
 
-    // non-blocking: poll for incoming packets
+    void resetLoginStatus();
+    
     void sendLogin(int clientId);
-    int pollLogin();
-    void pollReceive();
+    
+    // non-blocking: poll for incoming packets
+    void pollTCP();
+    void pollUDP();
 
     int getClientId() const;
+
+    LoginStatus getLoginStatus() const;
 
     ChunkSnapshot & getChunkSnapshot();
     EquipmentSnapshot & getEquipmentSnapshot();
