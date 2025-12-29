@@ -16,6 +16,10 @@ private:
     sf::Vector2f velocity;
     sf::Vector2f impulse;
     
+    sf::Vector2f mousePosition;
+    bool         mouseSelected    = false;
+    int          entitySelectedId = -1;
+
     Inventory inventory;
     Equipment equipment;
     
@@ -37,6 +41,14 @@ public:
     void setOldShootDir(const sf::Vector2f &newPosition);
     void setVelocity(const sf::Vector2f &newVelocity);
     void resetProjectileCooldownTimer();
+
+    // === Mouse selected ===
+    void setMousePosition(const sf::Vector2f &newPosition);
+    void setEntitySelectedId(int newId);
+    void toggleMouseSelected();
+    int getEntitySelectedId() const;
+    const sf::Vector2f & getMousePosition() const;
+    bool getMouseSelected() const;
 
     int getHealth() const;
     const sf::Vector2f & getOldShootDir() const;

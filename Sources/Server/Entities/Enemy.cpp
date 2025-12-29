@@ -83,6 +83,10 @@ int Enemy::getHealth() const {
     return health;
 }
 
+int Enemy::getMaxHealth() const {
+    return maxHealth;
+}
+
 const sf::Vector2f & Enemy::getOldShootDir() const {
     return oldShootDir;
 }

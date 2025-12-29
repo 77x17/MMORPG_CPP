@@ -1,6 +1,6 @@
 Build/Server/Core/GameWorldSyncSystem.o: \
  Sources/Server/Core/GameWorldSyncSystem.cpp \
- Sources/Server/Core/GameWorldSynsSystem.hpp \
+ Sources/Server/Core/GameWorldSyncSystem.hpp \
  Sources/Server/Core/GameWorld.hpp \
  Sources/Server/Core/Chunk/ChunkSystem.hpp \
  Sources/Server/Core/Chunk/ChunkCoord.hpp \

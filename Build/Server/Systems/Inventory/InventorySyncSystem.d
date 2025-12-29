@@ -14,4 +14,4 @@ Build/Server/Systems/Inventory/InventorySyncSystem.o: \
  Sources/Server/Network/ClientSession.hpp \
  Sources/Server/Utils/ThreadSafeQueue/ThreadSafeQueue.hpp \
  Sources/Server/Network/NetworkEvent.hpp Sources/Shared/InputState.hpp \
- Sources/Server/Network/OutgoingPacket.hpp
+ Sources/Server/Network/OutgoingPacket.hpp Sources/Shared/PacketType.hpp

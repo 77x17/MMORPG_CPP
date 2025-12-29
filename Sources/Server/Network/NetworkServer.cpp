@@ -6,6 +6,8 @@
 
 #include "Server/Systems/Log/LogSystem.hpp"
 
+#include "Shared/PacketType.hpp"
+
 NetworkServer::~NetworkServer() {
     close();
 }
@@ -73,10 +75,16 @@ bool NetworkServer::flushOutgoing() {
     while (outgoingPackets.tryPop(outgoingPacket)) {
         ClientSession &client = getClient(outgoingPacket.clientId);
         if (outgoingPacket.useUdp) {
-            udp.send(outgoingPacket.packet, client.udpId, client.udpPort);
+            auto status = udp.send(outgoingPacket.packet, client.udpId, client.udpPort);
+            if (status != sf::Socket::Done) {
+                LogSystem::addMessage("[Network] UDP failed on client " + std::to_string(client.id));
+            }
         }
         else {
-            client.tcp->send(outgoingPacket.packet);
+            auto status = client.tcp->send(outgoingPacket.packet);
+            if (status != sf::Socket::Done) {
+                LogSystem::addMessage("[Network] TCP failed on client " + std::to_string(client.id));
+            }
         }
         didWork = true;
     }
@@ -118,12 +126,13 @@ void NetworkServer::handleTcpPacket(ClientSession &client) {
     sf::Packet         packet;
     sf::Socket::Status status = client.tcp->receive(packet);
     if (status == sf::Socket::Done) {
-        std::string type; packet >> type;
-        if (type == "Login") {
+        uint8_t type; packet >> type;
+        if (static_cast<PacketType>(type) == PacketType::Login) {
             int requestedId; packet >> requestedId;
 
             if (isValidClientId(requestedId) == false) {
-                sf::Packet packet; packet << std::string("Login_Fail");
+                sf::Packet packet; 
+                packet << static_cast<uint8_t>(PacketType::Login_Fail);
                 client.tcp->send(packet);
             }
             else {   
@@ -134,38 +143,50 @@ void NetworkServer::handleTcpPacket(ClientSession &client) {
                 event.clientId = requestedId;
                 incomingEvents.push(event);
 
-                sf::Packet packet; packet << std::string("Assign_ID") << requestedId;
-
+                sf::Packet packet; 
+                packet << static_cast<uint8_t>(PacketType::Assign_ID) << requestedId;
                 sendAsync(requestedId, packet, false);
                 
                 LogSystem::addMessage("[Network] Register ID: " + std::to_string(requestedId) + " for: " + client.tcp->getRemoteAddress().toString() + ":" + std::to_string(client.tcp->getRemotePort()));
             }
         }
-        else if (type == "MoveItem") {
+        else if (static_cast<PacketType>(type) == PacketType::MoveItem) {
             int from, to;
             packet >> from >> to;
             
             NetworkEvent event;
             event.type = NetworkEventType::MoveItem;
+            event.clientId = client.id;
             event.from = from, event.to = to;
             incomingEvents.push(event);
         }
-        else if (type == "EquipItem") {
+        else if (static_cast<PacketType>(type) == PacketType::EquipItem) {
             int fromInventory, toEquipment;
             packet >> fromInventory >> toEquipment;
             
             NetworkEvent event;
             event.type = NetworkEventType::EquipItem;
+            event.clientId = client.id;
             event.from = fromInventory, event.to = toEquipment;
             incomingEvents.push(event);
         }
-        else if (type == "TcpPing") {
+        else if (static_cast<PacketType>(type) == PacketType::TcpPing) {
             uint64_t clientTime; packet >> clientTime;
             
             sf::Packet replyPacket;
-            replyPacket << "TcpPing" << clientTime;
+            replyPacket << static_cast<uint8_t>(PacketType::TcpPing) << clientTime;
 
             client.tcp->send(replyPacket);
+        }
+        else if (static_cast<PacketType>(type) == PacketType::MouseSelect) {
+            sf::Vector2f selectPosition;
+            float x, y; packet >> x >> y;
+
+            NetworkEvent event;
+            event.type = NetworkEventType::MouseSelect;
+            event.clientId = client.id;
+            event.from = x, event.to = y;
+            incomingEvents.push(event);
         }
         else {
             LogSystem::addMessage("[Network] TCP received undefine type " + type);
@@ -261,7 +282,10 @@ bool NetworkServer::pollUdp() {
 }
 
 void NetworkServer::sendToClientUdp(ClientSession &client, sf::Packet &packet) {    
-    udp.send(packet, client.udpId, client.udpPort);
+    auto status = udp.send(packet, client.udpId, client.udpPort);
+    if (status != sf::Socket::Done) {
+        LogSystem::addMessage("[UDP] Send failed to client " + std::to_string(client.id));
+    }
 }
 
 void NetworkServer::sendToClientTcp(int clientId, sf::Packet &packet) {    
@@ -294,7 +318,7 @@ void NetworkServer::fetchEvents(std::vector<NetworkEvent> &outEvents) {
     incomingEvents.drain(outEvents);
 }
 
-void NetworkServer::sendAsync(int clientId, sf::Packet &packet, bool udp) {
+void NetworkServer::sendAsync(int clientId, sf::Packet packet, bool udp) {
     outgoingPackets.push({ clientId, udp, packet });
 }
 

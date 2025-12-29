@@ -62,7 +62,7 @@ public:
     const std::vector<ClientSession> & getClients() const;
 
     void fetchEvents(std::vector<NetworkEvent> &outEvents);
-    void sendAsync(int clientId, sf::Packet &packet, bool udp);
+    void sendAsync(int clientId, sf::Packet packet, bool udp);
 
     void cleanupDisconnectedClients();
 

@@ -7,7 +7,8 @@ enum class NetworkEventType {
     Disconnect,
     Input,
     MoveItem,
-    EquipItem
+    EquipItem,
+    MouseSelect
 };
 
 struct NetworkEvent {

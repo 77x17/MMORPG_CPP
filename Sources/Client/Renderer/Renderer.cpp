@@ -5,14 +5,15 @@
 #include <cmath>
 
 #include "Client/Entities/EntityManager.hpp"
+
 #include "Client/Inventory/Inventory.hpp"
 #include "Client/Inventory/Equipment.hpp"
 
-Renderer::Renderer(sf::RenderWindow &_window) : window(_window) {
-    if (!font.loadFromFile("Assets/Roboto_Mono.ttf")) {
-        font.loadFromFile("../Assets/Roboto_Mono.ttf");
-    }
+#include "Client/Snapshots/MouseSelectedSnapshot.hpp"
 
+#include "Client/Utils/Font.hpp"
+
+Renderer::Renderer(sf::RenderWindow &_window) : window(_window) {
     setCamera();
 
     buildBackground();
@@ -54,12 +55,17 @@ void Renderer::updateCamera(const EntityManager &entityManager, int clientId) {
 
 void Renderer::drawEnemies(const EntityManager &entityManager) {
     sf::RectangleShape enemiesShape({ 40, 40 }); enemiesShape.setOrigin(20, 20);
+    enemiesShape.setOutlineThickness(1.0f);
+    enemiesShape.setFillColor(sf::Color::Black);
     for (auto &[id, enemy] : entityManager.getEnemies()) {
         enemiesShape.setPosition(enemy.localPosition);
-        enemiesShape.setFillColor(sf::Color::Black);
 
-        enemiesShape.setOutlineColor(sf::Color::White);
-        enemiesShape.setOutlineThickness(1.0f);
+        if (id == selectedId) {
+            enemiesShape.setOutlineColor(sf::Color::Red);
+        }
+        else {
+            enemiesShape.setOutlineColor(sf::Color::White);
+        }
 
         window.draw(enemiesShape);
     }
@@ -67,16 +73,16 @@ void Renderer::drawEnemies(const EntityManager &entityManager) {
 
 void Renderer::drawPlayers(const EntityManager &entityManager, int clientId) {
     sf::RectangleShape playerShape({ 40, 40 }); playerShape.setOrigin(20, 20);
+    playerShape.setOutlineThickness(1.0f);
+    playerShape.setFillColor(sf::Color::Blue);
     for (auto &[id, player] : entityManager.getPlayers()) {
         playerShape.setPosition(player.localPosition);
-        playerShape.setFillColor(player.id == clientId ? sf::Color::Blue : sf::Color::Red);
 
         if (window.hasFocus() && player.id == clientId) {
             playerShape.setOutlineColor(sf::Color::Yellow);
-            playerShape.setOutlineThickness(1.0f);
         }
         else {
-            playerShape.setOutlineThickness(0.0f);
+            playerShape.setOutlineColor(sf::Color::White);
         }
 
         window.draw(playerShape);
@@ -106,7 +112,7 @@ void Renderer::drawDamageEntities(const EntityManager &entityManager, int client
 
 void Renderer::drawNametags(const EntityManager &entityManager) {
     sf::Text nametag;
-    nametag.setFont(font);
+    nametag.setFont(Font::getFont());
     nametag.setCharacterSize(12);
 
     for (auto &[id, enemy] : entityManager.getEnemies()) {
@@ -128,8 +134,29 @@ void Renderer::drawNametags(const EntityManager &entityManager) {
     }
 }
 
-void Renderer::drawUI(const Inventory &inventory, const Equipment &equipment) {
+void Renderer::drawInventory(const Inventory &inventory, const Equipment &equipment) {
     inventoryUI.draw(inventory, equipment, window);
+}
+
+void Renderer::drawSelectedEntityInfo() {
+    sf::Text label;
+    label.setFont(Font::getFont());
+    label.setCharacterSize(16);
+    label.setPosition({ uiView.getSize().x / 2.0f, 20.0f});
+    label.setString(selectedName + " Id: " + std::to_string(selectedId));
+    sf::FloatRect bounds = label.getLocalBounds();
+    label.setOrigin(bounds.left + bounds.width / 2.0f, bounds.top);
+
+    sf::Text healthbar;
+    healthbar.setFont(Font::getFont());
+    healthbar.setCharacterSize(16);
+    healthbar.setPosition({ uiView.getSize().x / 2.0f, 40.0f});
+    healthbar.setString(std::to_string(selectedHp) + " / " + std::to_string(selectedMaxHp));
+    bounds = healthbar.getLocalBounds();
+    healthbar.setOrigin(bounds.left + bounds.width / 2.0f, bounds.top);
+
+    window.draw(label);
+    window.draw(healthbar);
 }
 
 void Renderer::buildBackground() {
@@ -164,6 +191,17 @@ void Renderer::drawBackground() {
     }
 }
 
+sf::Vector2f Renderer::getWorldPosition(const sf::Vector2i &pixel) const {
+    return window.mapPixelToCoords(pixel, worldView);
+}
+
+void Renderer::applySnapshot(MouseSelectedSnapshot &mouseSelectedSnapshot) {
+    selectedId    = mouseSelectedSnapshot.id;
+    selectedName  = mouseSelectedSnapshot.name;
+    selectedHp    = mouseSelectedSnapshot.hp;
+    selectedMaxHp = mouseSelectedSnapshot.maxHp;
+}
+
 void Renderer::render(const EntityManager &entityManager, int clientId) {
     updateCamera(entityManager, clientId);
     window.setView(worldView);
@@ -178,5 +216,9 @@ void Renderer::render(const EntityManager &entityManager, int clientId) {
 
 void Renderer::renderUI(const Inventory &inventory, const Equipment &equipment) {
     window.setView(uiView);
-    drawUI(inventory, equipment);
+    drawInventory(inventory, equipment);
+
+    if (selectedId != -1) {
+        drawSelectedEntityInfo();
+    }
 }

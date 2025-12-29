@@ -10,6 +10,8 @@ Build/Client/Network/NetworkClient.o: \
  Sources/Client/Snapshots/WorldCollisionSnapshot.hpp \
  Sources/Client/Snapshots/WorldSnapshot.hpp \
  Sources/Client/Snapshots/EnemySnapshot.hpp \
+ Sources/Client/Snapshots/MouseSelectedSnapshot.hpp \
  Sources/Client/Snapshots/PlayerSnapshot.hpp \
  Sources/Client/Snapshots/ProjectileSnapshot.hpp \
- Sources/Client/Snapshots/SwordSlashSnapshot.hpp
+ Sources/Client/Snapshots/SwordSlashSnapshot.hpp \
+ Sources/Shared/PacketType.hpp

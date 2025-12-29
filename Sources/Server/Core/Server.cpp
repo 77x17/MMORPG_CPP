@@ -1,7 +1,7 @@
 #include "Server/Core/Chunk/ChunkSystem.hpp"
 #include "Server/Core/Chunk/DebugChunkSyncSystem.hpp"
 #include "Server/Core/GameWorld.hpp"
-#include "Server/Core/GameWorldSynsSystem.hpp"
+#include "Server/Core/GameWorldSyncSystem.hpp"
 
 #include "Server/Debug/DebugSystem.hpp"
 
@@ -75,6 +75,16 @@ void syncGameWorldFromClients(GameWorld &gameWorld, InputManager &inputManager, 
                     inventorySyncSystem.syncEquipmentToClient(event.clientId);
                 }
             
+                break;
+            case NetworkEventType::MouseSelect:
+                if (Player *player = gameWorld.getPlayer(event.clientId);
+                    player != nullptr) {
+                    int x = event.from, y = event.to;
+
+                    player->setMousePosition(sf::Vector2f( x, y ));
+                    player->toggleMouseSelected();
+                }
+
                 break;
             default:
                 break;

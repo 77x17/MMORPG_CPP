@@ -4,7 +4,7 @@ Build/Server/Core/Server.o: Sources/Server/Core/Server.cpp \
  Sources/Server/Core/Chunk/ChunkCoordHash.hpp \
  Sources/Server/Core/Chunk/DebugChunkSyncSystem.hpp \
  Sources/Server/Core/GameWorld.hpp \
- Sources/Server/Core/GameWorldSynsSystem.hpp \
+ Sources/Server/Core/GameWorldSyncSystem.hpp \
  Sources/Server/Debug/DebugSystem.hpp \
  Sources/Server/Debug/DebugSnapshot.hpp \
  Sources/Server/Entities/EnemiesManager.hpp \

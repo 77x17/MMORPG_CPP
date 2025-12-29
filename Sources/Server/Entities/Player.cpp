@@ -92,3 +92,27 @@ void Player::setVelocity(const sf::Vector2f &newVelocity) {
 void Player::resetProjectileCooldownTimer() {
     projectileCooldownTimer = PROJECTILE_COOLDOWN_TIME;
 }
+
+void Player::setMousePosition(const sf::Vector2f &newPosition) {
+    mousePosition = newPosition;
+}
+
+void Player::setEntitySelectedId(int newId) {
+    entitySelectedId = newId;
+}
+
+int Player::getEntitySelectedId() const {
+    return entitySelectedId;
+}
+
+const sf::Vector2f & Player::getMousePosition() const {
+    return mousePosition;
+}
+
+void Player::toggleMouseSelected() {
+    mouseSelected = !mouseSelected;
+}
+
+bool Player::getMouseSelected() const {
+    return mouseSelected;
+}

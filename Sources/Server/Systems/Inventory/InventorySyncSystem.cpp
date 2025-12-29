@@ -6,6 +6,8 @@
 
 #include "Server/Network/NetworkServer.hpp"
 
+#include "Shared/PacketType.hpp"
+
 InventorySyncSystem::InventorySyncSystem(GameWorld &_gameWorld, NetworkServer &_networkServer) 
 : gameWorld(_gameWorld), networkServer(_networkServer) {
     
@@ -17,7 +19,7 @@ void InventorySyncSystem::syncInventoryToClient(int clientId) {
 
     Inventory &inventory = player->getInventory();
     sf::Packet inventoryPacket;
-    inventoryPacket << "Inventory" << (int)inventory.getSlots().size();
+    inventoryPacket << static_cast<uint8_t>(PacketType::Inventory) << (int)inventory.getSlots().size();
     for (const ItemSlot &slot : inventory.getSlots()) {
         inventoryPacket << slot.id;
     }
@@ -30,7 +32,7 @@ void InventorySyncSystem::syncEquipmentToClient(int clientId) {
 
     Equipment &equipment = player->getEquipment();
     sf::Packet equipmentPacket;
-    equipmentPacket << "Equipment" << equipment.getSize();
+    equipmentPacket << static_cast<uint8_t>(PacketType::Equipment) << equipment.getSize();
     for (int index = 0; index < equipment.getSize(); ++index) {
         equipmentPacket << equipment[index].id;
     }

@@ -14,4 +14,5 @@ Build/Server/Core/Chunk/DebugChunkSyncSystem.o: \
  Sources/Server/Entities/Entity.hpp \
  Sources/Server/Systems/Inventory/Inventory.hpp \
  Sources/Server/Systems/Inventory/ItemSlot.hpp \
- Sources/Server/Systems/Inventory/Equipment.hpp
+ Sources/Server/Systems/Inventory/Equipment.hpp \
+ Sources/Shared/PacketType.hpp

@@ -1,4 +1,4 @@
-#include "Server/Core/GameWorldSynsSystem.hpp"
+#include "Server/Core/GameWorldSyncSystem.hpp"
 
 #include "Server/Core/GameWorld.hpp"
 #include "Server/Network/NetworkServer.hpp"
@@ -71,7 +71,43 @@ void GameWorldSyncSystem::syncToClients() {
                              << enemy->getHealth();
         }
 
+        if (currentPlayer->getMouseSelected()) {
+            worldStatePacket << true;
+            bool find = false;
+            for (const Enemy *enemy : visibleEnemy) {
+                if (enemy->getBounds().contains(currentPlayer->getMousePosition())) {
+                    worldStatePacket << enemy->getId()
+                                     << enemy->getHealth()
+                                     << enemy->getMaxHealth();
+
+                    currentPlayer->setEntitySelectedId(enemy->getId());
+                    
+                    find = true;
+                    break;
+                }
+            }
+            if (!find) {
+                currentPlayer->setEntitySelectedId(-1);
+                worldStatePacket << -1 << -1 << -1;
+            }
+            currentPlayer->toggleMouseSelected();
+        }
+        else if (currentPlayer->getEntitySelectedId() != -1) {
+            worldStatePacket << true;
+            for (const Enemy *enemy : visibleEnemy) {
+                if (enemy->getId() == currentPlayer->getEntitySelectedId()) {
+                    worldStatePacket << enemy->getId()
+                                     << enemy->getHealth()
+                                     << enemy->getMaxHealth();
+                    break;
+                }
+            }
+        }
+        else {
+            worldStatePacket << false;
+        }
+
         networkServer.sendAsync(client.id, worldStatePacket, true);
-        networkServer.sendToClientUdp(client, worldStatePacket);
+        // networkServer.sendToClientUdp(client, worldStatePacket);
     }
 }

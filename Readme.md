@@ -121,4 +121,3 @@ make clean
 
 ## 📝 License
 This project is for educational purposes. Feel free to use the code to learn about multiplayer game architecture.
-```

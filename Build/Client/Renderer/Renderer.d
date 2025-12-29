@@ -7,4 +7,6 @@ Build/Client/Renderer/Renderer.o: Sources/Client/Renderer/Renderer.cpp \
  Sources/Client/Entities/RemoteSwordSlash.hpp \
  Sources/Client/Inventory/Inventory.hpp \
  Sources/Client/Inventory/ItemSlot.hpp \
- Sources/Client/Inventory/Equipment.hpp
+ Sources/Client/Inventory/Equipment.hpp \
+ Sources/Client/Snapshots/MouseSelectedSnapshot.hpp \
+ Sources/Client/Utils/Font.hpp

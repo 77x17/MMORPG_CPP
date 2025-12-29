@@ -3,6 +3,8 @@
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Network/Packet.hpp>
 
+#include "Shared/PacketType.hpp"
+
 #include <iostream>
 
 NetworkClient::NetworkClient(const std::string &_host, unsigned short _tcpPort, unsigned short _udpPort) 
@@ -56,7 +58,7 @@ void NetworkClient::update(float dt) {
 
     if (tcpPingTracker.shouldSendPing()) {
         sf::Packet packet;
-        packet << "TcpPing" << TcpPingTracker::nowMs();
+        packet << static_cast<uint8_t>(PacketType::TcpPing) << TcpPingTracker::nowMs();
         tcp.send(packet);
         tcpPingTracker.onPingSent();
     }
@@ -80,12 +82,12 @@ void NetworkClient::sendTcpPacket(sf::Packet &packet) {
 
 void NetworkClient::sendLogin(int clientId) {
     sf::Packet loginPacket;
-    loginPacket << "Login" << clientId;
+    loginPacket << static_cast<uint8_t>(PacketType::Login) << clientId;
     tcp.send(loginPacket);
 }
 
 void NetworkClient::pollTCP() {
-    for (int i = 0; i < 10; ++i) {
+    // for (int i = 0; i < 10; ++i) {
         sf::Packet packet;
         sf::Socket::Status status = tcp.receive(packet);
         if (status != sf::Socket::Done) {
@@ -95,11 +97,12 @@ void NetworkClient::pollTCP() {
             else if (status == sf::Socket::Disconnected) {
                 // std::cout << "[Network] - TCP disconnected" << '\n';
             }
-            break;
+            // break;
+            return;
         }
 
-        std::string type; packet >> type;
-        if (type == "Assign_ID") {
+        uint8_t type; packet >> type;
+        if (static_cast<PacketType>(type) == PacketType::Assign_ID) {
             packet >> assignedId;
 
             std::cout << "[Network] - Assigned ID: " << assignedId << '\n';
@@ -110,10 +113,10 @@ void NetworkClient::pollTCP() {
 
             loginStatus = LoginStatus::Success;
         }
-        else if (type == "Login_Fail") {
+        else if (static_cast<PacketType>(type) == PacketType::Login_Fail) {
             loginStatus = LoginStatus::Fail;
         }
-        else if (type == "Inventory") {
+        else if (static_cast<PacketType>(type) == PacketType::Inventory) {
             inventorySnapshot.appear = true;
             inventorySnapshot.itemIds.clear();
             
@@ -123,7 +126,7 @@ void NetworkClient::pollTCP() {
                 inventorySnapshot.itemIds.push_back(itemId);
             }
         }
-        else if (type == "Equipment") {
+        else if (static_cast<PacketType>(type) == PacketType::Equipment) {
             equipmentSnapshot.appear = true;
             equipmentSnapshot.itemIds.clear();
             
@@ -133,7 +136,7 @@ void NetworkClient::pollTCP() {
                 equipmentSnapshot.itemIds.push_back(itemId);
             }
         }
-        else if (type == "WorldCollision") {
+        else if (static_cast<PacketType>(type) == PacketType::WorldCollision) {
             worldCollisionSnapshot.appear = true;
             worldCollisionSnapshot.colliders.clear();
 
@@ -144,7 +147,7 @@ void NetworkClient::pollTCP() {
                 worldCollisionSnapshot.colliders.push_back({ position, size });
             }
         }
-        else if (type == "Chunk") {
+        else if (static_cast<PacketType>(type) == PacketType::Chunk) {
             chunkSnapshot.appear = true;
             chunkSnapshot.chunks.clear();
 
@@ -158,22 +161,23 @@ void NetworkClient::pollTCP() {
                 chunkSnapshot.chunks.push_back({ sf::Vector2f(x, y), sf::Vector2f(size, size) });
             }
         } 
-        else if (type == "TcpPing") {
+        else if (static_cast<PacketType>(type) == PacketType::TcpPing) {
             uint64_t timeMs; packet >> timeMs;
             tcpPingTracker.onPingResponse(timeMs);
         }
         else {
             std::cout << "[Network] - Unknown pollReceive() TCP msg type: " << type << '\n';
         }
-    }
+    // }
 }
 
 void NetworkClient::pollUDP() {
-    for (int i = 0; i < 10; ++i) {
+    // for (int i = 0; i < 5; ++i) {
         sf::Packet packet; sf::IpAddress sender; unsigned short senderPort;
         sf::Socket::Status status = udp.receive(packet, sender, senderPort);
         if (status != sf::Socket::Done) {
-            break;
+            // break;
+            return;
         }
 
         std::string type; packet >> type;
@@ -227,10 +231,21 @@ void NetworkClient::pollUDP() {
             for (int i = 0; i < enemyCount; ++i) {
                 EnemySnapshot enemySnapshot;
                 packet >> enemySnapshot.id
-                        >> enemySnapshot.x
-                        >> enemySnapshot.y
-                        >> enemySnapshot.hp;
+                       >> enemySnapshot.x
+                       >> enemySnapshot.y
+                       >> enemySnapshot.hp;
                 worldSnapshot.enemies.push_back(enemySnapshot);
+            }
+
+            bool mouseSelected; packet >> mouseSelected;
+            if (mouseSelected) {
+                int id, hp, maxHp;
+                packet >> id >> hp >> maxHp;
+                worldSnapshot.mouseSelected.appear = true;
+                worldSnapshot.mouseSelected.id = id;
+                worldSnapshot.mouseSelected.hp = hp;
+                worldSnapshot.mouseSelected.maxHp = maxHp;
+                worldSnapshot.mouseSelected.name = "Enemy";
             }
         }
         else if (type == "UdpPing") {
@@ -240,21 +255,12 @@ void NetworkClient::pollUDP() {
         else {
             std::cout << "[Network] - Unknown UDP packet type: " << type << '\n';
         }
-    }
+    // }
 }
 
 void NetworkClient::poll() {
-    if (!selector.wait(sf::milliseconds(0))) {
-        return;
-    }
-
-    if (selector.isReady(tcp)) {
-        pollTCP();
-    }
-    
-    if (selector.isReady(udp)) {
-        pollUDP();
-    }
+    pollTCP();
+    pollUDP();
 }
 
 int NetworkClient::getClientId() const {

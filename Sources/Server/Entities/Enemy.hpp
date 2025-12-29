@@ -42,6 +42,8 @@ public:
     void resetRandomCooldownTimer();
 
     int getHealth() const;
+    int getMaxHealth() const;
+    
     const sf::Vector2f & getOldShootDir() const;
     const sf::Vector2f & getImpulse() const;
     const float & getProjectileCooldownTimer() const;
