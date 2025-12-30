@@ -20,6 +20,11 @@
 InGameState::InGameState(sf::RenderWindow &_window, NetworkClient &_networkClient) 
 :   window(_window), networkClient(_networkClient), renderer(window), debugRenderer(window) {
     window.setTitle("[Client] - ID: " + std::to_string(networkClient.getClientId()));
+    networkClient.startNetworkThread();
+}
+
+InGameState::~InGameState() {
+    networkClient.stopNetworkThread();
 }
 
 void InGameState::handleEvent(const sf::Event &event) {
@@ -84,27 +89,25 @@ void InGameState::handleEvent(const sf::Event &event) {
 void InGameState::update(float dt) {
     clientAccumulator += dt;
 
+    InputState input;
     if (window.hasFocus() && not renderer.getInventoryUI().isOpen()) {
-        InputState input;
-        if (InputManager::getPlayerInput(input) || true) {
-            input.seq = ++inputSeq;
-            pendingInputs.push_back(input);
-
-            networkClient.sendInputPacket(input.seq, input.movementDir, input.isShooting);
-        
-            RemotePlayer *localPlayer = entityManager.getPlayer(networkClient.getClientId());
-            if (localPlayer != nullptr) {
-                localPlayer->localPosition += normalize(input.movementDir) * PLAYER_SPEED * dt;
-            }
-        }
+        InputManager::getPlayerInput(input);
     }
 
-    networkClient.poll();
+    input.seq = ++inputSeq;
+    pendingInputs.push_back(input);
+
+    RemotePlayer *localPlayer = entityManager.getPlayer(networkClient.getClientId());
+    if (localPlayer != nullptr) {
+        localPlayer->localPosition += normalize(input.movementDir) * PLAYER_SPEED * dt;
+    }
+
+    // networkClient.poll();
 
     // networkClient.pollTCP();
     // networkClient.pollUDP();
     
-    WorldSnapshot &worldSnapshot = networkClient.getWorldSnapshot();
+    WorldSnapshot worldSnapshot = networkClient.getWorldSnapshot();
     if (worldSnapshot.appear) {
         worldSnapshot.appear = false;
         entityManager.applySnapshot(worldSnapshot, networkClient.getClientId(), pendingInputs);
@@ -116,13 +119,13 @@ void InGameState::update(float dt) {
     }
     
 
-    ChunkSnapshot &chunkSnapshot = networkClient.getChunkSnapshot();
+    ChunkSnapshot chunkSnapshot = networkClient.getChunkSnapshot();
     if (chunkSnapshot.appear) {
         chunkSnapshot.appear = false;
         debugRenderer.applySnapshot(chunkSnapshot);
     }
 
-    InventorySnapshot &inventorySnapshot = networkClient.getInventorySnapshot();
+    InventorySnapshot inventorySnapshot = networkClient.getInventorySnapshot();
     if (inventorySnapshot.appear) {
         inventorySnapshot.appear = false;
         if ((int)inventory.getSlots().size() != (int)inventorySnapshot.itemIds.size()) {
@@ -133,7 +136,7 @@ void InGameState::update(float dt) {
         }
     }
 
-    EquipmentSnapshot &equipmentSnapshot = networkClient.getEquipmentSnapshot();
+    EquipmentSnapshot equipmentSnapshot = networkClient.getEquipmentSnapshot();
     if (equipmentSnapshot.appear) {
         equipmentSnapshot.appear = false;
         if ((int)equipment.getSlots().size() != (int)equipmentSnapshot.itemIds.size()) {
@@ -144,7 +147,7 @@ void InGameState::update(float dt) {
         }
     }
 
-    WorldCollisionSnapshot &worldCollisionSnapshot = networkClient.getWorldCollisionSnapshot();
+    WorldCollisionSnapshot worldCollisionSnapshot = networkClient.getWorldCollisionSnapshot();
     if (worldCollisionSnapshot.appear) {
         worldCollisionSnapshot.appear = false;
         worldCollision.getColliders().clear();
@@ -155,11 +158,14 @@ void InGameState::update(float dt) {
 
     while (clientAccumulator >= CLIENT_TICK) {
         clientAccumulator -= CLIENT_TICK;
+
+        networkClient.sendInputPacket(input.seq, input.movementDir, input.isShooting);
+
         entityManager.update(CLIENT_TICK, networkClient.getClientId());    
     }
 
     fpsCounter.update();
-    networkClient.update(dt);
+    // networkClient.update(dt);
 
     RemotePlayer *player = entityManager.getPlayer(networkClient.getClientId());
     if (player != nullptr) {

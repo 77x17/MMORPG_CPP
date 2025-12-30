@@ -4,7 +4,13 @@
 #include <SFML/Network/UdpSocket.hpp>
 #include <SFML/Network/SocketSelector.hpp>
 #include <SFML/System/Vector2.hpp>
+#include <SFML/System/Clock.hpp>
 #include <vector>
+
+// === Multithreading ===
+#include <thread>
+#include <atomic>
+#include <mutex>
 
 #include "Client/Network/LoginStatusType.hpp"
 
@@ -19,6 +25,13 @@
 
 class NetworkClient {
 private:
+    // === Multithreading ===
+    std::thread networkThread;
+    std::atomic<bool> running{ false };
+    std::mutex snapshotMutex;           // to protect snapshot (race condition)
+    sf::Clock tcpPingClock;
+    sf::Clock udpPingClock;
+
     bool isConnected = false;
     LoginStatus loginStatus = LoginStatus::None;
 
@@ -38,6 +51,10 @@ private:
     TcpPingTracker tcpPingTracker;
     UdpPingTracker udpPingTracker;
 
+private:
+    void networkLoop();
+    void sendPingIfNeeded();
+
 public:
     int assignedId = -1;
 
@@ -47,6 +64,9 @@ public:
     bool connectTcp(const float &timeoutSeconds);
     bool bindUdp();
     bool connectAll(const float &timeoutSeconds = 1.0f);
+
+    void startNetworkThread();
+    void stopNetworkThread();
 
     void update(float dt);
 
@@ -67,11 +87,11 @@ public:
 
     LoginStatus getLoginStatus() const;
 
-    ChunkSnapshot & getChunkSnapshot();
-    EquipmentSnapshot & getEquipmentSnapshot();
-    InventorySnapshot & getInventorySnapshot();
-    WorldCollisionSnapshot & getWorldCollisionSnapshot();
-    WorldSnapshot & getWorldSnapshot();
+    ChunkSnapshot getChunkSnapshot();
+    EquipmentSnapshot getEquipmentSnapshot();
+    InventorySnapshot getInventorySnapshot();
+    WorldCollisionSnapshot getWorldCollisionSnapshot();
+    WorldSnapshot getWorldSnapshot();
 
     int getTcpPing() const;
     int getUdpPing() const;

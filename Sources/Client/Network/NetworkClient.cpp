@@ -2,6 +2,7 @@
 
 #include <SFML/System/Vector2.hpp>
 #include <SFML/Network/Packet.hpp>
+#include <SFML/System/Sleep.hpp>
 
 #include "Shared/PacketType.hpp"
 
@@ -50,6 +51,55 @@ bool NetworkClient::connectAll(const float& timeoutSeconds) {
     }
 
     return false;
+}
+
+// === Multithreading ===
+void NetworkClient::startNetworkThread() {
+    if (running) return;
+
+    running = true;
+    networkThread = std::thread(&NetworkClient::networkLoop, this);
+}
+
+void NetworkClient::stopNetworkThread() {
+    running = false;
+    if (networkThread.joinable()) {
+        networkThread.join();
+    }
+}
+
+void NetworkClient::networkLoop() {
+    while (running) {
+        {
+            std::lock_guard<std::mutex> lock(snapshotMutex);
+            pollTCP();
+            pollUDP();
+        }
+
+        sendPingIfNeeded();
+
+        sf::sleep(sf::milliseconds(1));
+    }
+}
+
+void NetworkClient::sendPingIfNeeded() {
+    // TCP ping ~ 1s
+    if (tcpPingClock.getElapsedTime().asMilliseconds() >= 1000) {
+        sf::Packet packet;
+        packet << static_cast<uint8_t>(PacketType::TcpPing)
+               << TcpPingTracker::nowMs();
+        tcp.send(packet);
+        tcpPingClock.restart();
+    }
+
+    // UDP ping ~ 1s
+    if (udpPingClock.getElapsedTime().asMilliseconds() >= 1000) {
+        sf::Packet packet;
+        uint64_t time = UdpPingTracker::nowMs();
+        packet << "UdpPing" << time;
+        udp.send(packet, host, udpPort);
+        udpPingClock.restart();
+    }
 }
 
 void NetworkClient::update(float dt) {
@@ -275,23 +325,28 @@ LoginStatus NetworkClient::getLoginStatus() const {
     return loginStatus;
 }
 
-ChunkSnapshot & NetworkClient::getChunkSnapshot() {
+ChunkSnapshot NetworkClient::getChunkSnapshot() {
+    std::lock_guard<std::mutex> lock(snapshotMutex);
     return chunkSnapshot;
 }
 
-EquipmentSnapshot & NetworkClient::getEquipmentSnapshot() {
+EquipmentSnapshot NetworkClient::getEquipmentSnapshot() {
+    std::lock_guard<std::mutex> lock(snapshotMutex);
     return equipmentSnapshot;
 }
 
-InventorySnapshot & NetworkClient::getInventorySnapshot() {
+InventorySnapshot NetworkClient::getInventorySnapshot() {
+    std::lock_guard<std::mutex> lock(snapshotMutex);
     return inventorySnapshot;
 }
 
-WorldCollisionSnapshot & NetworkClient::getWorldCollisionSnapshot() {
+WorldCollisionSnapshot NetworkClient::getWorldCollisionSnapshot() {
+    std::lock_guard<std::mutex> lock(snapshotMutex);
     return worldCollisionSnapshot;
 }
 
-WorldSnapshot & NetworkClient::getWorldSnapshot() {
+WorldSnapshot NetworkClient::getWorldSnapshot() {
+    std::lock_guard<std::mutex> lock(snapshotMutex);
     return worldSnapshot;
 }
 

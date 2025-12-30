@@ -37,14 +37,14 @@ void ChunkSystem::addPlayer(Player* player) {
 }
 
 void ChunkSystem::removePlayer(Player* player) {
-    ChunkCoord chunk = getChunk(player->getPosition());
-    playerChunks[chunk].erase(player);
-
-    chunk = getChunk(player->getOldPosition());
-    if (playerChunks[chunk].find(player) != playerChunks[chunk].end()) {
-        std::cout << "VCLVCLVCLVCLVCL\n";
+    ChunkCoord chunk = getChunk(player->getPosition()); 
+    auto it = playerChunks.find(chunk);
+    if (it != playerChunks.end()) {
+        it->second.erase(player);
+        if (it->second.empty()) {
+            playerChunks.erase(it);
+        }
     }
-    playerChunks[chunk].erase(player);
 }
 
 void ChunkSystem::updatePlayer(Player* player, const sf::Vector2f& oldPosition) {

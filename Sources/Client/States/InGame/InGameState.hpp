@@ -45,6 +45,7 @@ private:
 
 public:
     InGameState(sf::RenderWindow &_window, NetworkClient &_networkClient);
+    ~InGameState();
 
     void handleEvent(const sf::Event &event) override;
     void update(float dt) override;
