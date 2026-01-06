@@ -11,7 +11,10 @@
 #include "Server/Utils/Constants.hpp"
 
 void InputSystem::processPlayerInputs(InputManager &inputManager, GameWorld &gameWorld, PhysicsSystem &physicsSystem, WeaponSystem &weaponSystem) {
-    for (Player *player : gameWorld.getPlayers()) if (player != nullptr) {
+    for (Player *player : gameWorld.getPlayers()) {
+        if (player == nullptr) continue;
+        if (player->isDestroyed()) continue;
+
         InputState latestInput;
         std::vector<InputState> &inputQueue = inputManager.getClientQueue(player->getId());
 
@@ -31,7 +34,10 @@ void InputSystem::processPlayerInputs(InputManager &inputManager, GameWorld &gam
 }
 
 void InputSystem::processEnemyInputs(InputManager &inputManager, GameWorld &gameWorld, PhysicsSystem &physicsSystem, WeaponSystem &weaponSystem) {
-    for (Enemy *enemy : gameWorld.getEnemies()) if (enemy != nullptr) {
+    for (Enemy *enemy : gameWorld.getEnemies()) {
+        if (enemy == nullptr) continue;
+        if (enemy->isDestroyed()) continue;
+
         InputState latestInput;
         std::vector<InputState> &inputQueue = inputManager.getEnemyQueue(enemy->getId());
 

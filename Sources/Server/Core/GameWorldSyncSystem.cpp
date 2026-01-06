@@ -76,6 +76,9 @@ void GameWorldSyncSystem::syncToClients() {
             worldStatePacket << true;
             bool find = false;
             for (const Enemy *enemy : visibleEnemy) {
+                if (enemy == nullptr) continue;
+                if (enemy->isDestroyed()) continue;
+
                 if (enemy->getBounds().contains(currentPlayer->getMousePosition())) {
                     worldStatePacket << enemy->getId()
                                      << enemy->getHealth()
@@ -95,13 +98,22 @@ void GameWorldSyncSystem::syncToClients() {
         }
         else if (currentPlayer->getEntitySelectedId() != -1) {
             worldStatePacket << true;
+            bool find = false;
             for (const Enemy *enemy : visibleEnemy) {
+                if (enemy == nullptr) continue;
+                if (enemy->isDestroyed()) continue;
+                
                 if (enemy->getId() == currentPlayer->getEntitySelectedId()) {
                     worldStatePacket << enemy->getId()
                                      << enemy->getHealth()
                                      << enemy->getMaxHealth();
+                    find = true;
                     break;
                 }
+            }
+            if (!find) {
+                currentPlayer->setEntitySelectedId(-1);
+                worldStatePacket << -1 << -1 << -1;
             }
         }
         else {

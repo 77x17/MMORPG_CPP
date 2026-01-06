@@ -9,17 +9,20 @@
 #include "Server/Utils/Random.hpp"
 
 void EnemyAISystem::update(const float &dt, GameWorld &gameWorld, InputManager &inputManager) {
-    for (Enemy *enemy : gameWorld.getEnemies()) if (enemy != nullptr) {
+    for (Enemy *enemy : gameWorld.getEnemies()) {
+        if (enemy == nullptr) continue;
+        if (enemy->isDestroyed()) continue;
+
         InputState input;
 
         Player *target = gameWorld.findNearestPlayer(enemy->getPosition());
         if (target == nullptr || distance(target->getPosition(), enemy->getPosition()) > enemy->getDetectRange()) {
+            enemy->unChase();
             if (enemy->getRandomCooldownTimer() <= 0.0f) {
                 enemy->resetRandomCooldownTimer();
 
                 if (Random::chance(0.7)) {
                     input.movementDir = { Random::rangeFloat(-1.0f, 1.0f), Random::rangeFloat(-1.0f, 1.0f) };
-                    input.movementDir /= 2.0f;
                 }
                 else {
                     input.movementDir = { 0.0f, 0.0f };
@@ -32,13 +35,15 @@ void EnemyAISystem::update(const float &dt, GameWorld &gameWorld, InputManager &
             }
         }
         else {
+            enemy->toggleChase();
+
             float nearestPlayerDistance = distance(target->getPosition(), enemy->getPosition());
             
             sf::Vector2f direction = normalize(target->getPosition() - enemy->getPosition());
             input.movementDir = direction;
             
             // if (nearestPlayerDistance < 200.0f) {
-            if (nearestPlayerDistance < 50.0f) {
+            if (nearestPlayerDistance < 70.0f) {
                 input.isShooting = true;
             }
         }

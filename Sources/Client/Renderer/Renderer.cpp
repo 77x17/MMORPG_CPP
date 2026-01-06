@@ -56,7 +56,6 @@ void Renderer::updateCamera(const EntityManager &entityManager, int clientId) {
 void Renderer::drawEnemies(const EntityManager &entityManager) {
     sf::RectangleShape enemiesShape({ 40, 40 }); enemiesShape.setOrigin(20, 20);
     enemiesShape.setOutlineThickness(1.0f);
-    enemiesShape.setFillColor(sf::Color::Black);
     for (auto &[id, enemy] : entityManager.getEnemies()) {
         enemiesShape.setPosition(enemy.localPosition);
 
@@ -67,14 +66,21 @@ void Renderer::drawEnemies(const EntityManager &entityManager) {
             enemiesShape.setOutlineColor(sf::Color::White);
         }
 
+        if (enemy.hp == 0) {
+            enemiesShape.setFillColor(sf::Color(0, 0, 0, 80));
+        }
+        else {
+            enemiesShape.setFillColor(sf::Color::Black);
+        }
+
         window.draw(enemiesShape);
     }
 }
 
 void Renderer::drawPlayers(const EntityManager &entityManager, int clientId) {
     sf::RectangleShape playerShape({ 40, 40 }); playerShape.setOrigin(20, 20);
-    playerShape.setOutlineThickness(1.0f);
-    playerShape.setFillColor(sf::Color::Blue);
+    playerShape.setOutlineThickness(2.0f);
+    
     for (auto &[id, player] : entityManager.getPlayers()) {
         playerShape.setPosition(player.localPosition);
 
@@ -83,6 +89,13 @@ void Renderer::drawPlayers(const EntityManager &entityManager, int clientId) {
         }
         else {
             playerShape.setOutlineColor(sf::Color::White);
+        }
+
+        if (player.hp == 0) {
+            playerShape.setFillColor(sf::Color(0, 0, 255, 80));
+        }
+        else {
+            playerShape.setFillColor(sf::Color::Blue);
         }
 
         window.draw(playerShape);

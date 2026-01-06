@@ -16,11 +16,17 @@ Player::Player(int _id, const sf::Vector2f &startPosition)
 }
 
 void Player::update(const float &dt) {
-    if (isDestroyed()) {
-        respawn();
-    }
-
     if (projectileCooldownTimer > 0) projectileCooldownTimer -= dt;
+    
+    if (isDestroyed()) {
+        respawnCooldownTimer += dt;
+
+        if (respawnCooldownTimer >= RESPAWN_COOLDOWN_TIME) {
+            respawnCooldownTimer = 0.0f;
+
+            respawn();
+        }
+    }
 
     decayImpulse(dt);
 }

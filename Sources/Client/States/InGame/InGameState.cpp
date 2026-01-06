@@ -90,22 +90,19 @@ void InGameState::update(float dt) {
     clientAccumulator += dt;
 
     InputState input;
-    if (window.hasFocus() && not renderer.getInventoryUI().isOpen()) {
-        InputManager::getPlayerInput(input);
-    }
-
-    input.seq = ++inputSeq;
-    pendingInputs.push_back(input);
-
     RemotePlayer *localPlayer = entityManager.getPlayer(networkClient.getClientId());
-    if (localPlayer != nullptr) {
-        localPlayer->localPosition += normalize(input.movementDir) * PLAYER_SPEED * dt;
+    if (localPlayer != nullptr && localPlayer->hp != 0) {
+        if (window.hasFocus() && not renderer.getInventoryUI().isOpen()) {
+            InputManager::getPlayerInput(input);
+        }
+        
+        input.seq = ++inputSeq;
+        pendingInputs.push_back(input);
+
+        if (localPlayer != nullptr && localPlayer->hp != 0) {
+            localPlayer->localPosition += normalize(input.movementDir) * PLAYER_SPEED * dt;
+        }
     }
-
-    // networkClient.poll();
-
-    // networkClient.pollTCP();
-    // networkClient.pollUDP();
     
     WorldSnapshot worldSnapshot = networkClient.getWorldSnapshot();
     if (worldSnapshot.appear) {

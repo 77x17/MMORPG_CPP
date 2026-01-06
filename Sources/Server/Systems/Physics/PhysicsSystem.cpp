@@ -91,7 +91,7 @@ void PhysicsSystem::updateEnemy(Enemy &enemy, const InputState &inputState, cons
     sf::Vector2f inputVelocity{ 0.0f, 0.0f };
 
     if (inputState.movementDir.x != 0 || inputState.movementDir.y != 0) {
-        inputVelocity = normalize(inputState.movementDir) * ENEMY_SPEED;
+        inputVelocity = normalize(inputState.movementDir) * (enemy.isChasing() ? ENEMY_SPEED : ENEMY_SPEED / 2.0f);
         enemy.setOldShootDir(inputState.movementDir);
     }
 
@@ -128,8 +128,14 @@ void PhysicsSystem::updateEnemy(Enemy &enemy, const InputState &inputState, cons
 }
 
 void PhysicsSystem::resolvePlayerCollisions(const std::vector<Player *> &players) {
-    for (size_t i = 0; i < players.size(); ++i) if (players[i] != nullptr) {
-        for (size_t j = i + 1; j < players.size(); ++j) if (players[j] != nullptr) {
+    for (size_t i = 0; i < players.size(); ++i) {
+        if (players[i] == nullptr) continue;
+        if (players[i]->isDestroyed()) continue;
+
+        for (size_t j = i + 1; j < players.size(); ++j) {
+            if (players[j] == nullptr) continue;
+            if (players[j]->isDestroyed()) continue;
+
             if (not players[i]->getBounds().intersects(players[j]->getBounds())) {
                 continue;
             }
@@ -160,8 +166,14 @@ void PhysicsSystem::resolvePlayerCollisions(const std::vector<Player *> &players
 }
 
 void PhysicsSystem::resolveEnemyCollisions(const std::vector<Enemy *> &enemies) {
-    for (size_t i = 0; i < enemies.size(); ++i) if (enemies[i] != nullptr) {
-        for (size_t j = i + 1; j < enemies.size(); ++j) if (enemies[j] != nullptr) {
+    for (size_t i = 0; i < enemies.size(); ++i) {
+        if (enemies[i] == nullptr) continue;
+        if (enemies[i]->isDestroyed()) continue;
+
+        for (size_t j = i + 1; j < enemies.size(); ++j) {
+            if (enemies[j] == nullptr) continue;
+            if (enemies[j]->isDestroyed()) continue;
+
             if (not enemies[i]->getBounds().intersects(enemies[j]->getBounds())) {
                 continue;
             }
@@ -192,8 +204,14 @@ void PhysicsSystem::resolveEnemyCollisions(const std::vector<Enemy *> &enemies) 
 }
 
 void PhysicsSystem::resolvePlayerWithEnemyCollisions(const std::vector<Player *> &players, const std::vector<Enemy *> &enemies) {
-    for (size_t i = 0; i < players.size(); ++i) if (players[i] != nullptr) {
-        for (size_t j = 0; j < enemies.size(); ++j) if (enemies[j] != nullptr) {
+    for (size_t i = 0; i < players.size(); ++i) {
+        if (players[i] == nullptr) continue;
+        if (players[i]->isDestroyed()) continue;
+
+        for (size_t j = 0; j < enemies.size(); ++j) {
+            if (enemies[j] == nullptr) continue;
+            if (enemies[j]->isDestroyed()) continue;
+
             if (not players[i]->getBounds().intersects(enemies[j]->getBounds())) {
                 continue;
             }

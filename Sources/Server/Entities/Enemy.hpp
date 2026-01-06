@@ -18,9 +18,13 @@ private:
     float projectileCooldownTimer = 0;
     const float PROJECTILE_COOLDOWN_TIME = 1.0f;
 
+    bool _isChasing = false;
     float detectRange;
     float randomCooldownTimer = 0.0f;
     const float RANDOM_COOLDOWN_TIME = 3.0f;
+
+    float respawnCooldownTimer = 0.0f;
+    const float RESPAWN_COOLDOWN_TIME = 5.0f;
 
 public:
     int inputSeq = 0;
@@ -40,7 +44,10 @@ public:
     void resetProjectileCooldownTimer();
     void setPreviousMovement(const sf::Vector2f &newMovement);
     void resetRandomCooldownTimer();
+    void toggleChase();
+    void unChase();
 
+    bool isChasing() const;
     int getHealth() const;
     int getMaxHealth() const;
     

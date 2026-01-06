@@ -15,12 +15,18 @@ Enemy::Enemy(int id, const sf::Vector2f &startPosition)
 }
 
 void Enemy::update(const float &dt) {
-    if (isDestroyed()) {
-        respawn();
-    }
-
     if (projectileCooldownTimer >= 0) {
         projectileCooldownTimer -= dt;
+    }
+
+    if (isDestroyed()) {
+        respawnCooldownTimer += dt;
+
+        if (respawnCooldownTimer >= RESPAWN_COOLDOWN_TIME) {
+            respawnCooldownTimer = 0.0f;
+
+            respawn();
+        }
     }
 
     decayImpulse(dt);
@@ -77,6 +83,18 @@ void Enemy::setPreviousMovement(const sf::Vector2f &newMovement) {
 
 void Enemy::resetRandomCooldownTimer() {
     randomCooldownTimer = RANDOM_COOLDOWN_TIME;
+}
+
+void Enemy::toggleChase() {
+    _isChasing = true;
+}
+
+void Enemy::unChase() {
+    _isChasing = false;
+}
+
+bool Enemy::isChasing() const {
+    return _isChasing;
 }
 
 int Enemy::getHealth() const {

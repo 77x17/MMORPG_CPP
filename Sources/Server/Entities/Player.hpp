@@ -26,6 +26,9 @@ private:
     float projectileCooldownTimer = 0;
     const float PROJECTILE_COOLDOWN_TIME = 0.1f;
 
+    float respawnCooldownTimer = 0.0f;
+    const float RESPAWN_COOLDOWN_TIME = 5.0f;
+    
 public:
     int lastProcessedInput = 0;
 

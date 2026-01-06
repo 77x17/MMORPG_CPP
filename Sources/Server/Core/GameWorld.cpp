@@ -137,7 +137,10 @@ const std::vector<Player *> GameWorld::getPlayersInChunk(const sf::Vector2f &cen
 Player * GameWorld::findNearestPlayer(const sf::Vector2f &position) {
     Player *nearestPlayer = nullptr;
     float nearestDistance = -1;
-    for (Player *player : players) if (player != nullptr) {
+    for (Player *player : players) {
+        if (player == nullptr) continue;
+        if (player->isDestroyed()) continue;
+        
         if (nearestDistance == -1) {
             nearestPlayer = player;
             nearestDistance = distance(position, player->getPosition());

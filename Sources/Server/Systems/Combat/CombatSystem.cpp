@@ -15,7 +15,10 @@ void CombatSystem::handleCollision(const std::vector<Player *> &players, const s
         }
 
         bool hitSomething = false;
-        for (Player *player : players) if (player != nullptr) {
+        for (Player *player : players) {
+            if (player == nullptr) continue;
+            if (player->isDestroyed()) continue;
+
             if (damageEntity->getOwnerId() == player->getId()) {
                 continue;
             }
@@ -46,7 +49,10 @@ void CombatSystem::handleCollision(const std::vector<Enemy *> &enemies, const st
         }
 
         bool hitSomething = false;
-        for (Enemy *enemy : enemies) if (enemy != nullptr) {
+        for (Enemy *enemy : enemies) {
+            if (enemy == nullptr) continue;
+            if (enemy->isDestroyed()) continue;
+
             if (damageEntity->getOwnerId() == enemy->getId()) {
                 continue;
             }
