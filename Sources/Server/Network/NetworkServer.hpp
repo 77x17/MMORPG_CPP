@@ -54,9 +54,6 @@ public:
 
     bool isValidClientId(int id) const;
 
-    void sendToClientUdp(ClientSession &client, sf::Packet &packet);
-    void sendToClientTcp(int clientId, sf::Packet &packet);
-
     ClientSession & getClient(int clientId);
     std::vector<ClientSession> & getClients();
     const std::vector<ClientSession> & getClients() const;

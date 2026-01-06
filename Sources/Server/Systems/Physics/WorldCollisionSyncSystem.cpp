@@ -22,5 +22,5 @@ void WorldCollisionSyncSystem::syncToClient(int clientId) {
         worldCollisionPacket << box.position.x << box.position.y << box.size.x << box.size.y;
     }
 
-    networkServer.sendToClientTcp(clientId, worldCollisionPacket);
+    networkServer.sendAsync(clientId, worldCollisionPacket, false);
 }

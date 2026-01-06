@@ -282,22 +282,6 @@ bool NetworkServer::pollUdp() {
     return didWork;
 }
 
-void NetworkServer::sendToClientUdp(ClientSession &client, sf::Packet &packet) {    
-    auto status = udp.send(packet, client.udpId, client.udpPort);
-    if (status != sf::Socket::Done) {
-        LogSystem::addMessage("[UDP] Send failed to client " + std::to_string(client.id));
-    }
-}
-
-void NetworkServer::sendToClientTcp(int clientId, sf::Packet &packet) {    
-    for (ClientSession &client : clients) {
-        if (client.id == clientId) {
-            client.tcp->send(packet);
-            break;
-        }
-    }
-}
-
 ClientSession & NetworkServer::getClient(int clientId) {
     for (ClientSession &client : clients) {
         if (client.id == clientId) {

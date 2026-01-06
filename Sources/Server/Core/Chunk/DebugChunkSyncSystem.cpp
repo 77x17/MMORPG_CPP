@@ -28,6 +28,6 @@ void DebugChunkSyncSystem::syncToClients() {
                         << CHUNK_SIZE
                         << CHUNK_SIZE;
         }
-        networkServer.sendToClientTcp(client.id, chunkPacket);
+        networkServer.sendAsync(client.id, chunkPacket, false);
     }
 }

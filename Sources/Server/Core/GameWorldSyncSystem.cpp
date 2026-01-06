@@ -109,6 +109,5 @@ void GameWorldSyncSystem::syncToClients() {
         }
 
         networkServer.sendAsync(client.id, worldStatePacket, true);
-        // networkServer.sendToClientUdp(client, worldStatePacket);
     }
 }

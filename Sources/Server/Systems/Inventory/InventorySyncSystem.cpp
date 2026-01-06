@@ -23,7 +23,7 @@ void InventorySyncSystem::syncInventoryToClient(int clientId) {
     for (const ItemSlot &slot : inventory.getSlots()) {
         inventoryPacket << slot.id;
     }
-    networkServer.sendToClientTcp(clientId, inventoryPacket);
+    networkServer.sendAsync(clientId, inventoryPacket, false);
 }
 
 void InventorySyncSystem::syncEquipmentToClient(int clientId) {
@@ -36,5 +36,5 @@ void InventorySyncSystem::syncEquipmentToClient(int clientId) {
     for (int index = 0; index < equipment.getSize(); ++index) {
         equipmentPacket << equipment[index].id;
     }
-    networkServer.sendToClientTcp(clientId, equipmentPacket);
+    networkServer.sendAsync(clientId, equipmentPacket, false);
 }
