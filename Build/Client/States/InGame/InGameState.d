@@ -15,6 +15,7 @@ Build/Client/States/InGame/InGameState.o: \
  Sources/Client/Renderer/DebugInfo.hpp \
  Sources/Client/Renderer/DebugRenderer.hpp Sources/Shared/AABB.hpp \
  Sources/Client/Renderer/Renderer.hpp Sources/Client/UI/InventoryUI.hpp \
+ Sources/Client/Renderer/MinimapRenderer.hpp \
  Sources/Client/World/WorldCollision.hpp Sources/Shared/Constants.hpp \
  Sources/Shared/Utils.hpp Sources/Client/Input/InputManager.hpp \
  Sources/Client/Network/NetworkClient.hpp \

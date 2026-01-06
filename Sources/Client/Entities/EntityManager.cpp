@@ -169,3 +169,7 @@ const RemotePlayer * EntityManager::getPlayer(int myEntityId) const {
     }
     return &it->second;
 }
+
+int EntityManager::getDamageEntitiesSize() const {
+    return remoteProjectiles.size() + remoteSwordSlashs.size();
+}

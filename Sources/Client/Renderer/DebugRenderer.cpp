@@ -73,9 +73,12 @@ void DebugRenderer::drawChunks() {
 
 void DebugRenderer::drawInformation(const DebugInfo& debugInfo) {
     std::string informationString;
-    informationString  =   "[X - Y]: " + std::to_string(static_cast<int>(debugInfo.playerPosition.x)) + " - " + std::to_string(static_cast<int>(debugInfo.playerPosition.y));
-    informationString += "\n[FPS]  : " + std::to_string(static_cast<int>(debugInfo.fps));
-    informationString += "\n[PING] : TCP " + std::to_string(static_cast<int>(debugInfo.tcpPing)) + " ms | UDP " + std::to_string(static_cast<int>(debugInfo.udpPing)) + " ms";
+    informationString  =   "[FPS] | [X - Y]  : " + std::to_string(static_cast<int>(debugInfo.fps)) + " | " + std::to_string(static_cast<int>(debugInfo.playerPosition.x)) + " - " + std::to_string(static_cast<int>(debugInfo.playerPosition.y));
+    informationString += "\n[TCP | UDP PING] : " + std::to_string(static_cast<int>(debugInfo.tcpPing)) + " ms | " + std::to_string(static_cast<int>(debugInfo.udpPing)) + " ms";
+    informationString += "\n[PLAYERS]        : " + std::to_string(debugInfo.players);
+    informationString += "\n[ENEMIES]        : " + std::to_string(debugInfo.enemies);
+    informationString += "\n[DAMAGE ENTITY]  : " + std::to_string(debugInfo.damageEntities);
+    
     informationText.setString(informationString);
 
     window.draw(informationText);

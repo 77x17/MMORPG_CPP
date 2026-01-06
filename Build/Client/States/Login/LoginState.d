@@ -31,4 +31,5 @@ Build/Client/States/Login/LoginState.o: \
  Sources/Client/Renderer/DebugInfo.hpp \
  Sources/Client/Renderer/DebugRenderer.hpp \
  Sources/Client/Renderer/Renderer.hpp Sources/Client/UI/InventoryUI.hpp \
+ Sources/Client/Renderer/MinimapRenderer.hpp \
  Sources/Client/World/WorldCollision.hpp

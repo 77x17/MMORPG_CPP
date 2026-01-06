@@ -171,6 +171,9 @@ void InGameState::update(float dt) {
     debugInfo.fps     = fpsCounter.getFPS();
     debugInfo.tcpPing = networkClient.getTcpPing();
     debugInfo.udpPing = networkClient.getUdpPing();
+    debugInfo.enemies = entityManager.getEnemies().size();
+    debugInfo.players = entityManager.getPlayers().size();
+    debugInfo.damageEntities = entityManager.getDamageEntitiesSize();
 }
 
 void InGameState::render(sf::RenderWindow &window) {
@@ -182,7 +185,7 @@ void InGameState::render(sf::RenderWindow &window) {
         debugRenderer.render(worldCollision, debugInfo);
     // }
 
-    renderer.renderUI(inventory, equipment);
+    renderer.renderUI(entityManager, networkClient.getEntityId(), inventory, equipment);
 
     window.display();
 }

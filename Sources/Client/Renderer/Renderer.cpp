@@ -17,6 +17,9 @@ Renderer::Renderer(sf::RenderWindow &_window) : window(_window) {
     setCamera();
 
     buildBackground();
+
+    minimap.setWorldSize({ 50.0f * 64.0f, 50.0f * 64.0f });
+    minimap.setSize({ 200.0f, 200.0f });
 }
 
 void Renderer::setCamera() {
@@ -31,6 +34,8 @@ void Renderer::setCamera() {
         static_cast<float>(window.getSize().x),
         static_cast<float>(window.getSize().y)
     );
+
+    minimap.setPosition({ window.getSize().x - 220.0f, 20.0f });
 }
 
 InventoryUI &Renderer::getInventoryUI() {
@@ -227,11 +232,14 @@ void Renderer::render(const EntityManager &entityManager, int clientId) {
     drawNametags(entityManager);
 }
 
-void Renderer::renderUI(const Inventory &inventory, const Equipment &equipment) {
+void Renderer::renderUI(const EntityManager &entityManager, int clientId, const Inventory &inventory, const Equipment &equipment) {
     window.setView(uiView);
-    drawInventory(inventory, equipment);
 
+    minimap.render(window, worldView, entityManager, clientId);
+    
     if (selectedId != -1) {
         drawSelectedEntityInfo();
     }
+
+    drawInventory(inventory, equipment);
 }

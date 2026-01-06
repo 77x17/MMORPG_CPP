@@ -33,4 +33,5 @@ public:
 
     RemotePlayer * getPlayer(int myEntityId);
     const RemotePlayer * getPlayer(int myEntityId) const;
+    int getDamageEntitiesSize() const;
 };
