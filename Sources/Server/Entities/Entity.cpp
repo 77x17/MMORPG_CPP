@@ -1,7 +1,7 @@
 #include "Server/Entities/Entity.hpp"
 
 Entity::Entity(int newId, const sf::Vector2f &newSize) 
-: id(newId), size(newSize) {
+: entityId(newId), size(newSize) {
 
 }
 
@@ -34,13 +34,13 @@ sf::FloatRect Entity::getBounds() const {
     return sf::FloatRect(position - size / 2.0f, size);
 }
 
-int Entity::getId() const {
-    return id;
+int Entity::getEntityId() const {
+    return entityId;
 }
 
 
-void Entity::setId(int _id) {
-    id = _id;
+void Entity::setEntityId(int _id) {
+    entityId = _id;
 }
 
 bool Entity::isDestroyed() const {

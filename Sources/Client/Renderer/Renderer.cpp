@@ -138,7 +138,7 @@ void Renderer::drawNametags(const EntityManager &entityManager) {
     }
 
     for (auto &[id, player] : entityManager.getPlayers()) {
-        nametag.setString(std::to_string(player.id) + ". HP: " + std::to_string(player.hp));
+        nametag.setString(player.name + ". HP: " + std::to_string(player.hp));
         sf::FloatRect bounds = nametag.getLocalBounds();
         nametag.setOrigin(bounds.left + bounds.width / 2.0f,
                           bounds.top  + bounds.height      );

@@ -9,31 +9,11 @@
 #include "Server/Entities/Enemy.hpp"
 #include "Server/Entities/Player.hpp"
 
-#include "Server/Events/EventBus.hpp"
-
 #include "Server/Network/NetworkServer.hpp"
 
 #include "Server/Systems/Log/LogSystem.hpp"
 
-DebugSystem::DebugSystem(EventBus &eventBus) {
-    // eventBus.subscribe<EnemySpawnedEvent> (
-    //     [this](const EnemySpawnedEvent &) {
-    //         markEnemiesDirty();
-    //     }
-    // );
-
-    // eventBus.subscribe<PlayerSpawnedEvent> (
-    //     [this](const PlayerSpawnedEvent &) {
-    //         markPlayersDirty();
-    //     }
-    // );
-    
-    // eventBus.subscribe<PlayerRemovedEvent> (
-    //     [this](const PlayerRemovedEvent &) {
-    //         markPlayersDirty();
-    //     }
-    // );
-}
+DebugSystem::DebugSystem() {}
 
 void DebugSystem::rebuildPlayers(const GameWorld &gameWorld, const NetworkServer &networkServer) {
     std::ostringstream oss;
@@ -72,7 +52,7 @@ void DebugSystem::rebuildEnemies(const GameWorld &gameWorld) {
     for (const Enemy *enemy : gameWorld.getEnemies()) {
         oss << std::format(
             "ID: {:>2} | HP: {:>3} | POS: ({:>7.2f}, {:>7.2f})\n",
-            enemy->getId(),
+            enemy->getEntityId(),
             enemy->getHealth(),
             enemy->getPosition().x,
             enemy->getPosition().y
@@ -87,8 +67,8 @@ void DebugSystem::rebuildEntities(const GameWorld &gameWorld) {
         oss << std::format(
             "{} | ID: {:>2} | OId: {:>2} | POS: ({:>7.2f}, {:>7.2f})\n",
             entity->getName(),
-            entity->getId(),
-            entity->getOwnerId(),
+            entity->getEntityId(),
+            entity->getOwnerEntityId(),
             entity->getPosition().x,
             entity->getPosition().y
         );

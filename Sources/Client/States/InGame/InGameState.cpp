@@ -90,7 +90,7 @@ void InGameState::update(float dt) {
     clientAccumulator += dt;
 
     InputState input;
-    RemotePlayer *localPlayer = entityManager.getPlayer(networkClient.getClientId());
+    RemotePlayer *localPlayer = entityManager.getPlayer(networkClient.getEntityId());
     if (localPlayer != nullptr && localPlayer->hp != 0) {
         if (window.hasFocus() && not renderer.getInventoryUI().isOpen()) {
             InputManager::getPlayerInput(input);
@@ -107,7 +107,7 @@ void InGameState::update(float dt) {
     WorldSnapshot worldSnapshot = networkClient.getWorldSnapshot();
     if (worldSnapshot.appear) {
         worldSnapshot.appear = false;
-        entityManager.applySnapshot(worldSnapshot, networkClient.getClientId(), pendingInputs);
+        entityManager.applySnapshot(worldSnapshot, networkClient.getEntityId(), pendingInputs);
 
         if (worldSnapshot.mouseSelected.appear) {
             worldSnapshot.mouseSelected.appear = false;
@@ -158,13 +158,13 @@ void InGameState::update(float dt) {
 
         networkClient.sendInputPacket(input.seq, input.movementDir, input.isShooting);
 
-        entityManager.update(CLIENT_TICK, networkClient.getClientId());    
+        entityManager.update(CLIENT_TICK, networkClient.getEntityId());    
     }
 
     fpsCounter.update();
     // networkClient.update(dt);
 
-    RemotePlayer *player = entityManager.getPlayer(networkClient.getClientId());
+    RemotePlayer *player = entityManager.getPlayer(networkClient.getEntityId());
     if (player != nullptr) {
         debugInfo.playerPosition = player->localPosition;
     }
@@ -176,7 +176,7 @@ void InGameState::update(float dt) {
 void InGameState::render(sf::RenderWindow &window) {
     window.clear(sf::Color(30.0f, 30.0f, 30.0f));
         
-    renderer.render(entityManager, networkClient.getClientId());
+    renderer.render(entityManager, networkClient.getEntityId());
 
     // if (debugRenderer.isEnabled()) {
         debugRenderer.render(worldCollision, debugInfo);

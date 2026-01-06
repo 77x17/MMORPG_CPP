@@ -4,7 +4,7 @@
 
 class Entity {
 protected:
-    int          id;
+    int          entityId;
     sf::Vector2f position = { 0.0f, 0.0f };
     sf::Vector2f oldPosition;
     sf::Vector2f size;
@@ -23,8 +23,8 @@ public:
     void setPosition(const sf::Vector2f &newPosition);
     void setOldPosition(const sf::Vector2f &newPosition);
     sf::FloatRect getBounds() const;
-    int getId() const;
-    void setId(int _id);
+    int getEntityId() const;
+    void setEntityId(int _id);
 
     virtual bool isDestroyed() const;
     virtual void destroy();

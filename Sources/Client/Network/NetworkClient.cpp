@@ -105,7 +105,7 @@ void NetworkClient::sendPingIfNeeded() {
 
 void NetworkClient::sendInputPacket(int seq, const sf::Vector2f &moveDir, bool isShooting) {
     sf::Packet packet;
-    packet << static_cast<uint8_t>(UdpPacketType::Input) << assignedId << seq << moveDir.x << moveDir.y << isShooting;
+    packet << static_cast<uint8_t>(UdpPacketType::Input) << clientId << seq << moveDir.x << moveDir.y << isShooting;
     udp.send(packet, host, udpPort);
 }
 
@@ -135,16 +135,21 @@ void NetworkClient::pollTCP() {
         }
 
         uint8_t type; packet >> type;
-        if (static_cast<TcpPacketType>(type) == TcpPacketType::Assign_ID) {
-            packet >> assignedId;
+        if (static_cast<TcpPacketType>(type) == TcpPacketType::Assign_ClientID) {
+            packet >> clientId;
 
-            std::cout << "[Network] - Assigned ID: " << assignedId << '\n';
+            std::cout << "[Network] - Assigned Client ID: " << clientId << '\n';
 
             sf::Packet assignUdp;
-            assignUdp << static_cast<uint8_t>(UdpPacketType::Assign_UDP) << assignedId;
+            assignUdp << static_cast<uint8_t>(UdpPacketType::Assign_UDP) << clientId;
             udp.send(assignUdp, host, udpPort);
 
             loginStatus = LoginStatus::Success;
+        }
+        else if (static_cast<TcpPacketType>(type) == TcpPacketType::Assign_EntityID) {
+            packet >> entityId;
+
+            std::cout << "[Network] - Assigned Entity ID: " << entityId << '\n';
         }
         else if (static_cast<TcpPacketType>(type) == TcpPacketType::Login_Fail) {
             loginStatus = LoginStatus::Fail;
@@ -224,7 +229,8 @@ void NetworkClient::pollUDP() {
                         >> playerSnapshot.x 
                         >> playerSnapshot.y 
                         >> playerSnapshot.hp
-                        >> playerSnapshot.lastProcessed;
+                        >> playerSnapshot.lastProcessed
+                        >> playerSnapshot.name;
 
                 worldSnapshot.players.push_back(playerSnapshot); 
             }
@@ -297,7 +303,11 @@ void NetworkClient::poll() {
 }
 
 int NetworkClient::getClientId() const {
-    return assignedId;
+    return clientId;
+}
+
+int NetworkClient::getEntityId() const {
+    return entityId;
 }
 
 void NetworkClient::resetLoginStatus() {

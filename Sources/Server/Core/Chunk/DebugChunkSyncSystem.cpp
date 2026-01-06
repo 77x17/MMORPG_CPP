@@ -17,7 +17,7 @@ void DebugChunkSyncSystem::syncToClients() {
         Player *player = gameWorld.getPlayer(client.id);
         if (player == nullptr) continue;
         
-        std::vector<ChunkCoord> chunks = gameWorld.getChunkInRange(player->getId(), player->getPosition());
+        std::vector<ChunkCoord> chunks = gameWorld.getChunkInRange(player->getClientId(), player->getPosition());
         if (chunks.size() == 0) continue;
         
         sf::Packet chunkPacket;

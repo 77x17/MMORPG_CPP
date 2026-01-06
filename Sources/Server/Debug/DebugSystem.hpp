@@ -5,8 +5,6 @@
 class GameWorld;
 class NetworkServer;
 
-class EventBus;
-
 class DebugSystem {
 private:
     DebugSnapshot snapshot;
@@ -23,7 +21,7 @@ private:
     void rebuildLogs();
 
 public:
-    DebugSystem(EventBus &eventBus);
+    DebugSystem();
 
     void markPlayersDirty();
     void markEnemiesDirty();

@@ -16,18 +16,19 @@ void InputSystem::processPlayerInputs(InputManager &inputManager, GameWorld &gam
         if (player->isDestroyed()) continue;
 
         InputState latestInput;
-        std::vector<InputState> &inputQueue = inputManager.getClientQueue(player->getId());
+        std::vector<InputState> &inputQueue = inputManager.getClientQueue(player->getClientId());
 
         if (!inputQueue.empty()) {
             latestInput = inputQueue.back();
-            inputManager.clearClientQueue(player->getId());
+            inputManager.clearClientQueue(player->getClientId());
             player->lastProcessedInput = latestInput.seq;
         }
 
         physicsSystem.updatePlayer(*player, latestInput, SERVER_TICK);
 
         if (DamageEntity *damageEntity = weaponSystem.tryFire(*player, latestInput)) {
-            damageEntity->setId(++nextProjectileId);
+            int entityId = gameWorld.generateEntityId();
+            damageEntity->setEntityId(entityId);
             gameWorld.addDamageEntity(damageEntity);
         }
     }
@@ -39,18 +40,19 @@ void InputSystem::processEnemyInputs(InputManager &inputManager, GameWorld &game
         if (enemy->isDestroyed()) continue;
 
         InputState latestInput;
-        std::vector<InputState> &inputQueue = inputManager.getEnemyQueue(enemy->getId());
+        std::vector<InputState> &inputQueue = inputManager.getEnemyQueue(enemy->getEntityId());
 
         if (!inputQueue.empty()) {
             latestInput = inputQueue.back();
-            inputManager.getEnemyQueue(enemy->getId());
+            inputManager.getEnemyQueue(enemy->getEntityId());
             enemy->lastProcessedInput = latestInput.seq;
         }
 
         physicsSystem.updateEnemy(*enemy, latestInput, SERVER_TICK);
 
         if (DamageEntity *damageEntity = weaponSystem.tryFire(*enemy, latestInput)) {
-            damageEntity->setId(++nextProjectileId);
+            int entityId = gameWorld.generateEntityId();
+            damageEntity->setEntityId(entityId);
             gameWorld.addDamageEntity(damageEntity);
         }
     }

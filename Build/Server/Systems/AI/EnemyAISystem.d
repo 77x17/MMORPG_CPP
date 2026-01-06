@@ -5,6 +5,7 @@ Build/Server/Systems/AI/EnemyAISystem.o: \
  Sources/Server/Core/Chunk/ChunkSystem.hpp \
  Sources/Server/Core/Chunk/ChunkCoord.hpp \
  Sources/Server/Core/Chunk/ChunkCoordHash.hpp \
+ Sources/Server/Entities/EntityIdGenerator.hpp \
  Sources/Server/Entities/Enemy.hpp Sources/Shared/AABB.hpp \
  Sources/Server/Entities/Entity.hpp Sources/Server/Entities/Player.hpp \
  Sources/Server/Systems/Inventory/Inventory.hpp \

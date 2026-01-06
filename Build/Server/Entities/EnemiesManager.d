@@ -4,4 +4,5 @@ Build/Server/Entities/EnemiesManager.o: \
  Sources/Server/Core/GameWorld.hpp \
  Sources/Server/Core/Chunk/ChunkSystem.hpp \
  Sources/Server/Core/Chunk/ChunkCoord.hpp \
- Sources/Server/Core/Chunk/ChunkCoordHash.hpp
+ Sources/Server/Core/Chunk/ChunkCoordHash.hpp \
+ Sources/Server/Entities/EntityIdGenerator.hpp

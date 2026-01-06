@@ -30,11 +30,12 @@ void GameWorldSyncSystem::syncToClients() {
         std::vector<Player *> visiblePlayers = interestSystem.getVisiblePlayers(currentPlayer, gameWorld.getPlayersInChunk(currentPlayer->getPosition()));
         worldStatePacket << static_cast<int>(visiblePlayers.size());
         for (Player *player : visiblePlayers) {
-            worldStatePacket << player->getId() 
+            worldStatePacket << player->getEntityId() 
                              << player->getPosition().x 
                              << player->getPosition().y 
                              << player->getHealth() 
-                             << player->lastProcessedInput;
+                             << player->lastProcessedInput
+                             << std::to_string(player->getClientId());
         }
 
         std::vector<DamageEntity *> visibleDamageEntities = interestSystem.getVisibleDamageEntities(currentPlayer, gameWorld.getDamageEntitiesInChunk(currentPlayer->getPosition()));
@@ -43,30 +44,30 @@ void GameWorldSyncSystem::syncToClients() {
             Projectile *projectile = dynamic_cast<Projectile *>(damageEntity);
             if (projectile) {
                 worldStatePacket << static_cast<uint8_t>(UdpPacketType::Projectile)
-                                 << projectile->getId() 
+                                 << projectile->getEntityId() 
                                  << projectile->getPosition().x 
                                  << projectile->getPosition().y 
                                  << projectile->getVelocity().x
                                  << projectile->getVelocity().y
-                                 << projectile->getOwnerId();
+                                 << projectile->getOwnerEntityId();
             }
 
             SwordSlash *swordSlash = dynamic_cast<SwordSlash *>(damageEntity);
             if (swordSlash) {
                 worldStatePacket << static_cast<uint8_t>(UdpPacketType::SwordSlash)
-                                 << swordSlash->getId()
+                                 << swordSlash->getEntityId()
                                  << swordSlash->getBounds().left
                                  << swordSlash->getBounds().top
                                  << swordSlash->getBounds().width
                                  << swordSlash->getBounds().height
-                                 << swordSlash->getOwnerId();
+                                 << swordSlash->getOwnerEntityId();
             }
         }
         
         std::vector<Enemy *> visibleEnemy = interestSystem.getVisibleEnemies(currentPlayer, gameWorld.getEnemiesInChunk(currentPlayer->getPosition()));
         worldStatePacket << static_cast<int>(visibleEnemy.size());
         for (Enemy *enemy : visibleEnemy) {
-            worldStatePacket << enemy->getId()
+            worldStatePacket << enemy->getEntityId()
                              << enemy->getPosition().x
                              << enemy->getPosition().y
                              << enemy->getHealth();
@@ -80,11 +81,11 @@ void GameWorldSyncSystem::syncToClients() {
                 if (enemy->isDestroyed()) continue;
 
                 if (enemy->getBounds().contains(currentPlayer->getMousePosition())) {
-                    worldStatePacket << enemy->getId()
+                    worldStatePacket << enemy->getEntityId()
                                      << enemy->getHealth()
                                      << enemy->getMaxHealth();
 
-                    currentPlayer->setEntitySelectedId(enemy->getId());
+                    currentPlayer->setEntitySelectedId(enemy->getEntityId());
                     
                     find = true;
                     break;
@@ -103,8 +104,8 @@ void GameWorldSyncSystem::syncToClients() {
                 if (enemy == nullptr) continue;
                 if (enemy->isDestroyed()) continue;
                 
-                if (enemy->getId() == currentPlayer->getEntitySelectedId()) {
-                    worldStatePacket << enemy->getId()
+                if (enemy->getEntityId() == currentPlayer->getEntitySelectedId()) {
+                    worldStatePacket << enemy->getEntityId()
                                      << enemy->getHealth()
                                      << enemy->getMaxHealth();
                     find = true;

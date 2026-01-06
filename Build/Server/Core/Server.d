@@ -4,6 +4,7 @@ Build/Server/Core/Server.o: Sources/Server/Core/Server.cpp \
  Sources/Server/Core/Chunk/ChunkCoordHash.hpp \
  Sources/Server/Core/Chunk/DebugChunkSyncSystem.hpp \
  Sources/Server/Core/GameWorld.hpp \
+ Sources/Server/Entities/EntityIdGenerator.hpp \
  Sources/Server/Core/GameWorldSyncSystem.hpp \
  Sources/Server/Debug/DebugSystem.hpp \
  Sources/Server/Debug/DebugSnapshot.hpp \
@@ -16,7 +17,6 @@ Build/Server/Core/Server.o: Sources/Server/Core/Server.cpp \
  Sources/Server/Entities/Projectile.hpp \
  Sources/Server/Entities/DamageEntity.hpp \
  Sources/Server/Entities/SwordSlash.hpp \
- Sources/Server/Events/EventBus.hpp Sources/Server/Events/Event.hpp \
  Sources/Server/Network/NetworkServer.hpp \
  Sources/Server/Network/ClientSession.hpp \
  Sources/Server/Utils/ThreadSafeQueue/ThreadSafeQueue.hpp \
@@ -38,4 +38,4 @@ Build/Server/Core/Server.o: Sources/Server/Core/Server.cpp \
  Sources/Server/Systems/Physics/WorldCollisionSystem.hpp \
  Sources/Server/Systems/Physics/WorldCollisionSyncSystem.hpp \
  Sources/Server/Utils/Constants.hpp Sources/Server/Utils/Random.hpp \
- Sources/Server/Utils/Font.hpp
+ Sources/Server/Utils/Font.hpp Sources/Shared/TcpPacketType.hpp

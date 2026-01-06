@@ -5,7 +5,8 @@
 enum class TcpPacketType : std::uint8_t {
     Login,
     Login_Fail,
-    Assign_ID,
+    Assign_ClientID,
+    Assign_EntityID,
     MoveItem,
     EquipItem,
     TcpPing,

@@ -51,13 +51,14 @@ private:
     TcpPingTracker tcpPingTracker;
     UdpPingTracker udpPingTracker;
 
+    int clientId = -1;
+    int entityId = -1;
+
 private:
     void networkLoop();
     void sendPingIfNeeded();
 
 public:
-    int assignedId = -1;
-
     NetworkClient(const std::string &_host, unsigned short _tcpPort, unsigned short _udpPort);
     ~NetworkClient();
 
@@ -82,6 +83,7 @@ public:
     void poll();
 
     int getClientId() const;
+    int getEntityId() const;
 
     LoginStatus getLoginStatus() const;
 

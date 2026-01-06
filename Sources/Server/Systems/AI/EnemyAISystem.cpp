@@ -42,13 +42,12 @@ void EnemyAISystem::update(const float &dt, GameWorld &gameWorld, InputManager &
             sf::Vector2f direction = normalize(target->getPosition() - enemy->getPosition());
             input.movementDir = direction;
             
-            // if (nearestPlayerDistance < 200.0f) {
-            if (nearestPlayerDistance < 70.0f) {
+            if (nearestPlayerDistance < 55.0f) {
                 input.isShooting = true;
             }
         }
         
         input.seq = ++enemy->inputSeq;
-        inputManager.pushEnemyInput(enemy->getId(), input);
+        inputManager.pushEnemyInput(enemy->getEntityId(), input);
     }
 }

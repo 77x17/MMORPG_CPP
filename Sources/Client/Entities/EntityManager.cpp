@@ -7,7 +7,7 @@
 
 #include "Client/Snapshots/WorldSnapshot.hpp"
 
-void EntityManager::applySnapshot(const WorldSnapshot &snapshot, int clientId, std::vector<InputState> &pendingInputs) {
+void EntityManager::applySnapshot(const WorldSnapshot &snapshot, int myEntityId, std::vector<InputState> &pendingInputs) {
     std::unordered_map<int, RemotePlayer> newRemotePlayers;
     for (const PlayerSnapshot &playerSnapshot : snapshot.players) {
         RemotePlayer remotePlayer;
@@ -16,6 +16,7 @@ void EntityManager::applySnapshot(const WorldSnapshot &snapshot, int clientId, s
         remotePlayer.serverVelocity = { 0.0f, 0.0f };
         remotePlayer.hp             = playerSnapshot.hp;
         remotePlayer.lastAck        = playerSnapshot.lastProcessed;
+        remotePlayer.name           = playerSnapshot.name;
 
         if (remotePlayers.count(remotePlayer.id)) {
             remotePlayer.localPosition = remotePlayers[remotePlayer.id].localPosition;
@@ -24,7 +25,7 @@ void EntityManager::applySnapshot(const WorldSnapshot &snapshot, int clientId, s
             remotePlayer.localPosition = remotePlayer.serverPosition;
         }
 
-        if (remotePlayer.id == clientId) {
+        if (remotePlayer.id == myEntityId) {
             // reconcile pending inputs: remove acknowledged
             while (!pendingInputs.empty() && pendingInputs.front().seq <= remotePlayer.lastAck) {
                 pendingInputs.erase(pendingInputs.begin());
@@ -121,9 +122,9 @@ void EntityManager::applySnapshot(const WorldSnapshot &snapshot, int clientId, s
     remoteEnemies.swap(newRemoteEnemies);
 }
 
-void EntityManager::update(const float &dt, int clientId) {
+void EntityManager::update(const float &dt, int myEntityId) {
     for (auto &[id, remotePlayer] : remotePlayers) {
-        if (remotePlayer.id == clientId) continue;
+        if (remotePlayer.id == myEntityId) continue;
         remotePlayer.localPosition = lerp(remotePlayer.localPosition, remotePlayer.serverPosition, 0.2f);
     }
 
@@ -153,16 +154,16 @@ const std::unordered_map<int, RemoteSwordSlash> & EntityManager::getSwordSlashs(
     return remoteSwordSlashs;
 }
 
-RemotePlayer * EntityManager::getPlayer(int id) {
-    auto it = remotePlayers.find(id);
+RemotePlayer * EntityManager::getPlayer(int myEntityId) {
+    auto it = remotePlayers.find(myEntityId);
     if (it == remotePlayers.end()) {
         return nullptr;
     }
     return &it->second;
 }
 
-const RemotePlayer * EntityManager::getPlayer(int id) const {
-    const auto it = remotePlayers.find(id);
+const RemotePlayer * EntityManager::getPlayer(int myEntityId) const {
+    const auto it = remotePlayers.find(myEntityId);
     if (it == remotePlayers.end()) {
         return nullptr;
     }

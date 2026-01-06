@@ -5,8 +5,8 @@
 #include "Shared/Constants.hpp"
 #include "Shared/Utils.hpp"
 
-Player::Player(int _id, const sf::Vector2f &startPosition) 
-    : Entity(_id, sf::Vector2f(PLAYER_WIDTH, PLAYER_HEIGHT)), 
+Player::Player(int _entityId, int _clientId, const sf::Vector2f &startPosition) 
+    : Entity(_entityId, sf::Vector2f(PLAYER_WIDTH, PLAYER_HEIGHT)), clientId(_clientId), 
       health(100), maxHealth(100), 
       spawnPosition(startPosition)
 {
@@ -42,7 +42,7 @@ void Player::takeDamage(int damage) {
     if (health <= 0) {
         health = 0;
         destroy();
-        LogSystem::addMessage("[Player] ID: " + std::to_string(id) + " died!");
+        LogSystem::addMessage("[Player] ID: " + std::to_string(clientId) + " died!");
     }
 }
 
@@ -121,4 +121,12 @@ void Player::toggleMouseSelected() {
 
 bool Player::getMouseSelected() const {
     return mouseSelected;
+}
+
+int Player::getClientId() const {
+    return clientId;
+}
+
+void Player::setClientId(int _clientId) {
+    clientId = _clientId;
 }

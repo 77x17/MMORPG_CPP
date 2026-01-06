@@ -19,7 +19,7 @@ void CombatSystem::handleCollision(const std::vector<Player *> &players, const s
             if (player == nullptr) continue;
             if (player->isDestroyed()) continue;
 
-            if (damageEntity->getOwnerId() == player->getId()) {
+            if (damageEntity->getOwnerEntityId() == player->getEntityId()) {
                 continue;
             }
 
@@ -53,7 +53,7 @@ void CombatSystem::handleCollision(const std::vector<Enemy *> &enemies, const st
             if (enemy == nullptr) continue;
             if (enemy->isDestroyed()) continue;
 
-            if (damageEntity->getOwnerId() == enemy->getId()) {
+            if (damageEntity->getOwnerEntityId() == enemy->getEntityId()) {
                 continue;
             }
 

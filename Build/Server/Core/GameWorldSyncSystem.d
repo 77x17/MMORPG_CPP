@@ -5,6 +5,7 @@ Build/Server/Core/GameWorldSyncSystem.o: \
  Sources/Server/Core/Chunk/ChunkSystem.hpp \
  Sources/Server/Core/Chunk/ChunkCoord.hpp \
  Sources/Server/Core/Chunk/ChunkCoordHash.hpp \
+ Sources/Server/Entities/EntityIdGenerator.hpp \
  Sources/Server/Network/NetworkServer.hpp \
  Sources/Server/Network/ClientSession.hpp \
  Sources/Server/Utils/ThreadSafeQueue/ThreadSafeQueue.hpp \

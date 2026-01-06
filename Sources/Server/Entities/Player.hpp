@@ -8,6 +8,8 @@
 
 class Player : public Entity {
 private:
+    int          clientId;
+
     int          health;
     int          maxHealth;
     
@@ -32,7 +34,7 @@ private:
 public:
     int lastProcessedInput = 0;
 
-    Player(int _id, const sf::Vector2f &startPosition);
+    Player(int _entityId, int _clientId, const sf::Vector2f &startPosition);
 
     void update(const float &dt) override;
 
@@ -57,9 +59,12 @@ public:
     const sf::Vector2f & getOldShootDir() const;
     const sf::Vector2f & getImpulse() const;
     const float & getProjectileCooldownTimer() const;
-
+    
     Inventory & getInventory();
     Equipment & getEquipment();
 
     AABB buildAABB(const sf::Vector2f &atPosition) const;
+    
+    int getClientId() const;
+    void setClientId(int _clientId);
 };

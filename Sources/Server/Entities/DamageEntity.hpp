@@ -7,17 +7,17 @@ class Player;
 
 class DamageEntity : public Entity {
 protected:
-    int   ownerId;
+    int   ownerEntityId;
     int   damage;
     float knockbackStrength;
     float lifeTimer;
     float displayTimer = 0.0f;
 
 public:
-    DamageEntity(int _ownerId, const sf::Vector2f &_position, const sf::Vector2f &_size);
+    DamageEntity(int _ownerEntityId, const sf::Vector2f &_position, const sf::Vector2f &_size);
     virtual ~DamageEntity() = default;
 
-    int getOwnerId() const;
+    int getOwnerEntityId() const;
     int getDamage() const;
     float getKnockbackStrength() const;
 

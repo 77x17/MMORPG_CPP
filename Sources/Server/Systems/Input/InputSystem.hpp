@@ -7,9 +7,6 @@ class WeaponSystem;
 class DamageEntity;
 
 class InputSystem {
-private:
-    int nextProjectileId = 0;
-
 public:
     InputSystem() = default;
 

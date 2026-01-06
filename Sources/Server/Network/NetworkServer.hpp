@@ -54,7 +54,7 @@ public:
 
     bool isValidClientId(int id) const;
 
-    ClientSession & getClient(int clientId);
+    ClientSession * getClient(int clientId);
     std::vector<ClientSession> & getClients();
     const std::vector<ClientSession> & getClients() const;
 

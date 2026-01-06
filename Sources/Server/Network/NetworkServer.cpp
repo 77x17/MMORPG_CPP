@@ -74,17 +74,19 @@ bool NetworkServer::flushOutgoing() {
     bool didWork = false;
     OutgoingPacket outgoingPacket;
     while (outgoingPackets.tryPop(outgoingPacket)) {
-        ClientSession &client = getClient(outgoingPacket.clientId);
+        ClientSession *client = getClient(outgoingPacket.clientId);
+        if (client == nullptr) continue;
+
         if (outgoingPacket.useUdp) {
-            auto status = udp.send(outgoingPacket.packet, client.udpId, client.udpPort);
+            auto status = udp.send(outgoingPacket.packet, client->udpId, client->udpPort);
             if (status != sf::Socket::Done) {
-                LogSystem::addMessage("[Network] UDP failed on client " + std::to_string(client.id));
+                LogSystem::addMessage("[Network] UDP failed on client " + std::to_string(client->id));
             }
         }
         else {
-            auto status = client.tcp->send(outgoingPacket.packet);
+            auto status = client->tcp->send(outgoingPacket.packet);
             if (status != sf::Socket::Done) {
-                LogSystem::addMessage("[Network] TCP failed on client " + std::to_string(client.id));
+                LogSystem::addMessage("[Network] TCP failed on client " + std::to_string(client->id));
             }
         }
         didWork = true;
@@ -145,7 +147,7 @@ void NetworkServer::handleTcpPacket(ClientSession &client) {
                 incomingEvents.push(event);
 
                 sf::Packet packet; 
-                packet << static_cast<uint8_t>(TcpPacketType::Assign_ID) << requestedId;
+                packet << static_cast<uint8_t>(TcpPacketType::Assign_ClientID) << requestedId;
                 sendAsync(requestedId, packet, false);
                 
                 LogSystem::addMessage("[Network] Register ID: " + std::to_string(requestedId) + " for: " + client.tcp->getRemoteAddress().toString() + ":" + std::to_string(client.tcp->getRemotePort()));
@@ -282,13 +284,13 @@ bool NetworkServer::pollUdp() {
     return didWork;
 }
 
-ClientSession & NetworkServer::getClient(int clientId) {
+ClientSession * NetworkServer::getClient(int clientId) {
     for (ClientSession &client : clients) {
         if (client.id == clientId) {
-            return client;
+            return &client;
         }
     }
-    throw std::out_of_range("[Network] getClient() out of range");
+    return nullptr;
 }
 
 std::vector<ClientSession> & NetworkServer::getClients() {

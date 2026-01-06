@@ -6,6 +6,7 @@ Build/Server/Systems/Input/InputSystem.o: \
  Sources/Server/Core/Chunk/ChunkSystem.hpp \
  Sources/Server/Core/Chunk/ChunkCoord.hpp \
  Sources/Server/Core/Chunk/ChunkCoordHash.hpp \
+ Sources/Server/Entities/EntityIdGenerator.hpp \
  Sources/Server/Systems/Physics/PhysicsSystem.hpp \
  Sources/Server/Systems/Combat/WeaponSystem.hpp \
  Sources/Server/Entities/Enemy.hpp Sources/Shared/AABB.hpp \

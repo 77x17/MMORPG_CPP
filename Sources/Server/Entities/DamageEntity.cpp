@@ -1,12 +1,12 @@
 #include "Server/Entities/DamageEntity.hpp"
 
-DamageEntity::DamageEntity(int _ownerId, const sf::Vector2f &_position, const sf::Vector2f &_size) 
-: Entity(-1, _size), ownerId(_ownerId) {
+DamageEntity::DamageEntity(int _ownerEntityId, const sf::Vector2f &_position, const sf::Vector2f &_size) 
+: Entity(-1, _size), ownerEntityId(_ownerEntityId) {
     position = _position;
 }
 
-int DamageEntity::getOwnerId() const {
-    return ownerId;
+int DamageEntity::getOwnerEntityId() const {
+    return ownerEntityId;
 }
 
 int DamageEntity::getDamage() const {

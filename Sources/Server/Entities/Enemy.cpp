@@ -48,7 +48,7 @@ void Enemy::takeDamage(int damage) {
         health = 0;
         destroy();
 
-        LogSystem::addMessage("[Enemy] ID: " + std::to_string(id) + " died!");
+        LogSystem::addMessage("[Enemy] ID: " + std::to_string(entityId) + " died!");
     }
 }
 

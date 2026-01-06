@@ -10,8 +10,6 @@
 #include "Server/Entities/Projectile.hpp"
 #include "Server/Entities/SwordSlash.hpp"
 
-#include "Server/Events/EventBus.hpp"
-
 #include "Server/Network/NetworkServer.hpp"
 
 #include "Server/Renderer/Renderer.hpp"
@@ -33,6 +31,7 @@
 #include "Server/Utils/Constants.hpp"
 #include "Server/Utils/Random.hpp"
 #include "Server/Utils/Font.hpp"
+#include "Shared/TcpPacketType.hpp"
 
 sf::Font Font::font;
 std::deque<std::string> LogSystem::logs;
@@ -42,8 +41,8 @@ void syncGameWorldFromClients(GameWorld &gameWorld, InputManager &inputManager, 
     networkServer.fetchEvents(events);
     for (NetworkEvent &event : events) {
         switch (event.type) {
-            case NetworkEventType::NewClient:
-                gameWorld.addPlayer(event.clientId);
+            case NetworkEventType::NewClient: {
+                int entityId = gameWorld.addPlayer(event.clientId);
                 inputManager.clearClientQueue(event.clientId);
 
                 inventorySyncSystem.syncInventoryToClient(event.clientId);
@@ -51,7 +50,12 @@ void syncGameWorldFromClients(GameWorld &gameWorld, InputManager &inputManager, 
 
                 worldCollisionSyncSystem.syncToClient(event.clientId);
 
+                // Sửa lại sau, cần di chuyển thành file mới
+                sf::Packet packet; packet << static_cast<uint8_t>(TcpPacketType::Assign_EntityID) << entityId;
+                networkServer.sendAsync(event.clientId, packet, false);
+            
                 break;
+            }
             case NetworkEventType::Input:
                 inputManager.pushClientInput(event.clientId, event.input);
                 
@@ -97,10 +101,8 @@ int main() {
     if (!networkServer.start(55001, 55002)) {
         return -1;
     }
-
-    EventBus eventBus;
     
-    GameWorld       gameWorld(eventBus);
+    GameWorld       gameWorld;
     WorldCollision  worldCollision;
     InputManager    inputManager;
     
@@ -132,7 +134,7 @@ int main() {
     Renderer renderer(window);
     Font::loadFromFile("Assets/Roboto_Mono.ttf");
 
-    DebugSystem debugSystem(eventBus);
+    DebugSystem debugSystem;
 
     sf::Clock clock, sendClock;
     float accumulator = 0.0f;

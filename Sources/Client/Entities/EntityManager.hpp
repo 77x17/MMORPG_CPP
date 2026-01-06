@@ -22,15 +22,15 @@ private:
 public:
     EntityManager() = default;
 
-    void applySnapshot(const WorldSnapshot &snapshot, int myId, std::vector<InputState> &pendingInputs);
+    void applySnapshot(const WorldSnapshot &snapshot, int myEntityId, std::vector<InputState> &pendingInputs);
 
-    void update(const float &dt, int myId);
+    void update(const float &dt, int myEntityId);
 
     const std::unordered_map<int, RemoteEnemy> & getEnemies() const;
     const std::unordered_map<int, RemotePlayer> & getPlayers() const;
     const std::unordered_map<int, RemoteProjectile> & getProjectiles() const;
     const std::unordered_map<int, RemoteSwordSlash> & getSwordSlashs() const;
 
-    RemotePlayer * getPlayer(int myId);
-    const RemotePlayer * getPlayer(int myId) const;
+    RemotePlayer * getPlayer(int myEntityId);
+    const RemotePlayer * getPlayer(int myEntityId) const;
 };

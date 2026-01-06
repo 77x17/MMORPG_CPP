@@ -4,6 +4,8 @@
 
 #include "Server/Core/Chunk/ChunkSystem.hpp"
 
+#include "Server/Entities/EntityIdGenerator.hpp"
+
 class Enemy;
 class Player;
 class DamageEntity;
@@ -18,18 +20,18 @@ private:
 
     ChunkSystem chunkSystem;
 
-    EventBus &eventBus;
-
+    EntityIdGenerator entityIdGenerator;
+    
 public:
-    GameWorld(EventBus &_eventBus);
+    GameWorld();
 
-    void addEnemy(int id);
-    void removeEnemy(int id);
+    void addEnemy();
+    void removeEnemy(int entityId);
     std::vector<Enemy *> & getEnemies();
     const std::vector<Enemy *> & getEnemies() const;
     const std::vector<Enemy *> getEnemiesInChunk(const sf::Vector2f &centerPosition) const;
 
-    void addPlayer(int id);
+    int addPlayer(int clientId);
     void removePlayer(int id);
     Player * getPlayer(int clientId);
     const Player * getPlayer(int clientId) const;
@@ -45,4 +47,5 @@ public:
     void update(const float &dt);
 
     std::vector<ChunkCoord> getChunkInRange(int clientId, const sf::Vector2f &centerPosition);
+    int generateEntityId();
 };
