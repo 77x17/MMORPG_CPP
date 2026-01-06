@@ -68,8 +68,6 @@ public:
     void startNetworkThread();
     void stopNetworkThread();
 
-    void update(float dt);
-
     // non-blocking: send input via TCP
     void sendInputPacket(int seq, const sf::Vector2f &moveDir, bool isShooting);
     void sendTcpPacket(sf::Packet &packet);

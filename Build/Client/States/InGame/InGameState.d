@@ -31,4 +31,4 @@ Build/Client/States/InGame/InGameState.o: \
  Sources/Client/Snapshots/PlayerSnapshot.hpp \
  Sources/Client/Snapshots/ProjectileSnapshot.hpp \
  Sources/Client/Snapshots/SwordSlashSnapshot.hpp \
- Sources/Client/Utils/Constants.hpp Sources/Shared/PacketType.hpp
+ Sources/Client/Utils/Constants.hpp Sources/Shared/TcpPacketType.hpp

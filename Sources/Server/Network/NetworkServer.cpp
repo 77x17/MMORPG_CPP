@@ -6,7 +6,8 @@
 
 #include "Server/Systems/Log/LogSystem.hpp"
 
-#include "Shared/PacketType.hpp"
+#include "Shared/TcpPacketType.hpp"
+#include "Shared/UdpPacketType.hpp"
 
 NetworkServer::~NetworkServer() {
     close();
@@ -127,12 +128,12 @@ void NetworkServer::handleTcpPacket(ClientSession &client) {
     sf::Socket::Status status = client.tcp->receive(packet);
     if (status == sf::Socket::Done) {
         uint8_t type; packet >> type;
-        if (static_cast<PacketType>(type) == PacketType::Login) {
+        if (static_cast<TcpPacketType>(type) == TcpPacketType::Login) {
             int requestedId; packet >> requestedId;
 
             if (isValidClientId(requestedId) == false) {
                 sf::Packet packet; 
-                packet << static_cast<uint8_t>(PacketType::Login_Fail);
+                packet << static_cast<uint8_t>(TcpPacketType::Login_Fail);
                 client.tcp->send(packet);
             }
             else {   
@@ -144,13 +145,13 @@ void NetworkServer::handleTcpPacket(ClientSession &client) {
                 incomingEvents.push(event);
 
                 sf::Packet packet; 
-                packet << static_cast<uint8_t>(PacketType::Assign_ID) << requestedId;
+                packet << static_cast<uint8_t>(TcpPacketType::Assign_ID) << requestedId;
                 sendAsync(requestedId, packet, false);
                 
                 LogSystem::addMessage("[Network] Register ID: " + std::to_string(requestedId) + " for: " + client.tcp->getRemoteAddress().toString() + ":" + std::to_string(client.tcp->getRemotePort()));
             }
         }
-        else if (static_cast<PacketType>(type) == PacketType::MoveItem) {
+        else if (static_cast<TcpPacketType>(type) == TcpPacketType::MoveItem) {
             int from, to;
             packet >> from >> to;
             
@@ -160,7 +161,7 @@ void NetworkServer::handleTcpPacket(ClientSession &client) {
             event.from = from, event.to = to;
             incomingEvents.push(event);
         }
-        else if (static_cast<PacketType>(type) == PacketType::EquipItem) {
+        else if (static_cast<TcpPacketType>(type) == TcpPacketType::EquipItem) {
             int fromInventory, toEquipment;
             packet >> fromInventory >> toEquipment;
             
@@ -170,15 +171,15 @@ void NetworkServer::handleTcpPacket(ClientSession &client) {
             event.from = fromInventory, event.to = toEquipment;
             incomingEvents.push(event);
         }
-        else if (static_cast<PacketType>(type) == PacketType::TcpPing) {
+        else if (static_cast<TcpPacketType>(type) == TcpPacketType::TcpPing) {
             uint64_t clientTime; packet >> clientTime;
             
             sf::Packet replyPacket;
-            replyPacket << static_cast<uint8_t>(PacketType::TcpPing) << clientTime;
+            replyPacket << static_cast<uint8_t>(TcpPacketType::TcpPing) << clientTime;
 
             client.tcp->send(replyPacket);
         }
-        else if (static_cast<PacketType>(type) == PacketType::MouseSelect) {
+        else if (static_cast<TcpPacketType>(type) == TcpPacketType::MouseSelect) {
             sf::Vector2f selectPosition;
             float x, y; packet >> x >> y;
 
@@ -241,19 +242,19 @@ bool NetworkServer::pollUdp() {
 
         didWork = true;
 
-        std::string type; packet >> type;
+        std::uint8_t type; packet >> type;
         // === UDP Ping === 
-        if (type == "UdpPing") {
+        if (static_cast<UdpPacketType>(type) == UdpPacketType::UdpPing) {
             uint64_t clientTime; packet >> clientTime;
             
             sf::Packet replyPacket;
-            replyPacket << "UdpPing" << clientTime;
+            replyPacket << static_cast<uint8_t>(UdpPacketType::UdpPing) << clientTime;
 
             udp.send(replyPacket, sender, senderPort);
             continue;
         }
         // === Gameplay ===
-        if (type == "Assign_UDP") {
+        if (static_cast<UdpPacketType>(type) == UdpPacketType::Assign_UDP) {
             int clientId; packet >> clientId;
             for (ClientSession &client : clients) {
                 if (client.id == clientId) {
@@ -264,7 +265,7 @@ bool NetworkServer::pollUdp() {
                 }
             }
         }
-        else if (type == "Input") {
+        else if (static_cast<UdpPacketType>(type) == UdpPacketType::Input) {
             NetworkEvent event;
             event.type = NetworkEventType::Input;
             packet >> event.clientId

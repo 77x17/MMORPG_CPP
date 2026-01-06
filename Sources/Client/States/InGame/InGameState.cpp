@@ -13,7 +13,7 @@
 
 #include "Client/Utils/Constants.hpp"
 
-#include "Shared/PacketType.hpp"
+#include "Shared/TcpPacketType.hpp"
 
 #include <iostream>
 
@@ -57,7 +57,7 @@ void InGameState::handleEvent(const sf::Event &event) {
                 if (from.first == to.first) {
                     if (from.first == 0) {
                         sf::Packet moveItemPacket;
-                        moveItemPacket << static_cast<uint8_t>(PacketType::MoveItem) << from.second << to.second;
+                        moveItemPacket << static_cast<uint8_t>(TcpPacketType::MoveItem) << from.second << to.second;
                         networkClient.sendTcpPacket(moveItemPacket);
                     }
                     else { // 1
@@ -65,7 +65,7 @@ void InGameState::handleEvent(const sf::Event &event) {
                     }
                 }
                 else {
-                    sf::Packet equipItemPacket; equipItemPacket << static_cast<uint8_t>(PacketType::EquipItem);
+                    sf::Packet equipItemPacket; equipItemPacket << static_cast<uint8_t>(TcpPacketType::EquipItem);
                     if (from.first == 0) {
                         equipItemPacket << from.second << to.second;
                         networkClient.sendTcpPacket(equipItemPacket);
@@ -79,7 +79,7 @@ void InGameState::handleEvent(const sf::Event &event) {
         }
     }
     else if (event.type == sf::Event::MouseButtonPressed) {
-        sf::Packet mouseSelectPacket; mouseSelectPacket << static_cast<uint8_t>(PacketType::MouseSelect);
+        sf::Packet mouseSelectPacket; mouseSelectPacket << static_cast<uint8_t>(TcpPacketType::MouseSelect);
         sf::Vector2f mouseWorldPosition = renderer.getWorldPosition(sf::Mouse::getPosition(window));
         mouseSelectPacket << mouseWorldPosition.x << mouseWorldPosition.y;
         networkClient.sendTcpPacket(mouseSelectPacket);

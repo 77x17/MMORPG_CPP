@@ -5,7 +5,7 @@
 
 #include "Server/Entities/Player.hpp"
 
-#include "Shared/PacketType.hpp"
+#include "Shared/TcpPacketType.hpp"
 
 DebugChunkSyncSystem::DebugChunkSyncSystem(GameWorld &_gameWorld, NetworkServer &_networkServer) 
 : gameWorld(_gameWorld), networkServer(_networkServer) {
@@ -21,7 +21,7 @@ void DebugChunkSyncSystem::syncToClients() {
         if (chunks.size() == 0) continue;
         
         sf::Packet chunkPacket;
-        chunkPacket << static_cast<uint8_t>(PacketType::Chunk) << (int)chunks.size();  
+        chunkPacket << static_cast<uint8_t>(TcpPacketType::Chunk) << (int)chunks.size();  
         for (const ChunkCoord &chunk : chunks) {
             chunkPacket << chunk.getX() * CHUNK_SIZE
                         << chunk.getY() * CHUNK_SIZE

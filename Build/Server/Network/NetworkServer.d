@@ -5,4 +5,5 @@ Build/Server/Network/NetworkServer.o: \
  Sources/Server/Utils/ThreadSafeQueue/ThreadSafeQueue.hpp \
  Sources/Server/Network/NetworkEvent.hpp Sources/Shared/InputState.hpp \
  Sources/Server/Network/OutgoingPacket.hpp \
- Sources/Server/Systems/Log/LogSystem.hpp Sources/Shared/PacketType.hpp
+ Sources/Server/Systems/Log/LogSystem.hpp \
+ Sources/Shared/TcpPacketType.hpp Sources/Shared/UdpPacketType.hpp

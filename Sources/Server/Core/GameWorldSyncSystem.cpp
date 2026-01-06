@@ -11,6 +11,8 @@
 
 #include "Server/Systems/Log/LogSystem.hpp"
 
+#include "Shared/UdpPacketType.hpp"
+
 GameWorldSyncSystem::GameWorldSyncSystem(GameWorld &_gameWorld, NetworkServer &_networkServer, InterestSystem &_interestSystem)
 : gameWorld(_gameWorld), networkServer(_networkServer), interestSystem(_interestSystem) {
 
@@ -23,8 +25,7 @@ void GameWorldSyncSystem::syncToClients() {
         Player *currentPlayer = gameWorld.getPlayer(client.id);
         if (currentPlayer == nullptr) continue;
 
-        sf::Packet worldStatePacket;
-        worldStatePacket << "WorldState";
+        sf::Packet worldStatePacket; worldStatePacket << static_cast<uint8_t>(UdpPacketType::WorldState);
         
         std::vector<Player *> visiblePlayers = interestSystem.getVisiblePlayers(currentPlayer, gameWorld.getPlayersInChunk(currentPlayer->getPosition()));
         worldStatePacket << static_cast<int>(visiblePlayers.size());
@@ -41,7 +42,7 @@ void GameWorldSyncSystem::syncToClients() {
         for (DamageEntity *damageEntity : visibleDamageEntities) {
             Projectile *projectile = dynamic_cast<Projectile *>(damageEntity);
             if (projectile) {
-                worldStatePacket << "Projectile"
+                worldStatePacket << static_cast<uint8_t>(UdpPacketType::Projectile)
                                  << projectile->getId() 
                                  << projectile->getPosition().x 
                                  << projectile->getPosition().y 
@@ -52,7 +53,7 @@ void GameWorldSyncSystem::syncToClients() {
 
             SwordSlash *swordSlash = dynamic_cast<SwordSlash *>(damageEntity);
             if (swordSlash) {
-                worldStatePacket << "SwordSlash"
+                worldStatePacket << static_cast<uint8_t>(UdpPacketType::SwordSlash)
                                  << swordSlash->getId()
                                  << swordSlash->getBounds().left
                                  << swordSlash->getBounds().top

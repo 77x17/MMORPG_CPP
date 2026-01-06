@@ -14,4 +14,4 @@ Build/Client/Network/NetworkClient.o: \
  Sources/Client/Snapshots/PlayerSnapshot.hpp \
  Sources/Client/Snapshots/ProjectileSnapshot.hpp \
  Sources/Client/Snapshots/SwordSlashSnapshot.hpp \
- Sources/Shared/PacketType.hpp
+ Sources/Shared/TcpPacketType.hpp Sources/Shared/UdpPacketType.hpp

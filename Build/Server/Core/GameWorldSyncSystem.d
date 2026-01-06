@@ -19,4 +19,5 @@ Build/Server/Core/GameWorldSyncSystem.o: \
  Sources/Server/Entities/Projectile.hpp \
  Sources/Server/Entities/DamageEntity.hpp \
  Sources/Server/Entities/SwordSlash.hpp \
- Sources/Server/Systems/Log/LogSystem.hpp
+ Sources/Server/Systems/Log/LogSystem.hpp \
+ Sources/Shared/UdpPacketType.hpp
