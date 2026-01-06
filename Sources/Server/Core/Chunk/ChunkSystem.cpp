@@ -31,29 +31,55 @@ std::vector<ChunkCoord> ChunkSystem::getChunkInRange(int clientId, const sf::Vec
     return result;
 }
 
+void ChunkSystem::removeClientTracking(int clientId) {
+    previousChunk.erase(clientId);
+}
+
 void ChunkSystem::addPlayer(Player* player) {
+    if (player == nullptr) return;
+
     ChunkCoord chunk = getChunk(player->getPosition());
     playerChunks[chunk].insert(player);
+
+    playerToChunk[player] = chunk;
 }
 
 void ChunkSystem::removePlayer(Player* player) {
-    ChunkCoord chunk = getChunk(player->getPosition()); 
-    auto it = playerChunks.find(chunk);
-    if (it != playerChunks.end()) {
-        it->second.erase(player);
-        if (it->second.empty()) {
-            playerChunks.erase(it);
+    if (player == nullptr) return;
+    
+    auto it = playerToChunk.find(player);
+    if (it == playerToChunk.end()) return;
+
+    ChunkCoord chunk = it->second; 
+
+    auto chunkIt = playerChunks.find(chunk);
+    if (chunkIt != playerChunks.end()) {
+        chunkIt->second.erase(player);
+        if (chunkIt->second.empty()) {
+            playerChunks.erase(chunkIt);
         }
     }
+    playerToChunk.erase(it);
 }
 
 void ChunkSystem::updatePlayer(Player* player, const sf::Vector2f& oldPosition) {
-    ChunkCoord oldChunk = getChunk(oldPosition);
+    if (player == nullptr) return;
+
+    auto it = playerToChunk.find(player);
+    if (it == playerToChunk.end()) return;
+
+    ChunkCoord oldChunk = it->second;
     ChunkCoord newChunk = getChunk(player->getPosition());
 
-    if (!(oldChunk == newChunk)) {
+
+    if (oldChunk != newChunk) {
         playerChunks[oldChunk].erase(player);
+        if (playerChunks[oldChunk].empty()) {
+            playerChunks.erase(oldChunk);
+        }
+
         playerChunks[newChunk].insert(player);
+        it->second = newChunk;
     }
 }
 
@@ -74,24 +100,50 @@ std::vector<Player*> ChunkSystem::getPlayersInRange(const sf::Vector2f& position
 }
 
 void ChunkSystem::addDamageEntity(DamageEntity* entity) {
-    damageEntityChunks[getChunk(entity->getPosition())].insert(entity);
+    if (entity == nullptr) return;
+    
+    ChunkCoord chunk = getChunk(entity->getPosition());
+    damageEntityChunks[chunk].insert(entity);
+
+    damageEntityToChunk[entity] = chunk;
 }
 
 void ChunkSystem::removeDamageEntity(DamageEntity* entity) {
-    ChunkCoord chunk = getChunk(entity->getPosition());
-    damageEntityChunks[chunk].erase(entity);
+    if (entity == nullptr) return;
 
-    chunk = getChunk(entity->getOldPosition());
-    damageEntityChunks[chunk].erase(entity);
+    auto it = damageEntityToChunk.find(entity);
+    if (it == damageEntityToChunk.end()) return;
+
+    ChunkCoord chunk = it->second;
+
+    auto chunkIt = damageEntityChunks.find(chunk);
+    if (chunkIt != damageEntityChunks.end()) {
+        chunkIt->second.erase(entity);
+        if (chunkIt->second.empty()) {
+            damageEntityChunks.erase(chunkIt);
+        }
+    }
+
+    damageEntityToChunk.erase(it);
 }
 
 void ChunkSystem::updateDamageEntity(DamageEntity* entity, const sf::Vector2f& oldPosition) {
-    ChunkCoord oldChunk = getChunk(oldPosition);
+    if (entity == nullptr) return;
+
+    auto it = damageEntityToChunk.find(entity);
+    if (it == damageEntityToChunk.end()) return;
+
+    ChunkCoord oldChunk = it->second;
     ChunkCoord newChunk = getChunk(entity->getPosition());
 
-    if (!(oldChunk == newChunk)) {
+    if (oldChunk != newChunk) {
         damageEntityChunks[oldChunk].erase(entity);
+        if (damageEntityChunks[oldChunk].empty()) {
+            damageEntityChunks.erase(oldChunk);
+        }
+
         damageEntityChunks[newChunk].insert(entity);
+        it->second = newChunk;
     }
 }
 
@@ -112,25 +164,49 @@ std::vector<DamageEntity*> ChunkSystem::getDamageEntitiesInRange(const sf::Vecto
 }
 
 void ChunkSystem::addEnemy(Enemy* enemy) {
+    if (enemy == nullptr) return;
+
     ChunkCoord chunk = getChunk(enemy->getPosition());
     enemyChunks[chunk].insert(enemy);
+
+    enemyToChunk[enemy] = chunk;
 }
 
 void ChunkSystem::removeEnemy(Enemy* enemy) {
-    ChunkCoord chunk = getChunk(enemy->getPosition());
-    enemyChunks[chunk].erase(enemy);
-    
-    chunk = getChunk(enemy->getOldPosition());
-    enemyChunks[chunk].erase(enemy);
+    if (enemy == nullptr) return;
+
+    auto it = enemyToChunk.find(enemy);
+    if (it == enemyToChunk.end()) return;
+
+    ChunkCoord chunk = it->second;
+
+    auto chunkIt = enemyChunks.find(chunk);
+    if (chunkIt != enemyChunks.end()) {
+        chunkIt->second.erase(enemy);
+        if (chunkIt->second.empty()) {
+            enemyChunks.erase(chunkIt);
+        }
+    }
+    enemyToChunk.erase(it);
 }
 
 void ChunkSystem::updateEnemy(Enemy* enemy, const sf::Vector2f& oldPosition) {
-    ChunkCoord oldChunk = getChunk(oldPosition);
+    if (enemy == nullptr) return;
+
+    auto it = enemyToChunk.find(enemy);
+    if (it == enemyToChunk.end()) return;
+
+    ChunkCoord oldChunk = it->second;
     ChunkCoord newChunk = getChunk(enemy->getPosition());
 
-    if (!(oldChunk == newChunk)) {
+    if (oldChunk != newChunk) {
         enemyChunks[oldChunk].erase(enemy);
+        if (enemyChunks[oldChunk].empty()) {
+            enemyChunks.erase(oldChunk);
+        }
+
         enemyChunks[newChunk].insert(enemy);
+        it->second = newChunk;
     }
 }
 

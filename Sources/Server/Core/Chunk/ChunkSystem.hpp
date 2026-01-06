@@ -18,9 +18,15 @@ constexpr int CHUNK_RANGE = 2;
 class ChunkSystem {
 private:
     std::unordered_map<int, ChunkCoord> previousChunk;
+
     std::unordered_map<ChunkCoord, std::unordered_set<Player *>, ChunkCoordHash> playerChunks;
+    std::unordered_map<Player*, ChunkCoord> playerToChunk;
+    
     std::unordered_map<ChunkCoord, std::unordered_set<DamageEntity *>, ChunkCoordHash> damageEntityChunks;
+    std::unordered_map<DamageEntity*, ChunkCoord> damageEntityToChunk;
+    
     std::unordered_map<ChunkCoord, std::unordered_set<Enemy *>, ChunkCoordHash> enemyChunks;
+    std::unordered_map<Enemy*, ChunkCoord> enemyToChunk;
 
 private:
     ChunkCoord getChunk(const sf::Vector2f &position) const;
@@ -29,6 +35,7 @@ public:
     ChunkSystem() = default;
     
     std::vector<ChunkCoord> getChunkInRange(int clientId, const sf::Vector2f &position, int chunkRange = CHUNK_RANGE);
+    void removeClientTracking(int clientId);
 
     void addPlayer(Player *player);
     void removePlayer(Player *player);

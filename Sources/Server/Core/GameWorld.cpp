@@ -74,6 +74,7 @@ void GameWorld::removePlayer(int id) {
             InventoryManager::saveEquipment(players[i]->getId(), players[i]->getEquipment());
             
             chunkSystem.removePlayer(players[i]);
+            chunkSystem.removeClientTracking(players[i]->getId());
 
             // eventBus.publish(PlayerRemovedEvent(id));
 
