@@ -5,8 +5,8 @@
 
 #include "Server/Systems/Log/LogSystem.hpp"
 
-Enemy::Enemy(int id, const sf::Vector2f &startPosition) 
-: Entity(id, sf::Vector2f( ENEMY_WIDTH, ENEMY_HEIGHT )),
+Enemy::Enemy(int _entityId, int _enemyId, const sf::Vector2f &startPosition) 
+: Entity(_entityId, sf::Vector2f( ENEMY_WIDTH, ENEMY_HEIGHT )), enemyId(_enemyId),
     health(100), maxHealth(100),
     spawnPosition(startPosition),
     detectRange(250.0f)
@@ -135,4 +135,8 @@ const sf::Vector2f & Enemy::getSpawnPosition() const {
 
 AABB Enemy::buildAABB(const sf::Vector2f &atPosition) const {
     return { atPosition - size / 2.0f, size };
+}
+
+int Enemy::getEnemyId() const {
+    return enemyId;
 }

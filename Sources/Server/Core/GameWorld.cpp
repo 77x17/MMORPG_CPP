@@ -10,9 +10,9 @@
 
 GameWorld::GameWorld() {}
 
-void GameWorld::addEnemy() {
+void GameWorld::addEnemy(int enemyId) {
     int entityId = entityIdGenerator.next();
-    Enemy *newEnemy = new Enemy(entityId, sf::Vector2f(300, 200));
+    Enemy *newEnemy = new Enemy(entityId, enemyId, sf::Vector2f(300, 200));
     
     enemies.push_back(newEnemy);
     chunkSystem.addEnemy(newEnemy);

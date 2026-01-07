@@ -105,19 +105,20 @@ void EntityManager::applySnapshot(const WorldSnapshot &snapshot, int myEntityId,
     std::unordered_map<int, RemoteEnemy> newRemoteEnemies;
     for (const EnemySnapshot &enemySnapshot : snapshot.enemies) {
         RemoteEnemy remoteEnemy;
-        remoteEnemy.id             = enemySnapshot.id;
+        remoteEnemy.entityId       = enemySnapshot.entityId;
+        remoteEnemy.enemyId        = enemySnapshot.enemyId;
         remoteEnemy.serverPosition = { enemySnapshot.x, enemySnapshot.y };
         remoteEnemy.serverVelocity = { 0.0f, 0.0f };
         remoteEnemy.hp             = enemySnapshot.hp;
 
-        if (remoteEnemies.count(remoteEnemy.id)) {
-            remoteEnemy.localPosition = remoteEnemies[remoteEnemy.id].localPosition;
+        if (remoteEnemies.count(remoteEnemy.entityId)) {
+            remoteEnemy.localPosition = remoteEnemies[remoteEnemy.entityId].localPosition;
         }
         else {
             remoteEnemy.localPosition = remoteEnemy.serverPosition;
         }
 
-        newRemoteEnemies[remoteEnemy.id] = remoteEnemy;
+        newRemoteEnemies[remoteEnemy.entityId] = remoteEnemy;
     }
     remoteEnemies.swap(newRemoteEnemies);
 }

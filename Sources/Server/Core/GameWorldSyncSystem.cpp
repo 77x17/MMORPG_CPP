@@ -68,6 +68,7 @@ void GameWorldSyncSystem::syncToClients() {
         worldStatePacket << static_cast<int>(visibleEnemy.size());
         for (Enemy *enemy : visibleEnemy) {
             worldStatePacket << enemy->getEntityId()
+                             << enemy->getEnemyId()
                              << enemy->getPosition().x
                              << enemy->getPosition().y
                              << enemy->getHealth();
@@ -82,6 +83,7 @@ void GameWorldSyncSystem::syncToClients() {
 
                 if (enemy->getBounds().contains(currentPlayer->getMousePosition())) {
                     worldStatePacket << enemy->getEntityId()
+                                     << enemy->getEnemyId()
                                      << enemy->getHealth()
                                      << enemy->getMaxHealth();
 
@@ -93,7 +95,7 @@ void GameWorldSyncSystem::syncToClients() {
             }
             if (!find) {
                 currentPlayer->setEntitySelectedId(-1);
-                worldStatePacket << -1 << -1 << -1;
+                worldStatePacket << -1 << -1 << -1 << -1;
             }
             currentPlayer->toggleMouseSelected();
         }
@@ -106,6 +108,7 @@ void GameWorldSyncSystem::syncToClients() {
                 
                 if (enemy->getEntityId() == currentPlayer->getEntitySelectedId()) {
                     worldStatePacket << enemy->getEntityId()
+                                     << enemy->getEnemyId()
                                      << enemy->getHealth()
                                      << enemy->getMaxHealth();
                     find = true;
@@ -114,7 +117,7 @@ void GameWorldSyncSystem::syncToClients() {
             }
             if (!find) {
                 currentPlayer->setEntitySelectedId(-1);
-                worldStatePacket << -1 << -1 << -1;
+                worldStatePacket << -1 << -1 << -1 << -1;
             }
         }
         else {

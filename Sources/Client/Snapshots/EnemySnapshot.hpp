@@ -1,7 +1,8 @@
 #pragma once
 
 struct EnemySnapshot {
-    int   id;
+    int   entityId;
+    int   enemyId;
     float x, y;
     int   hp;
 };

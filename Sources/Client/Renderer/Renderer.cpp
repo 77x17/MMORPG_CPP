@@ -61,10 +61,10 @@ void Renderer::updateCamera(const EntityManager &entityManager, int clientId) {
 void Renderer::drawEnemies(const EntityManager &entityManager) {
     sf::RectangleShape enemiesShape({ 40, 40 }); enemiesShape.setOrigin(20, 20);
     enemiesShape.setOutlineThickness(1.0f);
-    for (auto &[id, enemy] : entityManager.getEnemies()) {
+    for (auto &[entityId, enemy] : entityManager.getEnemies()) {
         enemiesShape.setPosition(enemy.localPosition);
 
-        if (id == selectedId) {
+        if (enemy.entityId == selectedEntityId) {
             enemiesShape.setOutlineColor(sf::Color::Red);
         }
         else {
@@ -134,7 +134,7 @@ void Renderer::drawNametags(const EntityManager &entityManager) {
     nametag.setCharacterSize(12);
 
     for (auto &[id, enemy] : entityManager.getEnemies()) {
-        nametag.setString(std::to_string(enemy.id) + ". HP: " + std::to_string(enemy.hp));
+        nametag.setString(std::to_string(enemy.enemyId) + ". HP: " + std::to_string(enemy.hp));
         sf::FloatRect bounds = nametag.getLocalBounds();
         nametag.setOrigin(bounds.left + bounds.width / 2.0f,
                           bounds.top  + bounds.height      );
@@ -161,7 +161,7 @@ void Renderer::drawSelectedEntityInfo() {
     label.setFont(Font::getFont());
     label.setCharacterSize(16);
     label.setPosition({ uiView.getSize().x / 2.0f, 20.0f});
-    label.setString(selectedName + " Id: " + std::to_string(selectedId));
+    label.setString(selectedName + " ID: " + std::to_string(selectedEnemyId));
     sf::FloatRect bounds = label.getLocalBounds();
     label.setOrigin(bounds.left + bounds.width / 2.0f, bounds.top);
 
@@ -214,10 +214,11 @@ sf::Vector2f Renderer::getWorldPosition(const sf::Vector2i &pixel) const {
 }
 
 void Renderer::applySnapshot(MouseSelectedSnapshot &mouseSelectedSnapshot) {
-    selectedId    = mouseSelectedSnapshot.id;
-    selectedName  = mouseSelectedSnapshot.name;
-    selectedHp    = mouseSelectedSnapshot.hp;
-    selectedMaxHp = mouseSelectedSnapshot.maxHp;
+    selectedEntityId = mouseSelectedSnapshot.entityId;
+    selectedEnemyId  = mouseSelectedSnapshot.enemyId;
+    selectedName     = mouseSelectedSnapshot.name;
+    selectedHp       = mouseSelectedSnapshot.hp;
+    selectedMaxHp    = mouseSelectedSnapshot.maxHp;
 }
 
 void Renderer::render(const EntityManager &entityManager, int clientId) {
@@ -237,7 +238,7 @@ void Renderer::renderUI(const EntityManager &entityManager, int clientId, const 
 
     minimap.render(window, worldView, entityManager, clientId);
     
-    if (selectedId != -1) {
+    if (selectedEntityId != -1) {
         drawSelectedEntityInfo();
     }
 

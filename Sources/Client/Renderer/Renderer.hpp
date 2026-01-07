@@ -22,7 +22,8 @@ private:
     std::vector<sf::RectangleShape> backgroundTiles;
 
     // === Mouse Selected ===
-    int selectedId = -1;
+    int selectedEntityId = -1;
+    int selectedEnemyId = -1;
     std::string selectedName;
     int selectedHp;
     int selectedMaxHp;

@@ -25,7 +25,7 @@ private:
 public:
     GameWorld();
 
-    void addEnemy();
+    void addEnemy(int enemyId);
     void removeEnemy(int entityId);
     std::vector<Enemy *> & getEnemies();
     const std::vector<Enemy *> & getEnemies() const;

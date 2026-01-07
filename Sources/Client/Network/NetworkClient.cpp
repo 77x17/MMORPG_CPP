@@ -225,7 +225,7 @@ void NetworkClient::pollUDP() {
             int playerCount; packet >> playerCount;
             for (int i = 0; i < playerCount; ++i) {
                 PlayerSnapshot playerSnapshot; 
-                packet >> playerSnapshot.id 
+                packet  >> playerSnapshot.id 
                         >> playerSnapshot.x 
                         >> playerSnapshot.y 
                         >> playerSnapshot.hp
@@ -242,7 +242,7 @@ void NetworkClient::pollUDP() {
                 uint8_t damageEntityType; packet >> damageEntityType;
                 if (static_cast<UdpPacketType>(damageEntityType) == UdpPacketType::Projectile) {
                     ProjectileSnapshot projectileSnapshot; 
-                    packet >> projectileSnapshot.id 
+                    packet  >> projectileSnapshot.id 
                             >> projectileSnapshot.x 
                             >> projectileSnapshot.y 
                             >> projectileSnapshot.vx 
@@ -252,7 +252,7 @@ void NetworkClient::pollUDP() {
                 }
                 else if (static_cast<UdpPacketType>(damageEntityType) == UdpPacketType::SwordSlash) {
                     SwordSlashSnapshot swordSlashSnapshot;
-                    packet >> swordSlashSnapshot.id 
+                    packet  >> swordSlashSnapshot.id 
                             >> swordSlashSnapshot.left 
                             >> swordSlashSnapshot.top 
                             >> swordSlashSnapshot.width
@@ -269,19 +269,21 @@ void NetworkClient::pollUDP() {
             worldSnapshot.enemies.clear();
             for (int i = 0; i < enemyCount; ++i) {
                 EnemySnapshot enemySnapshot;
-                packet >> enemySnapshot.id
-                       >> enemySnapshot.x
-                       >> enemySnapshot.y
-                       >> enemySnapshot.hp;
+                packet  >> enemySnapshot.entityId
+                        >> enemySnapshot.enemyId
+                        >> enemySnapshot.x
+                        >> enemySnapshot.y
+                        >> enemySnapshot.hp;
                 worldSnapshot.enemies.push_back(enemySnapshot);
             }
 
             bool mouseSelected; packet >> mouseSelected;
             if (mouseSelected) {
-                int id, hp, maxHp;
-                packet >> id >> hp >> maxHp;
+                int entityId, enemyId, hp, maxHp;
+                packet >> entityId >> enemyId >> hp >> maxHp;
                 worldSnapshot.mouseSelected.appear = true;
-                worldSnapshot.mouseSelected.id = id;
+                worldSnapshot.mouseSelected.entityId = entityId;
+                worldSnapshot.mouseSelected.enemyId = enemyId;
                 worldSnapshot.mouseSelected.hp = hp;
                 worldSnapshot.mouseSelected.maxHp = maxHp;
                 worldSnapshot.mouseSelected.name = "Enemy";

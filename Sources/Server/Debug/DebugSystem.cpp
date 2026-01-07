@@ -19,7 +19,7 @@ void DebugSystem::rebuildPlayers(const GameWorld &gameWorld, const NetworkServer
     std::ostringstream oss;
     for (const ClientSession & client : networkServer.getClients()) {
         oss << std::format(
-            "ID: {:>2} | TCP: {}:{} | UDP: {}:{}\n",
+            "CID: {:>2} | TCP: {}:{} | UDP: {}:{}\n",
             client.id,
             client.tcp ? client.tcp->getRemoteAddress().toString() : 0,
             client.tcp ? client.tcp->getRemotePort() : 0,
@@ -30,7 +30,8 @@ void DebugSystem::rebuildPlayers(const GameWorld &gameWorld, const NetworkServer
         if (client.id != -1) {
             if (const Player *player = gameWorld.getPlayer(client.id)) {
                 oss << std::format(
-                    "       | HP: {:>3} | POS: ({:>7.2f}, {:>7.2f})\n",
+                    "GID: {:>2} | HP: {:>3} | POS: ({:>7.2f}, {:>7.2f})\n",
+                    player->getEntityId(),
                     player->getHealth(),
                     player->getPosition().x,
                     player->getPosition().y
@@ -51,7 +52,8 @@ void DebugSystem::rebuildEnemies(const GameWorld &gameWorld) {
     std::ostringstream oss;
     for (const Enemy *enemy : gameWorld.getEnemies()) {
         oss << std::format(
-            "ID: {:>2} | HP: {:>3} | POS: ({:>7.2f}, {:>7.2f})\n",
+            "EID: {:>2} | GID: {:>2} | HP: {:>3} | POS: ({:>7.2f}, {:>7.2f})\n",
+            enemy->getEnemyId(),
             enemy->getEntityId(),
             enemy->getHealth(),
             enemy->getPosition().x,
@@ -65,7 +67,7 @@ void DebugSystem::rebuildEntities(const GameWorld &gameWorld) {
     std::ostringstream oss;
     for (const DamageEntity *entity : gameWorld.getDamageEntities()) {
         oss << std::format(
-            "{} | ID: {:>2} | OId: {:>2} | POS: ({:>7.2f}, {:>7.2f})\n",
+            "{} | GID: {:>2} | OId: {:>2} | POS: ({:>7.2f}, {:>7.2f})\n",
             entity->getName(),
             entity->getEntityId(),
             entity->getOwnerEntityId(),

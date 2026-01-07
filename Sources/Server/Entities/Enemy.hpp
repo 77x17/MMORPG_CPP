@@ -6,6 +6,8 @@
 
 class Enemy : public Entity {
 private:
+    int enemyId;
+
     int health;
     int maxHealth;
 
@@ -30,7 +32,7 @@ public:
     int inputSeq = 0;
     int lastProcessedInput = 0;
     
-    Enemy(int id, const sf::Vector2f &startPosition);
+    Enemy(int entityId, int enemyId, const sf::Vector2f &startPosition);
 
     void update(const float &dt) override;
 
@@ -60,4 +62,6 @@ public:
     const sf::Vector2f & getSpawnPosition() const;
 
     AABB buildAABB(const sf::Vector2f &atPosition) const;
+
+    int getEnemyId() const;
 };

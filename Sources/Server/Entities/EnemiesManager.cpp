@@ -9,6 +9,6 @@ EnemiesManager::EnemiesManager(GameWorld &_gameWorld)
 
 void EnemiesManager::loadStaticEnemies() {
     for (int i = 0; i < 16; ++i) {
-        gameWorld.addEnemy();
+        gameWorld.addEnemy(0);
     }
 }

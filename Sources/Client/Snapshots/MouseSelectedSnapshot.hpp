@@ -6,7 +6,8 @@ struct MouseSelectedSnapshot {
     bool appear = false;
 
     std::string name;
-    int id;
+    int entityId;
+    int enemyId;
     int hp;
     int maxHp;
 };
