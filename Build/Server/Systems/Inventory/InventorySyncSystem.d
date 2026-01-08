@@ -11,6 +11,9 @@ Build/Server/Systems/Inventory/InventorySyncSystem.o: \
  Sources/Server/Systems/Inventory/Inventory.hpp \
  Sources/Server/Systems/Inventory/ItemSlot.hpp \
  Sources/Server/Systems/Inventory/Equipment.hpp \
+ Sources/Server/Quests/PlayerQuestState.hpp \
+ Sources/Server/Quests/QuestTypes.hpp \
+ Sources/Server/Quests/ObjectiveState.hpp \
  Sources/Server/Network/NetworkServer.hpp \
  Sources/Server/Network/ClientSession.hpp \
  Sources/Server/Utils/ThreadSafeQueue/ThreadSafeQueue.hpp \

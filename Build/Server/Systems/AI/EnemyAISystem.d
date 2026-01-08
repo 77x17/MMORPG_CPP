@@ -11,5 +11,8 @@ Build/Server/Systems/AI/EnemyAISystem.o: \
  Sources/Server/Systems/Inventory/Inventory.hpp \
  Sources/Server/Systems/Inventory/ItemSlot.hpp \
  Sources/Server/Systems/Inventory/Equipment.hpp \
+ Sources/Server/Quests/PlayerQuestState.hpp \
+ Sources/Server/Quests/QuestTypes.hpp \
+ Sources/Server/Quests/ObjectiveState.hpp \
  Sources/Server/Systems/Input/InputManager.hpp \
  Sources/Shared/InputState.hpp Sources/Server/Utils/Random.hpp

@@ -7,7 +7,7 @@ private:
     sf::Vector2f velocity;
     
 public:
-    Projectile(int _ownerId, const sf::Vector2f &startPosition, const sf::Vector2f &direction);
+    Projectile(int _ownerId, EntityType _entityType, const sf::Vector2f &startPosition, const sf::Vector2f &direction);
 
     void update(const float &dt) override;
 

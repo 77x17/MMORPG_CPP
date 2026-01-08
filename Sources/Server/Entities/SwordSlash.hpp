@@ -9,7 +9,7 @@ private:
     bool         hitEnemy = false;
 
 public:
-    SwordSlash(int _ownerId, const sf::Vector2f &startPosition, const sf::Vector2f &direction);
+    SwordSlash(int _ownerId, EntityType _entityType, const sf::Vector2f &startPosition, const sf::Vector2f &direction);
 
     void update(const float &dt) override;
 

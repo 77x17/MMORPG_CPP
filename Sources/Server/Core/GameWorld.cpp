@@ -173,3 +173,21 @@ const Player * GameWorld::getPlayer(int clientId) const {
 int GameWorld::generateEntityId() {
     return entityIdGenerator.next();
 }
+
+Player * GameWorld::getPlayerWithEntityId(int entityId) {
+    for (Player *player : players) {
+        if (player == nullptr) continue;
+
+        if (player->getEntityId() == entityId) return player;
+    }
+    return nullptr;
+}
+
+const Enemy * GameWorld::getEnemy(int entityId) const {
+    for (Enemy *enemy : enemies) {
+        if (enemy == nullptr) continue;
+
+        if (enemy->getEntityId() == entityId) return enemy;
+    }
+    return nullptr;
+}

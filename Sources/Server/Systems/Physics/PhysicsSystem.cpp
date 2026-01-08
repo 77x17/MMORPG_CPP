@@ -9,6 +9,8 @@
 #include "Server/Entities/Enemy.hpp"
 #include "Server/Entities/Player.hpp"
 
+#include "Server/Quests/QuestSystem.hpp"
+
 PhysicsSystem::PhysicsSystem(WorldCollision &_worldCollision) 
 : worldCollision(_worldCollision) {
 
@@ -85,6 +87,8 @@ void PhysicsSystem::updatePlayer(Player &player, const InputState &inputState, c
 
     player.setPosition(proposedPosition);
     player.setVelocity(inputVelocity);
+
+    QuestSystem::onPlayerMoved(&player);
 }
  
 void PhysicsSystem::updateEnemy(Enemy &enemy, const InputState &inputState, const float &dt) {

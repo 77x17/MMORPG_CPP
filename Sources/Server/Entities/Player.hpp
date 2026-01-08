@@ -6,6 +6,8 @@
 #include "Server/Systems/Inventory/Inventory.hpp"
 #include "Server/Systems/Inventory/Equipment.hpp"
 
+#include "Server/Quests/PlayerQuestState.hpp"
+
 class Player : public Entity {
 private:
     int          clientId;
@@ -31,6 +33,8 @@ private:
     float respawnCooldownTimer = 0.0f;
     const float RESPAWN_COOLDOWN_TIME = 5.0f;
     
+    std::vector<PlayerQuestState> quests;
+
 public:
     int lastProcessedInput = 0;
 
@@ -67,4 +71,7 @@ public:
     
     int getClientId() const;
     void setClientId(int _clientId);
+
+    // === Quests ===
+    std::vector<PlayerQuestState> & getQuests();
 };

@@ -1,0 +1,29 @@
+{
+    "quests": [
+        {
+            "id": 0,
+            "name": "Clear the Forest",
+            "description": "Kill 5 slimes in Darkwood forest",
+            "objectives": [
+                {
+                    "type": "kill",
+                    "enemyId": 0,
+                    "count": 5
+                }
+            ]
+        },
+        {
+            "id": 1,
+            "name": "Go to the Old Tower",
+            "description": "Reach the old tower entrance",
+            "objectives": [
+                {
+                    "type": "reach",
+                    "x": 1200,
+                    "y": 800,
+                    "radius": 40
+                }
+            ]
+        }
+    ]
+}

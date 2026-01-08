@@ -4,4 +4,4 @@ Build/Server/Systems/Inventory/InventoryManager.o: \
  Sources/Server/Systems/Inventory/Inventory.hpp \
  Sources/Server/Systems/Inventory/ItemSlot.hpp \
  Sources/Server/Systems/Inventory/Equipment.hpp \
- Sources/Server/Systems/Inventory/json.hpp
+ Sources/Server/Utils/json.hpp

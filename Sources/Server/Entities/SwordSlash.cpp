@@ -5,8 +5,8 @@
 #include "Server/Entities/Enemy.hpp"
 #include "Server/Entities/Player.hpp"
 
-SwordSlash::SwordSlash(int _ownerId, const sf::Vector2f &startPosition, const sf::Vector2f &_direction) 
-: DamageEntity(_ownerId, startPosition, { 40.0f, 40.0f }) {
+SwordSlash::SwordSlash(int _ownerId, EntityType _entityType, const sf::Vector2f &startPosition, const sf::Vector2f &_direction) 
+: DamageEntity(_ownerId, _entityType, startPosition, { 40.0f, 40.0f }) {
     direction         = normalize(_direction);
     range             = 30.0f;
     damage            = 10;

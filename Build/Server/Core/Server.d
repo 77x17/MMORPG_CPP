@@ -14,9 +14,17 @@ Build/Server/Core/Server.o: Sources/Server/Core/Server.cpp \
  Sources/Server/Systems/Inventory/Inventory.hpp \
  Sources/Server/Systems/Inventory/ItemSlot.hpp \
  Sources/Server/Systems/Inventory/Equipment.hpp \
+ Sources/Server/Quests/PlayerQuestState.hpp \
+ Sources/Server/Quests/QuestTypes.hpp \
+ Sources/Server/Quests/ObjectiveState.hpp \
  Sources/Server/Entities/Projectile.hpp \
  Sources/Server/Entities/DamageEntity.hpp \
+ Sources/Server/Entities/EntityType.hpp \
  Sources/Server/Entities/SwordSlash.hpp \
+ Sources/Server/Quests/QuestManager.hpp \
+ Sources/Server/Quests/QuestDefinition.hpp \
+ Sources/Server/Quests/QuestObjective.hpp \
+ Sources/Server/Quests/QuestSystem.hpp \
  Sources/Server/Network/NetworkServer.hpp \
  Sources/Server/Network/ClientSession.hpp \
  Sources/Server/Utils/ThreadSafeQueue/ThreadSafeQueue.hpp \
@@ -26,6 +34,7 @@ Build/Server/Core/Server.o: Sources/Server/Core/Server.cpp \
  Sources/Server/Renderer/ScrollArea.hpp \
  Sources/Server/Systems/AI/EnemyAISystem.hpp \
  Sources/Server/Systems/Combat/CombatSystem.hpp \
+ Sources/Server/Systems/Combat/KilledEvent.hpp \
  Sources/Server/Systems/Combat/WeaponSystem.hpp \
  Sources/Server/Systems/Input/InputManager.hpp \
  Sources/Server/Systems/Input/InputSystem.hpp \

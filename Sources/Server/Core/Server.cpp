@@ -10,6 +10,9 @@
 #include "Server/Entities/Projectile.hpp"
 #include "Server/Entities/SwordSlash.hpp"
 
+#include "Server/Quests/QuestManager.hpp"
+#include "Server/Quests/QuestSystem.hpp"
+
 #include "Server/Network/NetworkServer.hpp"
 
 #include "Server/Renderer/Renderer.hpp"
@@ -42,7 +45,11 @@ void syncGameWorldFromClients(GameWorld &gameWorld, InputManager &inputManager, 
     for (NetworkEvent &event : events) {
         switch (event.type) {
             case NetworkEventType::NewClient: {
+                // Sửa lại sau, cần di chuyển thành file mới
                 int entityId = gameWorld.addPlayer(event.clientId);
+                sf::Packet packet; packet << static_cast<uint8_t>(TcpPacketType::Assign_EntityID) << entityId;
+                networkServer.sendAsync(event.clientId, packet, false);
+                
                 inputManager.clearClientQueue(event.clientId);
 
                 inventorySyncSystem.syncInventoryToClient(event.clientId);
@@ -50,9 +57,8 @@ void syncGameWorldFromClients(GameWorld &gameWorld, InputManager &inputManager, 
 
                 worldCollisionSyncSystem.syncToClient(event.clientId);
 
-                // Sửa lại sau, cần di chuyển thành file mới
-                sf::Packet packet; packet << static_cast<uint8_t>(TcpPacketType::Assign_EntityID) << entityId;
-                networkServer.sendAsync(event.clientId, packet, false);
+                QuestSystem::acceptQuest(gameWorld.getPlayer(event.clientId), 0);
+                QuestSystem::acceptQuest(gameWorld.getPlayer(event.clientId), 1);
             
                 break;
             }
@@ -136,6 +142,10 @@ int main() {
 
     DebugSystem debugSystem;
 
+    if (QuestManager::instance().loadFromFile("Assets/Quests/quests.json") == false) {
+        QuestManager::instance().loadFromFile("../Assets/Quests/quests.json");
+    }
+
     sf::Clock clock, sendClock;
     float accumulator = 0.0f;
     while (window.isOpen()) {
@@ -197,8 +207,8 @@ int main() {
             physicsSystem.resolveEnemyCollisions(gameWorld.getEnemies());
             physicsSystem.resolvePlayerWithEnemyCollisions(gameWorld.getPlayers(), gameWorld.getEnemies());
 
-            combatSystem.handleCollision(gameWorld.getPlayers(), gameWorld.getDamageEntities());
-            combatSystem.handleCollision(gameWorld.getEnemies(), gameWorld.getDamageEntities());
+            combatSystem.handleCollision(gameWorld.getPlayers(), gameWorld.getEnemies(), gameWorld.getDamageEntities());
+            combatSystem.handleKilledEvents(gameWorld);
 
             gameWorld.update(SERVER_TICK);
         }

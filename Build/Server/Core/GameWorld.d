@@ -9,5 +9,9 @@ Build/Server/Core/GameWorld.o: Sources/Server/Core/GameWorld.cpp \
  Sources/Server/Systems/Inventory/Inventory.hpp \
  Sources/Server/Systems/Inventory/ItemSlot.hpp \
  Sources/Server/Systems/Inventory/Equipment.hpp \
+ Sources/Server/Quests/PlayerQuestState.hpp \
+ Sources/Server/Quests/QuestTypes.hpp \
+ Sources/Server/Quests/ObjectiveState.hpp \
  Sources/Server/Entities/DamageEntity.hpp \
+ Sources/Server/Entities/EntityType.hpp \
  Sources/Server/Systems/Inventory/InventoryManager.hpp

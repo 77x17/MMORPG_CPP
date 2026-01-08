@@ -17,8 +17,12 @@ Build/Server/Core/GameWorldSyncSystem.o: \
  Sources/Server/Systems/Inventory/Inventory.hpp \
  Sources/Server/Systems/Inventory/ItemSlot.hpp \
  Sources/Server/Systems/Inventory/Equipment.hpp \
+ Sources/Server/Quests/PlayerQuestState.hpp \
+ Sources/Server/Quests/QuestTypes.hpp \
+ Sources/Server/Quests/ObjectiveState.hpp \
  Sources/Server/Entities/Projectile.hpp \
  Sources/Server/Entities/DamageEntity.hpp \
+ Sources/Server/Entities/EntityType.hpp \
  Sources/Server/Entities/SwordSlash.hpp \
  Sources/Server/Systems/Log/LogSystem.hpp \
  Sources/Shared/UdpPacketType.hpp

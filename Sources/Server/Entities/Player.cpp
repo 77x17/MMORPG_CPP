@@ -1,7 +1,5 @@
 #include "Server/Entities/Player.hpp"
 
-#include "Server/Systems/Log/LogSystem.hpp"
-
 #include "Shared/Constants.hpp"
 #include "Shared/Utils.hpp"
 
@@ -42,7 +40,6 @@ void Player::takeDamage(int damage) {
     if (health <= 0) {
         health = 0;
         destroy();
-        LogSystem::addMessage("[Player] ID: " + std::to_string(clientId) + " died!");
     }
 }
 
@@ -129,4 +126,8 @@ int Player::getClientId() const {
 
 void Player::setClientId(int _clientId) {
     clientId = _clientId;
+}
+
+std::vector<PlayerQuestState> & Player::getQuests() {
+    return quests;
 }

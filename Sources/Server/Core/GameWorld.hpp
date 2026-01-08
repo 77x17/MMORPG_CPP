@@ -48,4 +48,7 @@ public:
 
     std::vector<ChunkCoord> getChunkInRange(int clientId, const sf::Vector2f &centerPosition);
     int generateEntityId();
+
+    Player * getPlayerWithEntityId(int entityId);
+    const Enemy * getEnemy(int entityId) const;
 };

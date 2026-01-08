@@ -23,10 +23,10 @@ DamageEntity * WeaponSystem::tryFire(Player &player, const InputState &inputStat
     int weapon = player.getEquipment().getWeapon().id;
 
     if (weapon == 0) {
-        return new Projectile(player.getEntityId(), player.getPosition(), direction);
+        return new Projectile(player.getEntityId(), EntityType::Player, player.getPosition(), direction);
     }
     else if (weapon == 1) {
-        return new SwordSlash(player.getEntityId(), player.getPosition(), direction);
+        return new SwordSlash(player.getEntityId(), EntityType::Player, player.getPosition(), direction);
     }
     
     return nullptr;
@@ -47,10 +47,10 @@ DamageEntity * WeaponSystem::tryFire(Enemy &enemy, const InputState &inputState)
     int weapon = 1;
 
     if (weapon == 0) {
-        return new Projectile(enemy.getEntityId(), enemy.getPosition(), direction);
+        return new Projectile(enemy.getEntityId(), EntityType::Enemy, enemy.getPosition(), direction);
     }
     else if (weapon == 1) {
-        return new SwordSlash(enemy.getEntityId(), enemy.getPosition(), direction);
+        return new SwordSlash(enemy.getEntityId(), EntityType::Enemy, enemy.getPosition(), direction);
     }
     
     return nullptr;

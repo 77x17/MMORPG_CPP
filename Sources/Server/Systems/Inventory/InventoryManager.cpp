@@ -5,7 +5,7 @@
 #include "Server/Systems/Inventory/Inventory.hpp"
 #include "Server/Systems/Inventory/Equipment.hpp"
 
-#include "Server/Systems/Inventory/json.hpp"
+#include "Server/Utils/json.hpp"
 
 using json = nlohmann::json;
 

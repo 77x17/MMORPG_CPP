@@ -7,4 +7,8 @@ Build/Server/Systems/Interest/InterestSystem.o: \
  Sources/Server/Systems/Inventory/Inventory.hpp \
  Sources/Server/Systems/Inventory/ItemSlot.hpp \
  Sources/Server/Systems/Inventory/Equipment.hpp \
- Sources/Server/Entities/DamageEntity.hpp
+ Sources/Server/Quests/PlayerQuestState.hpp \
+ Sources/Server/Quests/QuestTypes.hpp \
+ Sources/Server/Quests/ObjectiveState.hpp \
+ Sources/Server/Entities/DamageEntity.hpp \
+ Sources/Server/Entities/EntityType.hpp
