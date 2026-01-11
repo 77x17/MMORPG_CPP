@@ -14,5 +14,7 @@ enum class TcpPacketType : std::uint8_t {
     Inventory,
     Equipment,
     WorldCollision,
-    Chunk
+    Chunk,
+    QuestFullSync,
+    QuestUpdate
 };

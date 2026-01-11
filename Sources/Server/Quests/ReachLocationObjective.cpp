@@ -27,3 +27,7 @@ void ReachLocationObjective::onEvent(const Player &player, ObjectiveState &state
         state.current   = 1;
     }
 }
+
+std::string ReachLocationObjective::getProgressText(const ObjectiveState &state) const {
+    return state.completed ? "Reached destination" : ("Go to target location at [" + std::to_string(static_cast<int>(x)) + ", " + std::to_string(static_cast<int>(y)) + "]");
+}

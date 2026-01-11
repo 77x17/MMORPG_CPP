@@ -154,6 +154,10 @@ void NetworkClient::pollTCP() {
         else if (static_cast<TcpPacketType>(type) == TcpPacketType::Login_Fail) {
             loginStatus = LoginStatus::Fail;
         }
+        else if (static_cast<TcpPacketType>(type) == TcpPacketType::TcpPing) {
+            uint64_t timeMs; packet >> timeMs;
+            tcpPingTracker.onPingResponse(timeMs);
+        }
         else if (static_cast<TcpPacketType>(type) == TcpPacketType::Inventory) {
             inventorySnapshot.appear = true;
             inventorySnapshot.itemIds.clear();
@@ -199,9 +203,23 @@ void NetworkClient::pollTCP() {
                 chunkSnapshot.chunks.push_back({ sf::Vector2f(x, y), sf::Vector2f(size, size) });
             }
         } 
-        else if (static_cast<TcpPacketType>(type) == TcpPacketType::TcpPing) {
-            uint64_t timeMs; packet >> timeMs;
-            tcpPingTracker.onPingResponse(timeMs);
+        else if (static_cast<TcpPacketType>(type) == TcpPacketType::QuestFullSync) {
+            questSnapshot.appear = true;
+            questSnapshot.quests.clear();
+
+            size_t questStateSize; packet >> questStateSize;
+            for (size_t i = 0; i < questStateSize; ++i) {
+                QuestStateSnapshot questState;
+                packet >> questState.questId >> questState.status;
+
+                size_t objectiveStateSize; packet >> objectiveStateSize;
+                for (size_t j = 0; j < objectiveStateSize; ++j) {
+                    questState.objectives.emplace_back();
+                    ObjectiveStateSnapshot &objectiveState = questState.objectives.back();
+                    packet >> objectiveState.type >> objectiveState.current >> objectiveState.completed;
+                }
+                questSnapshot.quests.push_back(std::move(questState));
+            }
         }
         else {
             std::cout << "[Network] - Unknown pollReceive() TCP msg type: " << type << '\n';
@@ -344,6 +362,42 @@ WorldSnapshot NetworkClient::getWorldSnapshot() {
     std::lock_guard<std::mutex> lock(snapshotMutex);
     return worldSnapshot;
 }
+
+QuestSnapshot NetworkClient::getQuestSnapshot() {
+    std::lock_guard<std::mutex> lock(snapshotMutex);
+    return questSnapshot;
+}
+
+void NetworkClient::clearChunkSnapshot() {
+    std::lock_guard<std::mutex> lock(snapshotMutex);
+    chunkSnapshot.appear = false;
+}
+
+void NetworkClient::clearEquipmentSnapshot() {
+    std::lock_guard<std::mutex> lock(snapshotMutex);
+    equipmentSnapshot.appear = false;
+}
+
+void NetworkClient::clearInventorySnapshot() {
+    std::lock_guard<std::mutex> lock(snapshotMutex);
+    inventorySnapshot.appear = false;
+}
+
+void NetworkClient::clearWorldCollisionSnapshot() {
+    std::lock_guard<std::mutex> lock(snapshotMutex);
+    worldCollisionSnapshot.appear = false;
+}
+
+void NetworkClient::clearWorldSnapshot() {
+    std::lock_guard<std::mutex> lock(snapshotMutex);
+    worldSnapshot.appear = false;
+}
+
+void NetworkClient::clearQuestSnapshot() {
+    std::lock_guard<std::mutex> lock(snapshotMutex);
+    questSnapshot.appear = false;
+}
+
 
 int NetworkClient::getTcpPing() const {
     return tcpPingTracker.getPing();

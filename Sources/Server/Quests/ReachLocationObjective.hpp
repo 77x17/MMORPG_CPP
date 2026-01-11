@@ -15,4 +15,6 @@ public:
     bool isCompleted(const Player &player, const ObjectiveState &state) const override;
 
     void onEvent(const Player &player, ObjectiveState &state, int /* unused */) const override;
+
+    std::string getProgressText(const ObjectiveState &state) const override;
 };

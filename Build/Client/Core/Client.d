@@ -6,6 +6,7 @@ Build/Client/Core/Client.o: Sources/Client/Core/Client.cpp \
  Sources/Client/Snapshots/ChunkSnapshot.hpp Sources/Shared/AABB.hpp \
  Sources/Client/Snapshots/EquipmentSnapshot.hpp \
  Sources/Client/Snapshots/InventorySnapshot.hpp \
+ Sources/Client/Snapshots/QuestSnapshot.hpp \
  Sources/Client/Snapshots/WorldCollisionSnapshot.hpp \
  Sources/Client/Snapshots/WorldSnapshot.hpp \
  Sources/Client/Snapshots/EnemySnapshot.hpp \

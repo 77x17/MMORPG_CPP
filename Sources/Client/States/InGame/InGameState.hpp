@@ -19,6 +19,8 @@ class NetworkClient;
 
 #include "Client/World/WorldCollision.hpp"
 
+#include "Client/Quests/QuestStates.hpp"
+
 class InGameState : public IClientState {
 private:
     sf::RenderWindow &window;
@@ -42,6 +44,9 @@ private:
     float clientAccumulator = 0.0f;
 
     FPSCounter fpsCounter;
+
+    // === Quests ===
+    QuestStates questStates;
 
 public:
     InGameState(sf::RenderWindow &_window, NetworkClient &_networkClient);

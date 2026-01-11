@@ -106,7 +106,7 @@ void InGameState::update(float dt) {
     
     WorldSnapshot worldSnapshot = networkClient.getWorldSnapshot();
     if (worldSnapshot.appear) {
-        worldSnapshot.appear = false;
+        networkClient.clearWorldSnapshot();
         entityManager.applySnapshot(worldSnapshot, networkClient.getEntityId(), pendingInputs);
 
         if (worldSnapshot.mouseSelected.appear) {
@@ -118,13 +118,13 @@ void InGameState::update(float dt) {
 
     ChunkSnapshot chunkSnapshot = networkClient.getChunkSnapshot();
     if (chunkSnapshot.appear) {
-        chunkSnapshot.appear = false;
+        networkClient.clearChunkSnapshot();
         debugRenderer.applySnapshot(chunkSnapshot);
     }
 
     InventorySnapshot inventorySnapshot = networkClient.getInventorySnapshot();
     if (inventorySnapshot.appear) {
-        inventorySnapshot.appear = false;
+        networkClient.clearInventorySnapshot();
         if ((int)inventory.getSlots().size() != (int)inventorySnapshot.itemIds.size()) {
             std::cout << "[Client] - InventorySnapshot receive bug!\n";
         }
@@ -135,7 +135,7 @@ void InGameState::update(float dt) {
 
     EquipmentSnapshot equipmentSnapshot = networkClient.getEquipmentSnapshot();
     if (equipmentSnapshot.appear) {
-        equipmentSnapshot.appear = false;
+        networkClient.clearEquipmentSnapshot();
         if ((int)equipment.getSlots().size() != (int)equipmentSnapshot.itemIds.size()) {
             std::cout << "[Client] - EquipmentSnapshot receive bug!\n";
         }
@@ -146,11 +146,17 @@ void InGameState::update(float dt) {
 
     WorldCollisionSnapshot worldCollisionSnapshot = networkClient.getWorldCollisionSnapshot();
     if (worldCollisionSnapshot.appear) {
-        worldCollisionSnapshot.appear = false;
+        networkClient.clearWorldCollisionSnapshot();
         worldCollision.getColliders().clear();
         for (const AABB &box : worldCollisionSnapshot.colliders) {
             worldCollision.getColliders().push_back(box);
         }
+    }
+
+    QuestSnapshot questSnapshot = networkClient.getQuestSnapshot();
+    if (questSnapshot.appear) {
+        networkClient.clearQuestSnapshot();
+        questStates.applySnapshot(questSnapshot);
     }
 
     while (clientAccumulator >= CLIENT_TICK) {
@@ -185,7 +191,7 @@ void InGameState::render(sf::RenderWindow &window) {
         debugRenderer.render(worldCollision, debugInfo);
     // }
 
-    renderer.renderUI(entityManager, networkClient.getEntityId(), inventory, equipment);
+    renderer.renderUI(entityManager, networkClient.getEntityId(), inventory, equipment, questStates.getQuests());
 
     window.display();
 }

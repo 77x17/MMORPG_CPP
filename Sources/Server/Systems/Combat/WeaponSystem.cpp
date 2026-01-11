@@ -28,6 +28,9 @@ DamageEntity * WeaponSystem::tryFire(Player &player, const InputState &inputStat
     else if (weapon == 1) {
         return new SwordSlash(player.getEntityId(), EntityType::Player, player.getPosition(), direction);
     }
+    else if (weapon == 2) {
+        return new Projectile(player.getEntityId(), EntityType::Player, player.getPosition(), direction, 50);
+    }
     
     return nullptr;
 }

@@ -2,6 +2,8 @@
 
 #include "Server/Quests/QuestTypes.hpp"
 
+#include <string>
+
 class Player;
 struct ObjectiveState;
 
@@ -11,4 +13,5 @@ public:
     virtual ObjectiveType getType() const = 0;
     virtual bool isCompleted(const Player &player, const ObjectiveState &state) const = 0;
     virtual void onEvent(const Player &player, ObjectiveState &state, int eventParam) const = 0;
+    virtual std::string getProgressText(const ObjectiveState &state) const = 0;
 };

@@ -20,6 +20,7 @@
 #include "Client/Snapshots/ChunkSnapshot.hpp"
 #include "Client/Snapshots/EquipmentSnapshot.hpp"
 #include "Client/Snapshots/InventorySnapshot.hpp"
+#include "Client/Snapshots/QuestSnapshot.hpp"
 #include "Client/Snapshots/WorldCollisionSnapshot.hpp"
 #include "Client/Snapshots/WorldSnapshot.hpp"
 
@@ -45,6 +46,7 @@ private:
     ChunkSnapshot          chunkSnapshot;
     EquipmentSnapshot      equipmentSnapshot;
     InventorySnapshot      inventorySnapshot;
+    QuestSnapshot          questSnapshot;
     WorldCollisionSnapshot worldCollisionSnapshot;
     WorldSnapshot          worldSnapshot;
 
@@ -92,6 +94,14 @@ public:
     InventorySnapshot getInventorySnapshot();
     WorldCollisionSnapshot getWorldCollisionSnapshot();
     WorldSnapshot getWorldSnapshot();
+    QuestSnapshot getQuestSnapshot();
+
+    void clearChunkSnapshot();
+    void clearEquipmentSnapshot();
+    void clearInventorySnapshot();
+    void clearWorldCollisionSnapshot();
+    void clearWorldSnapshot();
+    void clearQuestSnapshot();
 
     int getTcpPing() const;
     int getUdpPing() const;

@@ -12,6 +12,7 @@
 
 #include "Server/Quests/QuestManager.hpp"
 #include "Server/Quests/QuestSystem.hpp"
+#include "Server/Quests/QuestSyncSystem.hpp"
 
 #include "Server/Network/NetworkServer.hpp"
 
@@ -59,7 +60,9 @@ void syncGameWorldFromClients(GameWorld &gameWorld, InputManager &inputManager, 
 
                 QuestSystem::acceptQuest(gameWorld.getPlayer(event.clientId), 0);
                 QuestSystem::acceptQuest(gameWorld.getPlayer(event.clientId), 1);
-            
+                
+                QuestSyncSystem::syncToClient(gameWorld.getPlayer(event.clientId)->getQuests(), event.clientId, networkServer);
+
                 break;
             }
             case NetworkEventType::Input:

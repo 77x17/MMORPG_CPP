@@ -6,10 +6,10 @@
 #include "Server/Entities/Enemy.hpp"
 #include "Server/Entities/Player.hpp"
 
-Projectile::Projectile(int _ownerId, EntityType _entityType, const sf::Vector2f &startPosition, const sf::Vector2f &direction) 
+Projectile::Projectile(int _ownerId, EntityType _entityType, const sf::Vector2f &startPosition, const sf::Vector2f &direction, int _damage) 
 : DamageEntity(_ownerId, _entityType, startPosition, { 10.0f, 10.0f }) {
     velocity          = normalize(direction) * BULLET_SPEED;
-    damage            = 5;
+    damage            = _damage;
     knockbackStrength = 250.0f;
     lifeTimer         = BULLET_LIFETIME;
 }

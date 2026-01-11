@@ -13,6 +13,8 @@
 
 #include "Client/Utils/Font.hpp"
 
+#include "Client/Quests/QuestStates.hpp"
+
 Renderer::Renderer(sf::RenderWindow &_window) : window(_window) {
     setCamera();
 
@@ -20,6 +22,8 @@ Renderer::Renderer(sf::RenderWindow &_window) : window(_window) {
 
     minimap.setWorldSize({ 50.0f * 64.0f, 50.0f * 64.0f });
     minimap.setSize({ 200.0f, 200.0f });
+
+    quests.setSize({ 200.0f, 300.0f });
 }
 
 void Renderer::setCamera() {
@@ -36,6 +40,7 @@ void Renderer::setCamera() {
     );
 
     minimap.setPosition({ window.getSize().x - 220.0f, 20.0f });
+    quests.setPosition({ window.getSize().x - 220.0f, 240.0f });
 }
 
 InventoryUI &Renderer::getInventoryUI() {
@@ -233,11 +238,19 @@ void Renderer::render(const EntityManager &entityManager, int clientId) {
     drawNametags(entityManager);
 }
 
-void Renderer::renderUI(const EntityManager &entityManager, int clientId, const Inventory &inventory, const Equipment &equipment) {
+void Renderer::renderUI(
+    const EntityManager &entityManager, 
+    int clientId, 
+    const Inventory &inventory, 
+    const Equipment &equipment, 
+    const std::vector<QuestState> &questStates
+) {
     window.setView(uiView);
 
     minimap.render(window, worldView, entityManager, clientId);
     
+    quests.render(window, questStates);
+
     if (selectedEntityId != -1) {
         drawSelectedEntityInfo();
     }

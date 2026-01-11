@@ -7,8 +7,11 @@
 class EntityManager;
 class MouseSelectedSnapshot;
 
+struct QuestState;
+
 #include "Client/UI/InventoryUI.hpp"
 #include "Client/Renderer/MinimapRenderer.hpp"
+#include "Client/Renderer/QuestRenderer.hpp"
 
 class Renderer {
 private:
@@ -30,6 +33,8 @@ private:
 
     MinimapRenderer minimap;
 
+    QuestRenderer quests;
+    
 private:
     void updateCamera(const EntityManager &entityManager, int clientId);
 
@@ -57,5 +62,11 @@ public:
     sf::Vector2f getWorldPosition(const sf::Vector2i &pixel) const;
     void applySnapshot(MouseSelectedSnapshot &mouseSelectedSnapshot);
 
-    void renderUI(const EntityManager &entityManager, int clientId, const Inventory &inventory, const Equipment &equipment);
+    void renderUI(
+        const EntityManager &entityManager, 
+        int clientId, 
+        const Inventory &inventory, 
+        const Equipment &equipment, 
+        const std::vector<QuestState> &questStates
+    );
 };

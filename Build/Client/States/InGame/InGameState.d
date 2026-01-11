@@ -16,7 +16,11 @@ Build/Client/States/InGame/InGameState.o: \
  Sources/Client/Renderer/DebugRenderer.hpp Sources/Shared/AABB.hpp \
  Sources/Client/Renderer/Renderer.hpp Sources/Client/UI/InventoryUI.hpp \
  Sources/Client/Renderer/MinimapRenderer.hpp \
- Sources/Client/World/WorldCollision.hpp Sources/Shared/Constants.hpp \
+ Sources/Client/Renderer/QuestRenderer.hpp \
+ Sources/Client/World/WorldCollision.hpp \
+ Sources/Client/Quests/QuestStates.hpp \
+ Sources/Client/Quests/QuestTypes.hpp \
+ Sources/Client/Quests/ObjectiveState.hpp Sources/Shared/Constants.hpp \
  Sources/Shared/Utils.hpp Sources/Client/Input/InputManager.hpp \
  Sources/Client/Network/NetworkClient.hpp \
  Sources/Client/Network/LoginStatusType.hpp \
@@ -25,6 +29,7 @@ Build/Client/States/InGame/InGameState.o: \
  Sources/Client/Snapshots/ChunkSnapshot.hpp \
  Sources/Client/Snapshots/EquipmentSnapshot.hpp \
  Sources/Client/Snapshots/InventorySnapshot.hpp \
+ Sources/Client/Snapshots/QuestSnapshot.hpp \
  Sources/Client/Snapshots/WorldCollisionSnapshot.hpp \
  Sources/Client/Snapshots/WorldSnapshot.hpp \
  Sources/Client/Snapshots/EnemySnapshot.hpp \

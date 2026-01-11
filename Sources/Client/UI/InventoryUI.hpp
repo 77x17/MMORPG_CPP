@@ -11,7 +11,6 @@ class Equipment;
 class InventoryUI {
 private:
     bool open = false;
-    sf::Font font;
     
     sf::RectangleShape background;
     sf::Text title;

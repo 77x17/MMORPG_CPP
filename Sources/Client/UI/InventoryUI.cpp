@@ -5,11 +5,9 @@
 #include "Client/Inventory/Inventory.hpp"
 #include "Client/Inventory/Equipment.hpp"
 
-InventoryUI::InventoryUI() {
-    if (!font.loadFromFile("Assets/Roboto_Mono.ttf")) {
-        font.loadFromFile("../Assets/Roboto_Mono.ttf");
-    }
+#include "Client/Utils/Font.hpp"
 
+InventoryUI::InventoryUI() {
     background.setSize({ 
         (40.0f + 5.0f) * 9 + 5.0f, 
         (40.0f + 5.0f) * 5 + 5.0f 
@@ -19,7 +17,7 @@ InventoryUI::InventoryUI() {
     background.setOutlineColor(sf::Color::White);
     background.setPosition(75.0f, 150.0f);
 
-    title.setFont(font);
+    title.setFont(Font::getFont());
     title.setString("Inventory");
     title.setCharacterSize(20);
     title.setFillColor(sf::Color::White);
@@ -37,7 +35,7 @@ InventoryUI::InventoryUI() {
     equipmentBackground.setOutlineColor(sf::Color::White);
     equipmentBackground.setPosition(background.getPosition() + sf::Vector2f(background.getSize().x + 10.0f, 0.0f));
 
-    equipmentTitle.setFont(font);
+    equipmentTitle.setFont(Font::getFont());
     equipmentTitle.setString("Equipment");
     equipmentTitle.setCharacterSize(20);
     equipmentTitle.setFillColor(sf::Color::White);
@@ -198,7 +196,7 @@ void InventoryUI::draw(const Inventory &inventory, const Equipment &equipment, s
     itemBox.setOutlineColor(sf::Color::White);
 
     sf::Text itemId;
-    itemId.setFont(font);
+    itemId.setFont(Font::getFont());
     itemId.setCharacterSize(10.0f);
     itemId.setFillColor(sf::Color::White);
 
@@ -219,7 +217,7 @@ void InventoryUI::draw(const Inventory &inventory, const Equipment &equipment, s
     }
 
     sf::Text boxLabel;
-    boxLabel.setFont(font);
+    boxLabel.setFont(Font::getFont());
     boxLabel.setCharacterSize(13.0f);
     boxLabel.setFillColor(sf::Color::White);
     std::string label[] = { "Helmet", "Chestplate", "Leggings", "Boots", "Weapon", "Shield", "Ring", "Amulet" };

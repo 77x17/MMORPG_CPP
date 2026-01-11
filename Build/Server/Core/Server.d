@@ -25,6 +25,7 @@ Build/Server/Core/Server.o: Sources/Server/Core/Server.cpp \
  Sources/Server/Quests/QuestDefinition.hpp \
  Sources/Server/Quests/QuestObjective.hpp \
  Sources/Server/Quests/QuestSystem.hpp \
+ Sources/Server/Quests/QuestSyncSystem.hpp \
  Sources/Server/Network/NetworkServer.hpp \
  Sources/Server/Network/ClientSession.hpp \
  Sources/Server/Utils/ThreadSafeQueue/ThreadSafeQueue.hpp \

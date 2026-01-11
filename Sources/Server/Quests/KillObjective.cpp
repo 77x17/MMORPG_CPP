@@ -26,3 +26,7 @@ void KillObjective::onEvent(const Player &player, ObjectiveState &state, int kil
         }
     }
 }
+
+std::string KillObjective::getProgressText(const ObjectiveState &state) const {
+    return "Kill enemy " + std::to_string(enemyId) + ": " + std::to_string(state.current) + "/" + std::to_string(count);
+}
