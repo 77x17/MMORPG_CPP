@@ -9,6 +9,11 @@ A robust prototype of a real-time multiplayer game engine built from scratch usi
 Unlike typical game projects that rely on Unity or Unreal, this project implements the low-level systems manually to understand the "how" and "why" behind multiplayer game architecture.
 
 ---
+## Game Screen
+
+![Multiplayer](Assets/MultiClient.png)
+
+![Server Screen](Assets/ServerWatch.png)
 
 ## 🌟 Key Features
 
