@@ -15,9 +15,9 @@ Unlike typical game projects that rely on Unity or Unreal, this project implemen
 
 ![Server Screen](Assets/ServerWatch.png)
 
-## 🌟 Key Features
+## Key Features
 
-### 📡 Networking & Architecture
+### Networking & Architecture
 - **Server-Authoritative Model:** The server owns the game state; clients send inputs and render the state.
 - **Hybrid Protocol:** Custom packet handling using SFML Network (TCP/UDP).
 - **Ping & Latency Tracking:** Real-time monitoring via `TcpPingTracker` and `UdpPingTracker`.
@@ -31,7 +31,7 @@ Unlike typical game projects that rely on Unity or Unreal, this project implemen
 - **Entity Interpolation:** Smooth rendering of remote entities between snapshot updates.
 - **Inventory UI:** Full UI system with Drag & Drop support and equipment management.
 
-### ⚔️ Gameplay & Systems
+### Gameplay & Systems
 - **Combat System:** Melee (Sword Slashes) and Projectiles with server-side hitbox detection.
 - **AI System:** Basic enemy behaviors managed by `EnemyAISystem`.
 - **Data Persistence:** Player stats and inventories saved in JSON format.
@@ -39,7 +39,7 @@ Unlike typical game projects that rely on Unity or Unreal, this project implemen
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```text
 .
@@ -78,7 +78,7 @@ Unlike typical game projects that rely on Unity or Unreal, this project implemen
 
 ---
 
-## 🛠️ Build & Installation
+## Build & Installation
 
 ### Prerequisites
 - **Compiler:** g++ (MinGW-w64) supporting C++17.
@@ -108,7 +108,7 @@ make clean
 
 ---
 
-## 🧠 Engineering Challenges
+## Engineering Challenges
 
 1.  **Latency Compensation:** Implemented Client-side Prediction and Reconciliation to ensure movement feels "snappy" despite network lag.
 2.  **Scalability:** Developed a `ChunkSystem` and `InterestSystem` to limit the data sent to each client, allowing for larger worlds and more players.
@@ -117,7 +117,7 @@ make clean
 
 ---
 
-## 🚀 Roadmap
+## Roadmap
 - [ ] **Database:** Migrate from JSON to SQLite for player data.
 - [ ] **Security:** Add basic packet encryption and authentication.
 - [ ] **Assets:** Integration of Sprite animations and Tilemaps.
