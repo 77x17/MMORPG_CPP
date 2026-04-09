@@ -249,7 +249,7 @@ void Renderer::renderUI(
 
     minimap.render(window, worldView, entityManager, clientId);
     
-    quests.render(window, questStates);
+    // quests.render(window, questStates);
 
     if (selectedEntityId != -1) {
         drawSelectedEntityInfo();
